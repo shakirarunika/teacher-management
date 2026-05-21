@@ -19,7 +19,7 @@ class Login extends BaseLogin
 
     public function getTitle(): string|\Illuminate\Contracts\Support\Htmlable
     {
-        return 'Login — SINTESIS Admin';
+        return 'Masuk';
     }
 }
 
