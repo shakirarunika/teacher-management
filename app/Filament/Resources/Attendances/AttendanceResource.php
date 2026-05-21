@@ -20,6 +20,7 @@ class AttendanceResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentList;
     protected static ?string $navigationLabel = 'Data Absensi';
     protected static ?string $modelLabel = 'Absensi';
+    protected static ?string $pluralModelLabel = 'Data Absensi';
     public static function getNavigationGroup(): ?string { return 'Laporan'; }
     protected static ?int $navigationSort = 1;
 

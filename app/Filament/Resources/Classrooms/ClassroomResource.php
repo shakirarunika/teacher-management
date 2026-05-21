@@ -20,6 +20,7 @@ class ClassroomResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingLibrary;
     protected static ?string $navigationLabel = 'Kelas';
     protected static ?string $modelLabel = 'Kelas';
+    protected static ?string $pluralModelLabel = 'Data Kelas';
     public static function getNavigationGroup(): ?string { return 'Akademik'; }
     protected static ?int $navigationSort = 1;
 

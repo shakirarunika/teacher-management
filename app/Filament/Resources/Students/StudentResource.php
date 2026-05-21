@@ -20,6 +20,7 @@ class StudentResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
     protected static ?string $navigationLabel = 'Data Siswa';
     protected static ?string $modelLabel = 'Siswa';
+    protected static ?string $pluralModelLabel = 'Data Siswa';
     public static function getNavigationGroup(): ?string { return 'Master Data'; }
     protected static ?int $navigationSort = 2;
 

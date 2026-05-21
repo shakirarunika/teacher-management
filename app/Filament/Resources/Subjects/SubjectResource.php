@@ -20,6 +20,7 @@ class SubjectResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBookOpen;
     protected static ?string $navigationLabel = 'Mata Pelajaran';
     protected static ?string $modelLabel = 'Mata Pelajaran';
+    protected static ?string $pluralModelLabel = 'Data Mata Pelajaran';
     public static function getNavigationGroup(): ?string { return 'Master Data'; }
     protected static ?int $navigationSort = 3;
 

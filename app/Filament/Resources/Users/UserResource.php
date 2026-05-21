@@ -20,6 +20,7 @@ class UserResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUsers;
     protected static ?string $navigationLabel = 'Data Guru';
     protected static ?string $modelLabel = 'Guru';
+    protected static ?string $pluralModelLabel = 'Data Guru';
     public static function getNavigationGroup(): ?string { return 'Master Data'; }
     protected static ?int $navigationSort = 1;
     protected static ?string $recordTitleAttribute = 'name';

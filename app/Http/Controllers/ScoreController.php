@@ -95,7 +95,13 @@ class ScoreController extends Controller
             'scores.*.pas' => 'nullable|integer|min:0|max:100',
         ]);
 
+        $classroomStudentIds = $classroom->students()->pluck('students.id')->toArray();
+
         foreach ($validated['scores'] as $item) {
+            if (!in_array($item['student_id'], $classroomStudentIds)) {
+                abort(403, 'Unauthorized student score update.');
+            }
+
             Score::updateOrCreate(
                 [
                     'classroom_id' => $classroom->id,

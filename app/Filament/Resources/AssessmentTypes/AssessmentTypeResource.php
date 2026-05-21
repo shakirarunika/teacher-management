@@ -19,6 +19,9 @@ class AssessmentTypeResource extends Resource
     protected static ?string $model = AssessmentType::class;
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
     protected static bool $shouldRegisterNavigation = false;
+    protected static ?string $navigationLabel = 'Jenis Penilaian';
+    protected static ?string $modelLabel = 'Jenis Penilaian';
+    protected static ?string $pluralModelLabel = 'Data Jenis Penilaian';
 
     public static function form(Schema $schema): Schema
     {

@@ -20,6 +20,7 @@ class ScoreResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChartBar;
     protected static ?string $navigationLabel = 'Data Nilai';
     protected static ?string $modelLabel = 'Nilai';
+    protected static ?string $pluralModelLabel = 'Data Nilai';
     public static function getNavigationGroup(): ?string { return 'Laporan'; }
     protected static ?int $navigationSort = 2;
 

@@ -64,7 +64,13 @@ class AttendanceController extends Controller
             'attendances.*.status' => 'required|in:Hadir,Sakit,Izin,Alpha',
         ]);
 
+        $classroomStudentIds = $classroom->students()->pluck('students.id')->toArray();
+
         foreach ($validated['attendances'] as $attendanceData) {
+            if (!in_array($attendanceData['student_id'], $classroomStudentIds)) {
+                abort(403, 'Unauthorized student attendance update.');
+            }
+
             Attendance::updateOrCreate(
                 [
                     'classroom_id' => $classroom->id,

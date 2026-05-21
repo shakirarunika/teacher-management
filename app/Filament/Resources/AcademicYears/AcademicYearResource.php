@@ -20,6 +20,7 @@ class AcademicYearResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCalendarDays;
     protected static ?string $navigationLabel = 'Tahun Ajaran';
     protected static ?string $modelLabel = 'Tahun Ajaran';
+    protected static ?string $pluralModelLabel = 'Data Tahun Ajaran';
     public static function getNavigationGroup(): ?string { return 'Akademik'; }
     protected static ?int $navigationSort = 2;
 
