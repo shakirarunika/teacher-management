@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Auth\Login;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -10,8 +11,11 @@ use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\Support\Facades\FilamentView;
+use Filament\View\PanelsRenderHook;
 use Filament\Widgets\AccountWidget;
 use App\Filament\Widgets\AdminStatsOverview;
+use Illuminate\Contracts\View\View;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -29,7 +33,8 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->darkMode(true)
-            ->login()
+            ->brandName('SINTESIS Admin')
+            ->login(Login::class)
             ->colors([
                 'primary' => Color::Indigo,
                 'secondary' => Color::Purple,
@@ -62,9 +67,31 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                \App\Http\Middleware\RedirectTeacherFromAdmin::class,
             ])
             ->authMiddleware([
                 Authenticate::class,
             ]);
+    }
+
+    public function boot(): void
+    {
+        // Inject custom branding block above the login form
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::SIMPLE_PAGE_START,
+            fn (): View => view('filament.login-header'),
+        );
+
+        // Inject custom footer under the login form
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::SIMPLE_PAGE_END,
+            fn (): View => view('filament.login-footer'),
+        );
+
+        // Inject custom footer in dashboard views
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::FOOTER,
+            fn (): View => view('filament.footer'),
+        );
     }
 }

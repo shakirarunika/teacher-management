@@ -10,34 +10,34 @@ const STATUS_CONFIG = {
     Hadir: {
         label: 'Hadir',
         active: 'bg-emerald-500 text-white',
-        inactive: 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100',
-        card: 'border-emerald-200 bg-emerald-50/40',
+        inactive: 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-950/40',
+        card: 'border-emerald-200 dark:border-emerald-900/30 bg-emerald-50/40 dark:bg-emerald-950/10',
         avatar: 'from-emerald-400 to-emerald-600 text-white',
-        badge: 'bg-emerald-100 text-emerald-700',
+        badge: 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300',
     },
     Sakit: {
         label: 'Sakit',
         active: 'bg-amber-500 text-white',
-        inactive: 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100',
-        card: 'border-amber-200 bg-amber-50/40',
+        inactive: 'bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-900/30 hover:bg-amber-100 dark:hover:bg-amber-950/40',
+        card: 'border-amber-200 dark:border-amber-900/30 bg-amber-50/40 dark:bg-amber-950/10',
         avatar: 'from-amber-400 to-amber-600 text-white',
-        badge: 'bg-amber-100 text-amber-700',
+        badge: 'bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300',
     },
     Izin: {
         label: 'Izin',
         active: 'bg-blue-500 text-white',
-        inactive: 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100',
-        card: 'border-blue-200 bg-blue-50/40',
+        inactive: 'bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-950/40',
+        card: 'border-blue-200 dark:border-blue-900/30 bg-blue-50/40 dark:bg-blue-950/10',
         avatar: 'from-blue-400 to-blue-600 text-white',
-        badge: 'bg-blue-100 text-blue-700',
+        badge: 'bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300',
     },
     Alpha: {
         label: 'Alpha',
         active: 'bg-rose-500 text-white',
-        inactive: 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100',
-        card: 'border-rose-200 bg-rose-50/40',
+        inactive: 'bg-rose-50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-450 border-rose-200 dark:border-rose-900/30 hover:bg-rose-100 dark:hover:bg-rose-950/40',
+        card: 'border-rose-200 dark:border-rose-900/30 bg-rose-50/40 dark:bg-rose-950/10',
         avatar: 'from-rose-400 to-rose-600 text-white',
-        badge: 'bg-rose-100 text-rose-700',
+        badge: 'bg-rose-100 dark:bg-rose-950/40 text-rose-750 dark:text-rose-350',
     },
 };
 
@@ -131,27 +131,27 @@ export default function AttendanceIndex({ classroom, date, students, holiday }) 
                     <motion.div
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="bg-white/70 backdrop-blur-xl border border-white rounded-[2rem] p-6 sm:p-8 shadow-xl shadow-indigo-100/50 mb-6"
+                        className="bg-white/70 dark:bg-slate-900/45 backdrop-blur-xl border border-white dark:border-slate-800/80 rounded-[2rem] p-6 sm:p-8 shadow-xl shadow-indigo-100/50 dark:shadow-none mb-6 transition-colors duration-300"
                     >
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
                             <div>
-                                <div className="flex items-center gap-3 text-indigo-600 mb-2">
+                                <div className="flex items-center gap-3 text-indigo-600 dark:text-indigo-400 mb-2">
                                     <UserGroupIcon className="w-6 h-6" />
                                     <span className="font-bold uppercase tracking-wider text-sm">Attendance Input</span>
                                 </div>
-                                <h2 className="text-3xl font-black text-gray-900 tracking-tight">{classroom.name}</h2>
-                                <p className="text-gray-500 font-medium mt-1">{students.length} Students Enrolled</p>
+                                <h2 className="text-3xl font-black text-gray-900 dark:text-slate-100 tracking-tight">{classroom.name}</h2>
+                                <p className="text-gray-500 dark:text-slate-400 font-medium mt-1">{students.length} Students Enrolled</p>
                             </div>
 
-                            <div className="flex items-center gap-3 bg-white/50 p-2 rounded-2xl border border-white shadow-inner">
-                                <div className="p-2 bg-indigo-100 rounded-xl text-indigo-600">
+                            <div className="flex items-center gap-3 bg-white/50 dark:bg-slate-950/50 p-2 rounded-2xl border border-white dark:border-slate-850 shadow-inner">
+                                <div className="p-2 bg-indigo-100 dark:bg-indigo-950/60 rounded-xl text-indigo-600 dark:text-indigo-400">
                                     <CalendarIcon className="w-6 h-6" />
                                 </div>
                                 <input
                                     type="date"
                                     value={data.date}
                                     onChange={handleDateChange}
-                                    className="bg-transparent border-none focus:ring-0 text-gray-800 font-bold px-2 py-1 cursor-pointer text-lg"
+                                    className="bg-transparent border-none focus:ring-0 text-gray-800 dark:text-slate-200 font-bold px-2 py-1 cursor-pointer text-lg focus:outline-none"
                                 />
                             </div>
                         </div>
@@ -159,19 +159,19 @@ export default function AttendanceIndex({ classroom, date, students, holiday }) 
                         {/* Progress Bar */}
                         <div>
                             <div className="flex justify-between items-center mb-2">
-                                <span className="text-sm font-semibold text-gray-500">
+                                <span className="text-sm font-semibold text-gray-500 dark:text-slate-400">
                                     Progress Pengisian
                                 </span>
                                 <motion.span
                                     key={filledCount}
-                                    initial={{ scale: 1.3, color: '#6366f1' }}
-                                    animate={{ scale: 1, color: allFilled ? '#10b981' : '#6b7280' }}
-                                    className="text-sm font-black tabular-nums"
+                                    initial={{ scale: 1.3 }}
+                                    animate={{ scale: 1 }}
+                                    className={`text-sm font-black tabular-nums transition-colors ${allFilled ? 'text-emerald-500 dark:text-emerald-400' : 'text-gray-500 dark:text-slate-400'}`}
                                 >
                                     {filledCount} / {students.length} siswa
                                 </motion.span>
                             </div>
-                            <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
+                            <div className="w-full h-3 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">
                                 <motion.div
                                     className={`h-full rounded-full ${allFilled ? 'bg-emerald-500' : 'bg-indigo-500'}`}
                                     initial={{ width: 0 }}
@@ -180,12 +180,12 @@ export default function AttendanceIndex({ classroom, date, students, holiday }) 
                                 />
                             </div>
                             <div className="flex justify-between mt-1.5">
-                                <span className="text-xs text-gray-400">{progressPct}% selesai</span>
+                                <span className="text-xs text-gray-400 dark:text-slate-500">{progressPct}% selesai</span>
                                 {allFilled && (
                                     <motion.span
                                         initial={{ opacity: 0, x: 10 }}
                                         animate={{ opacity: 1, x: 0 }}
-                                        className="text-xs font-bold text-emerald-600 flex items-center gap-1"
+                                        className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1"
                                     >
                                         <CheckCircleIcon className="w-3.5 h-3.5" />
                                         Semua terisi!
@@ -202,14 +202,14 @@ export default function AttendanceIndex({ classroom, date, students, holiday }) 
                                 initial={{ opacity: 0, y: -10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -10 }}
-                                className={`mb-6 p-5 rounded-[2rem] border-2 shadow-lg flex items-start gap-4 ${
+                                className={`mb-6 p-5 rounded-[2rem] border-2 shadow-lg flex items-start gap-4 transition-colors duration-300 ${
                                     holiday.type === 'Nasional'
-                                        ? 'bg-rose-50 border-rose-200 text-rose-800'
-                                        : 'bg-amber-50 border-amber-200 text-amber-800'
+                                        ? 'bg-rose-50 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900/30 text-rose-800 dark:text-rose-300'
+                                        : 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/30 text-amber-800 dark:text-amber-300'
                                 }`}
                             >
-                                <div className={`p-3 rounded-2xl flex-shrink-0 ${
-                                    holiday.type === 'Nasional' ? 'bg-rose-100 text-rose-600' : 'bg-amber-100 text-amber-600'
+                                <div className={`p-3 rounded-2xl flex-shrink-0 transition-colors duration-300 ${
+                                    holiday.type === 'Nasional' ? 'bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-450' : 'bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-450'
                                 }`}>
                                     <CalendarIcon className="w-6 h-6" />
                                 </div>
@@ -233,7 +233,7 @@ export default function AttendanceIndex({ classroom, date, students, holiday }) 
                             onClick={() => setShowClearConfirm(true)}
                             whileTap={{ scale: 0.95 }}
                             whileHover={{ scale: 1.02 }}
-                            className="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold py-2 px-4 rounded-xl transition-colors shadow-sm text-sm flex items-center gap-2 border border-rose-200"
+                            className="bg-rose-50 dark:bg-rose-950/30 hover:bg-rose-100 dark:hover:bg-rose-900/30 text-rose-600 dark:text-rose-400 font-bold py-2 px-4 rounded-xl transition-colors shadow-sm text-sm flex items-center gap-2 border border-rose-200 dark:border-rose-900/30"
                         >
                             <TrashIcon className="w-4 h-4" />
                             Clear All
@@ -243,7 +243,7 @@ export default function AttendanceIndex({ classroom, date, students, holiday }) 
                             onClick={markAllPresent}
                             whileTap={{ scale: 0.95 }}
                             whileHover={{ scale: 1.02 }}
-                            className="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-bold py-2 px-4 rounded-xl transition-colors shadow-sm text-sm flex items-center gap-2"
+                            className="bg-indigo-100 dark:bg-indigo-950/40 hover:bg-indigo-200 dark:hover:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 font-bold py-2 px-4 rounded-xl transition-colors shadow-sm text-sm flex items-center gap-2 border border-transparent dark:border-indigo-900/30"
                         >
                             <CheckIcon className="w-4 h-4" />
                             Mark All Present
@@ -263,8 +263,8 @@ export default function AttendanceIndex({ classroom, date, students, holiday }) 
                                         layout
                                         className={`backdrop-blur-xl border-2 rounded-3xl p-5 shadow-md transition-all duration-300 ${
                                             cfg
-                                                ? `${cfg.card} shadow-gray-100/80`
-                                                : 'bg-white/70 border-white shadow-gray-200/50 hover:bg-white/90'
+                                                ? `${cfg.card} shadow-gray-100/80 dark:shadow-none`
+                                                : 'bg-white/70 dark:bg-slate-900/45 border-white dark:border-slate-800/80 shadow-gray-200/50 dark:shadow-none hover:bg-white/90 dark:hover:bg-slate-900/50'
                                         }`}
                                     >
                                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -276,7 +276,7 @@ export default function AttendanceIndex({ classroom, date, students, holiday }) 
                                                     className={`w-12 h-12 rounded-full bg-gradient-to-br flex items-center justify-center font-black shadow-inner text-base transition-all duration-300 ${
                                                         cfg
                                                             ? cfg.avatar
-                                                            : 'from-indigo-100 to-purple-100 text-indigo-600'
+                                                            : 'from-indigo-105 dark:from-indigo-950 to-purple-105 dark:to-purple-950 text-indigo-600 dark:text-indigo-400 border border-transparent dark:border-indigo-900/30'
                                                     }`}
                                                 >
                                                     {currentStatus ? (
@@ -293,9 +293,9 @@ export default function AttendanceIndex({ classroom, date, students, holiday }) 
                                                     )}
                                                 </motion.div>
                                                 <div>
-                                                    <h3 className="font-bold text-gray-900 text-lg leading-tight">{student.name}</h3>
+                                                    <h3 className="font-bold text-gray-900 dark:text-slate-100 text-lg leading-tight">{student.name}</h3>
                                                     <div className="flex items-center gap-2 mt-0.5">
-                                                        <p className="text-sm font-medium text-gray-500">NIS: {student.nis}</p>
+                                                        <p className="text-sm font-medium text-gray-550 dark:text-slate-400">NIS: {student.nis}</p>
                                                         <AnimatePresence mode="wait">
                                                             {currentStatus ? (
                                                                 <motion.span
@@ -314,7 +314,7 @@ export default function AttendanceIndex({ classroom, date, students, holiday }) 
                                                                     initial={{ opacity: 0, scale: 0.7 }}
                                                                     animate={{ opacity: 1, scale: 1 }}
                                                                     exit={{ opacity: 0, scale: 0.7 }}
-                                                                    className="text-xs font-semibold text-gray-400 flex items-center gap-0.5"
+                                                                    className="text-xs font-semibold text-gray-400 dark:text-slate-500 flex items-center gap-0.5"
                                                                 >
                                                                     <ExclamationCircleIcon className="w-3.5 h-3.5" />
                                                                     Belum diisi
@@ -378,7 +378,7 @@ export default function AttendanceIndex({ classroom, date, students, holiday }) 
                                         exit={{ opacity: 0, y: 8 }}
                                         className="mb-3 pointer-events-auto text-center"
                                     >
-                                        <span className="inline-flex items-center gap-1.5 bg-amber-100 text-amber-700 text-sm font-semibold px-4 py-2 rounded-full shadow border border-amber-200">
+                                        <span className="inline-flex items-center gap-1.5 bg-amber-105 dark:bg-amber-950/80 text-amber-705 dark:text-amber-300 text-sm font-semibold px-4 py-2 rounded-full shadow border border-amber-200 dark:border-amber-900/30 backdrop-blur-md">
                                             <ExclamationCircleIcon className="w-4 h-4" />
                                             {unfilledCount} siswa belum diisi — tidak akan tersimpan
                                         </span>
@@ -389,10 +389,10 @@ export default function AttendanceIndex({ classroom, date, students, holiday }) 
                                 type="submit"
                                 disabled={processing || students.length === 0}
                                 whileTap={{ scale: 0.97 }}
-                                className={`w-full pointer-events-auto font-black text-lg py-4 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.18)] transition-all flex items-center justify-center gap-2 ${
+                                className={`w-full pointer-events-auto font-black text-lg py-4 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.18)] dark:shadow-none transition-all flex items-center justify-center gap-2 ${
                                     allFilled
-                                        ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-emerald-200'
-                                        : 'bg-gray-900 hover:bg-indigo-600 text-white'
+                                        ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-emerald-200 dark:shadow-none'
+                                        : 'bg-gray-900 dark:bg-slate-850 hover:bg-indigo-600 dark:hover:bg-indigo-750 text-white dark:text-slate-100 border dark:border-slate-800'
                                 }`}
                             >
                                 {processing ? (
@@ -437,7 +437,7 @@ export default function AttendanceIndex({ classroom, date, students, holiday }) 
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 dark:bg-slate-950/60 backdrop-blur-sm"
                         onClick={() => setShowClearConfirm(false)}
                     >
                         <motion.div
@@ -445,18 +445,18 @@ export default function AttendanceIndex({ classroom, date, students, holiday }) 
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.85, y: 24 }}
                             transition={{ type: 'spring', stiffness: 360, damping: 28 }}
-                            className="bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full"
+                            className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl rounded-3xl shadow-2xl p-8 max-w-sm w-full border border-transparent dark:border-slate-800/80"
                             onClick={e => e.stopPropagation()}
                         >
                             <motion.div
                                 animate={{ rotate: [0, -8, 8, -4, 0] }}
                                 transition={{ duration: 0.5, delay: 0.15 }}
-                                className="flex items-center justify-center w-14 h-14 rounded-2xl bg-rose-100 mx-auto mb-5"
+                                className="flex items-center justify-center w-14 h-14 rounded-2xl bg-rose-100 dark:bg-rose-950/50 mx-auto mb-5 text-rose-500 dark:text-rose-400"
                             >
-                                <TrashIcon className="w-7 h-7 text-rose-500" />
+                                <TrashIcon className="w-7 h-7" />
                             </motion.div>
-                            <h3 className="text-xl font-black text-gray-900 text-center mb-2">Clear Semua Status?</h3>
-                            <p className="text-gray-500 text-center text-sm mb-6">
+                            <h3 className="text-xl font-black text-gray-900 dark:text-slate-100 text-center mb-2">Clear Semua Status?</h3>
+                            <p className="text-gray-500 dark:text-slate-400 text-center text-sm mb-6">
                                 Semua status absensi akan dikosongkan.<br />Tindakan ini tidak dapat dibatalkan.
                             </p>
                             <div className="flex gap-3">
@@ -465,7 +465,7 @@ export default function AttendanceIndex({ classroom, date, students, holiday }) 
                                     onClick={() => setShowClearConfirm(false)}
                                     whileTap={{ scale: 0.96 }}
                                     whileHover={{ scale: 1.02 }}
-                                    className="flex-1 py-3 rounded-2xl border-2 border-gray-200 text-gray-700 font-bold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+                                    className="flex-1 py-3 rounded-2xl border-2 border-gray-200 dark:border-slate-800 text-gray-700 dark:text-slate-300 font-bold hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors flex items-center justify-center gap-2 bg-transparent"
                                 >
                                     <XMarkIcon className="w-4 h-4" />
                                     Batal
@@ -475,7 +475,7 @@ export default function AttendanceIndex({ classroom, date, students, holiday }) 
                                     onClick={clearAll}
                                     whileTap={{ scale: 0.96 }}
                                     whileHover={{ scale: 1.02 }}
-                                    className="flex-1 py-3 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white font-bold transition-colors flex items-center justify-center gap-2 shadow-lg shadow-rose-200"
+                                    className="flex-1 py-3 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white font-bold transition-colors flex items-center justify-center gap-2 shadow-lg dark:shadow-none shadow-rose-200"
                                 >
                                     <TrashIcon className="w-4 h-4" />
                                     Ya, Clear

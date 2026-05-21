@@ -53,14 +53,14 @@ export default function Edit({ mustVerifyEmail, status }) {
                     <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 pb-12">
 
                         {/* Profile Info */}
-                        <motion.div variants={item} className="bg-white/70 backdrop-blur-xl border border-white rounded-[2rem] p-7 shadow-xl shadow-indigo-100/50">
+                        <motion.div variants={item} className="bg-white/70 dark:bg-slate-900/45 backdrop-blur-xl border border-white dark:border-slate-800/80 rounded-[2rem] p-7 shadow-xl shadow-indigo-100/50 dark:shadow-none">
                             <div className="flex items-center gap-3 mb-6">
-                                <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-600">
+                                <div className="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-950/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
                                     <UserCircleIcon className="w-5 h-5" />
                                 </div>
                                 <div>
-                                    <h3 className="text-lg font-black text-gray-900">Informasi Profil</h3>
-                                    <p className="text-sm text-gray-500">Perbarui nama dan alamat email kamu.</p>
+                                    <h3 className="text-lg font-black text-gray-900 dark:text-slate-100">Informasi Profil</h3>
+                                    <p className="text-sm text-gray-500 dark:text-slate-400">Perbarui nama dan alamat email kamu.</p>
                                 </div>
                             </div>
                             <UpdateProfileInformationForm
@@ -70,28 +70,28 @@ export default function Edit({ mustVerifyEmail, status }) {
                         </motion.div>
 
                         {/* Password */}
-                        <motion.div variants={item} className="bg-white/70 backdrop-blur-xl border border-white rounded-[2rem] p-7 shadow-xl shadow-indigo-100/50">
+                        <motion.div variants={item} className="bg-white/70 dark:bg-slate-900/45 backdrop-blur-xl border border-white dark:border-slate-800/80 rounded-[2rem] p-7 shadow-xl shadow-indigo-100/50 dark:shadow-none">
                             <div className="flex items-center gap-3 mb-6">
-                                <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600">
+                                <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950/40 flex items-center justify-center text-blue-600 dark:text-blue-400">
                                     <LockClosedIcon className="w-5 h-5" />
                                 </div>
                                 <div>
-                                    <h3 className="text-lg font-black text-gray-900">Ubah Password</h3>
-                                    <p className="text-sm text-gray-500">Gunakan password yang kuat dan unik.</p>
+                                    <h3 className="text-lg font-black text-gray-900 dark:text-slate-100">Ubah Password</h3>
+                                    <p className="text-sm text-gray-500 dark:text-slate-400">Gunakan password yang kuat dan unik.</p>
                                 </div>
                             </div>
                             <UpdatePasswordForm />
                         </motion.div>
 
                         {/* Delete Account */}
-                        <motion.div variants={item} className="bg-white/70 backdrop-blur-xl border-2 border-rose-100 rounded-[2rem] p-7 shadow-xl shadow-rose-100/50">
+                        <motion.div variants={item} className="bg-white/70 dark:bg-slate-900/45 backdrop-blur-xl border-2 border-rose-100 dark:border-rose-950/30 rounded-[2rem] p-7 shadow-xl shadow-rose-100/50 dark:shadow-none">
                             <div className="flex items-center gap-3 mb-6">
-                                <div className="w-10 h-10 rounded-xl bg-rose-100 flex items-center justify-center text-rose-600">
+                                <div className="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-950/40 flex items-center justify-center text-rose-600 dark:text-rose-450">
                                     <TrashIcon className="w-5 h-5" />
                                 </div>
                                 <div>
-                                    <h3 className="text-lg font-black text-gray-900">Hapus Akun</h3>
-                                    <p className="text-sm text-gray-500">Tindakan ini permanen dan tidak bisa dibatalkan.</p>
+                                    <h3 className="text-lg font-black text-gray-900 dark:text-slate-100">Hapus Akun</h3>
+                                    <p className="text-sm text-gray-500 dark:text-slate-400">Tindakan ini permanen dan tidak bisa dibatalkan.</p>
                                 </div>
                             </div>
                             <DeleteUserForm />

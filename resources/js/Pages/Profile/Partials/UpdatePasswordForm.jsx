@@ -9,7 +9,7 @@ function PasswordInput({ id, label, value, onChange, inputRef, autoComplete, err
 
     return (
         <div>
-            <label htmlFor={id} className="block text-sm font-bold text-gray-700 mb-1.5">
+            <label htmlFor={id} className="block text-sm font-bold text-gray-700 dark:text-slate-350 mb-1.5">
                 {label}
             </label>
             <div className="relative">
@@ -20,13 +20,13 @@ function PasswordInput({ id, label, value, onChange, inputRef, autoComplete, err
                     value={value}
                     onChange={onChange}
                     autoComplete={autoComplete}
-                    className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 pr-12 text-gray-900 font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all shadow-sm placeholder-gray-300"
+                    className="w-full rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950/50 px-4 py-3 pr-12 text-gray-900 dark:text-slate-100 font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all shadow-sm dark:shadow-none placeholder-gray-300 dark:placeholder-slate-700"
                     placeholder={placeholder}
                 />
                 <button
                     type="button"
                     onClick={() => setShow(s => !s)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors"
                     tabIndex={-1}
                 >
                     {show ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
@@ -105,7 +105,7 @@ export default function UpdatePasswordForm() {
                     disabled={processing}
                     whileTap={{ scale: 0.97 }}
                     whileHover={{ scale: 1.02 }}
-                    className="bg-blue-600 hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold px-6 py-3 rounded-xl shadow-md shadow-blue-200 transition-colors"
+                    className="bg-blue-600 hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold px-6 py-3 rounded-xl shadow-md shadow-blue-200 dark:shadow-none transition-colors"
                 >
                     {processing ? (
                         <span className="animate-pulse">Memperbarui...</span>
@@ -121,7 +121,7 @@ export default function UpdatePasswordForm() {
                     leave="transition ease-in-out duration-300"
                     leaveTo="opacity-0"
                 >
-                    <span className="flex items-center gap-1.5 text-sm font-bold text-emerald-600">
+                    <span className="flex items-center gap-1.5 text-sm font-bold text-emerald-600 dark:text-emerald-400">
                         <CheckCircleIcon className="w-4 h-4" />
                         Password diperbarui!
                     </span>

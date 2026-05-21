@@ -1,2 +1,35 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 @source "../js";
+
+/* SINTESIS Custom Gradient Text Classes (prevent Chrome solid block bugs) */
+.sintesis-logo-nav {
+    background-image: linear-gradient(135deg, #0f172a 0%, #4f46e5 100%) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    color: transparent !important;
+    transition: none !important;
+    display: inline-block !important;
+    padding-right: 0.15em !important;
+}
+
+.dark .sintesis-logo-nav {
+    background-image: linear-gradient(135deg, #f1f5f9 0%, #a5b4fc 100%) !important;
+}
+
+.sintesis-text-gradient {
+    background-image: linear-gradient(135deg, #0f172a 0%, #312e81 50%, #4c1d95 100%) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    color: transparent !important;
+    transition: none !important;
+    display: inline-block !important;
+    padding-right: 0.15em !important;
+}
+
+.dark .sintesis-text-gradient {
+    background-image: linear-gradient(135deg, #f1f5f9 0%, #a5b4fc 50%, #c084fc 100%) !important;
+}
+

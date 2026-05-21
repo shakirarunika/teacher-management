@@ -8,215 +8,9 @@
   --font-sans: 'Outfit', sans-serif;
 }
 
-/* ============================================
-   BASE - Dark background, fully opaque
-   ============================================ */
-body {
-    background-color: #0f1117 !important;
-    background-image: none !important;
-    min-height: 100vh;
-}
-
-/* ============================================
-   SIDEBAR - Solid dark, readable
-   ============================================ */
-.fi-sidebar {
-    background-color: #16181f !important;
-    backdrop-filter: none !important;
-    border-right: 1px solid rgba(255, 255, 255, 0.07) !important;
-}
-
-.fi-sidebar-header {
-    background-color: #16181f !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
-}
-
-/* Sidebar nav items */
-.fi-sidebar-item-label {
-    color: #cbd5e1 !important;
-    font-weight: 500 !important;
-}
-
-.fi-sidebar-item-button:hover .fi-sidebar-item-label,
-.fi-sidebar-item-button[aria-current="page"] .fi-sidebar-item-label {
-    color: #fff !important;
-}
-
-/* Active nav item highlight */
-.fi-sidebar-item-button[aria-current="page"] {
-    background-color: rgba(99, 102, 241, 0.2) !important;
-    border-radius: 0.75rem !important;
-}
-
-/* Nav group labels */
-.fi-sidebar-group-label {
-    color: #64748b !important;
-    font-size: 0.65rem !important;
-    font-weight: 700 !important;
-    letter-spacing: 0.1em !important;
-    text-transform: uppercase !important;
-}
-
-/* ============================================
-   TOPBAR - Solid dark
-   ============================================ */
-.fi-topbar {
-    background-color: #16181f !important;
-    backdrop-filter: none !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
-}
-
-/* ============================================
-   MAIN CONTENT AREA
-   ============================================ */
-.fi-main {
-    background-color: #0f1117 !important;
-}
-
-/* Page header */
-.fi-header-heading {
-    font-weight: 900 !important;
-    letter-spacing: -0.025em;
-    color: #f1f5f9 !important;
-}
-
-.fi-header-subheading {
-    color: #94a3b8 !important;
-}
-
-/* ============================================
-   WIDGETS - Stats cards: solid, eye-catching
-   ============================================ */
-.fi-wi-stats-overview-stat {
-    background-color: #1e2028 !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    border-radius: 1.25rem !important;
-    box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.4) !important;
-    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
-}
-
-.fi-wi-stats-overview-stat:hover {
-    transform: translateY(-3px) !important;
-    box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.5) !important;
-}
-
-/* Stat value - big bold number */
-.fi-wi-stats-overview-stat-value {
-    color: #f1f5f9 !important;
-    font-weight: 900 !important;
-    font-size: 2rem !important;
-    line-height: 1 !important;
-}
-
-/* Stat label */
-.fi-wi-stats-overview-stat-label {
-    color: #94a3b8 !important;
-    font-weight: 600 !important;
-    font-size: 0.8rem !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.05em !important;
-}
-
-/* Stat description */
-.fi-wi-stats-overview-stat-description {
-    color: #64748b !important;
-    font-size: 0.82rem !important;
-}
-
-/* Colored left border accent per stat color */
-.fi-wi-stats-overview-stat-color-indigo {
-    border-left: 4px solid #6366f1 !important;
-}
-.fi-wi-stats-overview-stat-color-emerald,
-.fi-wi-stats-overview-stat-color-success {
-    border-left: 4px solid #10b981 !important;
-}
-.fi-wi-stats-overview-stat-color-purple {
-    border-left: 4px solid #a855f7 !important;
-}
-.fi-wi-stats-overview-stat-color-warning {
-    border-left: 4px solid #f59e0b !important;
-}
-.fi-wi-stats-overview-stat-color-danger {
-    border-left: 4px solid #f43f5e !important;
-}
-
-/* ============================================
-   SECTIONS, CARDS, PANELS - Solid dark
-   ============================================ */
-.fi-section,
-.fi-modal-window,
-.fi-ta-ctn,
-.fi-wi-account {
-    background-color: #1e2028 !important;
-    backdrop-filter: none !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    border-radius: 1.25rem !important;
-    box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.3) !important;
-}
-
-/* Section headings */
-.fi-section-header-heading {
-    color: #f1f5f9 !important;
-    font-weight: 700 !important;
-}
-
-/* ============================================
-   TABLE - Dark readable
-   ============================================ */
-.fi-ta-header-cell {
-    color: #94a3b8 !important;
-    font-size: 0.7rem !important;
-    font-weight: 700 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.08em !important;
-    background-color: #16181f !important;
-}
-
-.fi-ta-row {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
-}
-
-.fi-ta-row:hover {
-    background-color: rgba(99, 102, 241, 0.07) !important;
-}
-
-.fi-ta-cell-content {
-    color: #e2e8f0 !important;
-}
-
-/* ============================================
-   INPUT FIELDS - Dark style
-   ============================================ */
-.fi-input,
-.fi-select-input,
-.fi-input-wrapper,
-.fi-select-wrapper {
-    background-color: #2a2d38 !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    border-radius: 0.75rem !important;
-    color: #f1f5f9 !important;
-    transition: all 0.2s ease;
-}
-
-.fi-input:focus,
-.fi-input-wrapper:focus-within,
-.fi-select-wrapper:focus-within {
-    border-color: rgba(99, 102, 241, 0.6) !important;
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15) !important;
-    outline: none !important;
-}
-
-/* Labels */
-.fi-fo-field-wrp-label label,
-.fi-fo-field-wrp-label .fi-fo-field-wrp-label-text {
-    color: #cbd5e1 !important;
-    font-weight: 600 !important;
-}
-
-/* ============================================
-   BUTTONS
-   ============================================ */
+/* ==========================================================================
+   GLOBAL RULES (Shared across themes)
+   ========================================================================== */
 .fi-btn {
     border-radius: 0.875rem !important;
     transition: all 0.2s ease !important;
@@ -240,9 +34,6 @@ body {
     transform: translateY(0) !important;
 }
 
-/* ============================================
-   BADGES
-   ============================================ */
 .fi-badge {
     font-weight: 700 !important;
     font-size: 0.72rem !important;
@@ -250,48 +41,448 @@ body {
     padding: 0.2rem 0.65rem !important;
 }
 
-/* ============================================
-   ACCOUNT WIDGET - Dark card
-   ============================================ */
-.fi-wi-account-name {
-    color: #f1f5f9 !important;
-    font-weight: 700 !important;
+/* Colored left border accent per stat color */
+.fi-wi-stats-overview-stat-color-indigo {
+    border-left: 4px solid #6366f1 !important;
+}
+.fi-wi-stats-overview-stat-color-emerald,
+.fi-wi-stats-overview-stat-color-success {
+    border-left: 4px solid #10b981 !important;
+}
+.fi-wi-stats-overview-stat-color-purple {
+    border-left: 4px solid #a855f7 !important;
+}
+.fi-wi-stats-overview-stat-color-warning {
+    border-left: 4px solid #f59e0b !important;
+}
+.fi-wi-stats-overview-stat-color-danger {
+    border-left: 4px solid #f43f5e !important;
 }
 
-.fi-wi-account-email {
-    color: #94a3b8 !important;
-}
-
-/* ============================================
-   MODAL OVERLAY
-   ============================================ */
-.fi-modal-close-overlay {
-    background-color: rgba(0, 0, 0, 0.6) !important;
-    backdrop-filter: blur(4px) !important;
-}
-
-/* ============================================
-   PAGINATION
-   ============================================ */
-.fi-pagination-item {
-    color: #94a3b8 !important;
-    font-weight: 600 !important;
-}
-
-/* ============================================
-   SCROLLBAR - Subtle dark
-   ============================================ */
 ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
 }
-::-webkit-scrollbar-track {
+
+/* ==========================================================================
+   PREMIUM LIGHT THEME (html:not(.dark))
+   ========================================================================== */
+html:not(.dark) body {
+    background-color: #f8fafc !important;
+    background-image: none !important;
+    min-height: 100vh;
+}
+
+html:not(.dark) .fi-sidebar {
+    background-color: #ffffff !important;
+    backdrop-filter: none !important;
+    border-right: 1px solid #e2e8f0 !important;
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+html:not(.dark) .fi-sidebar-header {
+    background-color: #ffffff !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+}
+
+html:not(.dark) .fi-sidebar-item-label {
+    color: #475569 !important;
+    font-weight: 500 !important;
+}
+
+html:not(.dark) .fi-sidebar-item-button:hover .fi-sidebar-item-label,
+html:not(.dark) .fi-sidebar-item-button[aria-current="page"] .fi-sidebar-item-label {
+    color: #4f46e5 !important;
+}
+
+html:not(.dark) .fi-sidebar-item-button[aria-current="page"] {
+    background-color: rgba(99, 102, 241, 0.08) !important;
+    border-radius: 0.75rem !important;
+}
+
+html:not(.dark) .fi-sidebar-group-label {
+    color: #64748b !important;
+    font-size: 0.65rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.1em !important;
+    text-transform: uppercase !important;
+}
+
+html:not(.dark) .fi-topbar {
+    background-color: #ffffff !important;
+    backdrop-filter: none !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+}
+
+html:not(.dark) .fi-main {
+    background-color: #f8fafc !important;
+}
+
+html:not(.dark) .fi-header-heading {
+    font-weight: 900 !important;
+    letter-spacing: -0.025em;
+    color: #0f172a !important;
+}
+
+html:not(.dark) .fi-header-subheading {
+    color: #475569 !important;
+}
+
+html:not(.dark) .fi-logo {
+    font-size: 1.25rem !important;
+    font-weight: 900 !important;
+    letter-spacing: -0.03em !important;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 60%, #db2777 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+    display: inline-block;
+    padding: 0.1rem 0 !important;
+    line-height: 1.2 !important;
+}
+
+html:not(.dark) .fi-page .fi-header-heading {
+    font-size: 1.75rem !important;
+    font-weight: 900 !important;
+    background: linear-gradient(135deg, #0f172a 0%, #312e81 100%);
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+    letter-spacing: -0.03em !important;
+}
+
+html:not(.dark) .fi-wi-stats-overview-stat {
+    background-color: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 1.25rem !important;
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+html:not(.dark) .fi-wi-stats-overview-stat:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08) !important;
+}
+
+html:not(.dark) .fi-wi-stats-overview-stat-value {
+    color: #0f172a !important;
+    font-weight: 900 !important;
+    font-size: 2rem !important;
+    line-height: 1 !important;
+}
+
+html:not(.dark) .fi-wi-stats-overview-stat-label {
+    color: #475569 !important;
+    font-weight: 600 !important;
+    font-size: 0.8rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+}
+
+html:not(.dark) .fi-wi-stats-overview-stat-description {
+    color: #64748b !important;
+    font-size: 0.82rem !important;
+}
+
+html:not(.dark) .fi-section,
+html:not(.dark) .fi-modal-window,
+html:not(.dark) .fi-ta-ctn,
+html:not(.dark) .fi-wi-account {
+    background-color: #ffffff !important;
+    backdrop-filter: none !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 1.25rem !important;
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04) !important;
+}
+
+html:not(.dark) .fi-section-header-heading {
+    color: #0f172a !important;
+    font-weight: 700 !important;
+}
+
+html:not(.dark) .fi-ta-header-cell {
+    color: #475569 !important;
+    font-size: 0.7rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+    background-color: #f8fafc !important;
+}
+
+html:not(.dark) .fi-ta-row {
+    border-bottom: 1px solid #e2e8f0 !important;
+}
+
+html:not(.dark) .fi-ta-row:hover {
+    background-color: rgba(99, 102, 241, 0.04) !important;
+}
+
+html:not(.dark) .fi-ta-cell-content {
+    color: #334155 !important;
+}
+
+html:not(.dark) .fi-input,
+html:not(.dark) .fi-select-input,
+html:not(.dark) .fi-input-wrapper,
+html:not(.dark) .fi-select-wrapper {
+    background-color: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 0.75rem !important;
+    color: #0f172a !important;
+    transition: all 0.2s ease;
+}
+
+html:not(.dark) .fi-input:focus,
+html:not(.dark) .fi-input-wrapper:focus-within,
+html:not(.dark) .fi-select-wrapper:focus-within {
+    border-color: rgba(99, 102, 241, 0.6) !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
+    outline: none !important;
+}
+
+html:not(.dark) .fi-fo-field-wrp-label label,
+html:not(.dark) .fi-fo-field-wrp-label .fi-fo-field-wrp-label-text {
+    color: #334155 !important;
+    font-weight: 600 !important;
+}
+
+html:not(.dark) .fi-wi-account-name {
+    color: #0f172a !important;
+    font-weight: 700 !important;
+}
+
+html:not(.dark) .fi-wi-account-email {
+    color: #475569 !important;
+}
+
+html:not(.dark) .fi-modal-close-overlay {
+    background-color: rgba(15, 23, 42, 0.3) !important;
+    backdrop-filter: blur(4px) !important;
+}
+
+html:not(.dark) .fi-pagination-item {
+    color: #475569 !important;
+    font-weight: 600 !important;
+}
+
+html:not(.dark) ::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+html:not(.dark) ::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 9999px;
+}
+html:not(.dark) ::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* ==========================================================================
+   PREMIUM DARK THEME (.dark)
+   ========================================================================== */
+.dark body {
+    background-color: #0f1117 !important;
+    background-image: none !important;
+    min-height: 100vh;
+}
+
+.dark .fi-sidebar {
+    background-color: #16181f !important;
+    backdrop-filter: none !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.07) !important;
+}
+
+.dark .fi-sidebar-header {
+    background-color: #16181f !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+}
+
+.dark .fi-sidebar-item-label {
+    color: #cbd5e1 !important;
+    font-weight: 500 !important;
+}
+
+.dark .fi-sidebar-item-button:hover .fi-sidebar-item-label,
+.dark .fi-sidebar-item-button[aria-current="page"] .fi-sidebar-item-label {
+    color: #fff !important;
+}
+
+.dark .fi-sidebar-item-button[aria-current="page"] {
+    background-color: rgba(99, 102, 241, 0.2) !important;
+    border-radius: 0.75rem !important;
+}
+
+.dark .fi-sidebar-group-label {
+    color: #64748b !important;
+    font-size: 0.65rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.1em !important;
+    text-transform: uppercase !important;
+}
+
+.dark .fi-topbar {
+    background-color: #16181f !important;
+    backdrop-filter: none !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+}
+
+.dark .fi-main {
+    background-color: #0f1117 !important;
+}
+
+.dark .fi-header-heading {
+    font-weight: 900 !important;
+    letter-spacing: -0.025em;
+    color: #f1f5f9 !important;
+}
+
+.dark .fi-header-subheading {
+    color: #94a3b8 !important;
+}
+
+.dark .fi-logo {
+    font-size: 1.25rem !important;
+    font-weight: 900 !important;
+    letter-spacing: -0.03em !important;
+    background: linear-gradient(135deg, #f1f5f9 0%, #a5b4fc 60%, #c084fc 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+    display: inline-block;
+    padding: 0.1rem 0 !important;
+    line-height: 1.2 !important;
+}
+
+.dark .fi-page .fi-header-heading {
+    font-size: 1.75rem !important;
+    font-weight: 900 !important;
+    background: linear-gradient(135deg, #f1f5f9 0%, #c7d2fe 100%);
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+    letter-spacing: -0.03em !important;
+}
+
+.dark .fi-wi-stats-overview-stat {
+    background-color: #1e2028 !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 1.25rem !important;
+    box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.4) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.dark .fi-wi-stats-overview-stat:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.5) !important;
+}
+
+.dark .fi-wi-stats-overview-stat-value {
+    color: #f1f5f9 !important;
+    font-weight: 900 !important;
+    font-size: 2rem !important;
+    line-height: 1 !important;
+}
+
+.dark .fi-wi-stats-overview-stat-label {
+    color: #94a3b8 !important;
+    font-weight: 600 !important;
+    font-size: 0.8rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+}
+
+.dark .fi-wi-stats-overview-stat-description {
+    color: #64748b !important;
+    font-size: 0.82rem !important;
+}
+
+.dark .fi-section,
+.dark .fi-modal-window,
+.dark .fi-ta-ctn,
+.dark .fi-wi-account {
+    background-color: #1e2028 !important;
+    backdrop-filter: none !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 1.25rem !important;
+    box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.3) !important;
+}
+
+.dark .fi-section-header-heading {
+    color: #f1f5f9 !important;
+    font-weight: 700 !important;
+}
+
+.dark .fi-ta-header-cell {
+    color: #94a3b8 !important;
+    font-size: 0.7rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+    background-color: #16181f !important;
+}
+
+.dark .fi-ta-row {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.dark .fi-ta-row:hover {
+    background-color: rgba(99, 102, 241, 0.07) !important;
+}
+
+.dark .fi-ta-cell-content {
+    color: #e2e8f0 !important;
+}
+
+.dark .fi-input,
+.dark .fi-select-input,
+.dark .fi-input-wrapper,
+.dark .fi-select-wrapper {
+    background-color: #2a2d38 !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 0.75rem !important;
+    color: #f1f5f9 !important;
+    transition: all 0.2s ease;
+}
+
+.dark .fi-input:focus,
+.dark .fi-input-wrapper:focus-within,
+.dark .fi-select-wrapper:focus-within {
+    border-color: rgba(99, 102, 241, 0.6) !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15) !important;
+    outline: none !important;
+}
+
+.dark .fi-fo-field-wrp-label label,
+.dark .fi-fo-field-wrp-label .fi-fo-field-wrp-label-text {
+    color: #cbd5e1 !important;
+    font-weight: 600 !important;
+}
+
+.dark .fi-wi-account-name {
+    color: #f1f5f9 !important;
+    font-weight: 700 !important;
+}
+
+.dark .fi-wi-account-email {
+    color: #94a3b8 !important;
+}
+
+.dark .fi-modal-close-overlay {
+    background-color: rgba(0, 0, 0, 0.6) !important;
+    backdrop-filter: blur(4px) !important;
+}
+
+.dark .fi-pagination-item {
+    color: #94a3b8 !important;
+    font-weight: 600 !important;
+}
+
+.dark ::-webkit-scrollbar-track {
     background: #0f1117;
 }
-::-webkit-scrollbar-thumb {
+.dark ::-webkit-scrollbar-thumb {
     background: #2a2d38;
     border-radius: 9999px;
 }
-::-webkit-scrollbar-thumb:hover {
+.dark ::-webkit-scrollbar-thumb:hover {
     background: #6366f1;
 }

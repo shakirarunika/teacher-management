@@ -20,7 +20,7 @@ export default function UpdateProfileInformation({ mustVerifyEmail, status }) {
         <form onSubmit={submit} className="space-y-5">
             {/* Name */}
             <div>
-                <label htmlFor="name" className="block text-sm font-bold text-gray-700 mb-1.5">
+                <label htmlFor="name" className="block text-sm font-bold text-gray-700 dark:text-slate-350 mb-1.5">
                     Nama Lengkap
                 </label>
                 <input
@@ -31,7 +31,7 @@ export default function UpdateProfileInformation({ mustVerifyEmail, status }) {
                     required
                     autoFocus
                     autoComplete="name"
-                    className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-gray-900 font-medium focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all shadow-sm placeholder-gray-300"
+                    className="w-full rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950/50 px-4 py-3 text-gray-900 dark:text-slate-100 font-medium focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all shadow-sm dark:shadow-none placeholder-gray-300 dark:placeholder-slate-700"
                     placeholder="Nama lengkap kamu"
                 />
                 {errors.name && <p className="mt-2 text-sm text-rose-500 font-medium">{errors.name}</p>}
@@ -39,7 +39,7 @@ export default function UpdateProfileInformation({ mustVerifyEmail, status }) {
 
             {/* Email */}
             <div>
-                <label htmlFor="email" className="block text-sm font-bold text-gray-700 mb-1.5">
+                <label htmlFor="email" className="block text-sm font-bold text-gray-700 dark:text-slate-350 mb-1.5">
                     Alamat Email
                 </label>
                 <input
@@ -49,7 +49,7 @@ export default function UpdateProfileInformation({ mustVerifyEmail, status }) {
                     onChange={(e) => setData('email', e.target.value)}
                     required
                     autoComplete="username"
-                    className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-gray-900 font-medium focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all shadow-sm placeholder-gray-300"
+                    className="w-full rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950/50 px-4 py-3 text-gray-900 dark:text-slate-100 font-medium focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all shadow-sm dark:shadow-none placeholder-gray-300 dark:placeholder-slate-700"
                     placeholder="email@kamu.com"
                 />
                 {errors.email && <p className="mt-2 text-sm text-rose-500 font-medium">{errors.email}</p>}
@@ -57,20 +57,20 @@ export default function UpdateProfileInformation({ mustVerifyEmail, status }) {
 
             {/* Email Verification */}
             {mustVerifyEmail && user.email_verified_at === null && (
-                <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
-                    <p className="text-sm text-amber-800 font-medium">
+                <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 rounded-xl px-4 py-3">
+                    <p className="text-sm text-amber-800 dark:text-amber-300 font-medium">
                         Email kamu belum diverifikasi.{' '}
                         <Link
                             href={route('verification.send')}
                             method="post"
                             as="button"
-                            className="underline font-bold text-amber-700 hover:text-amber-900"
+                            className="underline font-bold text-amber-700 dark:text-amber-400 hover:text-amber-900 dark:hover:text-amber-300"
                         >
                             Kirim ulang email verifikasi.
                         </Link>
                     </p>
                     {status === 'verification-link-sent' && (
-                        <p className="mt-1 text-sm font-bold text-emerald-600">
+                        <p className="mt-1 text-sm font-bold text-emerald-600 dark:text-emerald-450">
                             Link verifikasi baru telah dikirim!
                         </p>
                     )}
@@ -84,7 +84,7 @@ export default function UpdateProfileInformation({ mustVerifyEmail, status }) {
                     disabled={processing}
                     whileTap={{ scale: 0.97 }}
                     whileHover={{ scale: 1.02 }}
-                    className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold px-6 py-3 rounded-xl shadow-md shadow-indigo-200 transition-colors flex items-center gap-2"
+                    className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold px-6 py-3 rounded-xl shadow-md shadow-indigo-200 dark:shadow-none transition-colors flex items-center gap-2"
                 >
                     {processing ? (
                         <span className="animate-pulse">Menyimpan...</span>
