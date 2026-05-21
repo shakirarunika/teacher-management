@@ -160,11 +160,29 @@ export default function Welcome({ auth }) {
                         @keyframes f2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-30px,40px)} }
                         @keyframes f3 { 0%,100%{transform:translateX(0)} 50%{transform:translateX(-40px)} }
                         @keyframes iconFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+
+                        @media (max-width: 640px) {
+                            .sintesis-nav {
+                                padding: 0.75rem 0.85rem !important;
+                                gap: 0.5rem !important;
+                            }
+                            .sintesis-logo-nav {
+                                display: none !important;
+                            }
+                            .sintesis-nav-right {
+                                gap: 0.4rem !important;
+                                width: auto !important;
+                            }
+                            .sintesis-btn-admin, .sintesis-btn-login {
+                                font-size: 0.72rem !important;
+                                padding: 0.35rem 0.65rem !important;
+                            }
+                        }
                     `}</style>
                 </div>
 
                 {/* ── Navbar ── */}
-                <nav style={{
+                <nav className="sintesis-nav" style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     padding: '1.25rem 2rem',
                     borderBottom: `1px solid ${colors.navBorder}`,
@@ -196,7 +214,7 @@ export default function Welcome({ auth }) {
                     </div>
 
                     {/* Nav right */}
-                    <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                    <div className="sintesis-nav-right" style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
                         {/* Theme Switcher Toggle */}
                         <button
                             onClick={toggleTheme}
@@ -227,6 +245,7 @@ export default function Welcome({ auth }) {
 
                         <a
                             href="/admin"
+                            className="sintesis-btn-admin"
                             style={{
                                 fontSize: '0.82rem', fontWeight: 600, color: colors.textSecondary,
                                 textDecoration: 'none', padding: '0.4rem 0.85rem',
@@ -242,6 +261,7 @@ export default function Welcome({ auth }) {
                         </a>
                         <Link
                             href={route('login')}
+                            className="sintesis-btn-login"
                             style={{
                                 fontSize: '0.82rem', fontWeight: 700, color: '#fff',
                                 textDecoration: 'none', padding: '0.4rem 1.1rem',
