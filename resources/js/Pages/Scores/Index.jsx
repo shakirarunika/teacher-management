@@ -135,7 +135,7 @@ export default function ScoreIndex({ classroom, subjects, students, existingScor
 
     return (
         <AuthenticatedLayout>
-            <Head title={`Nilai ${classroom.name} - SINTESIS`} />
+            <Head title={`Nilai ${classroom.name}`} />
 
             <form onSubmit={handleSubmit} className="py-6 sm:py-8 relative z-10 min-h-screen">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-36">

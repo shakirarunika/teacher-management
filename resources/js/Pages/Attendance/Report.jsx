@@ -137,7 +137,7 @@ export default function AttendanceReport({ classroom, filters, summary, detail, 
 
     return (
         <AuthenticatedLayout>
-            <Head title={`Laporan ${classroom.name} - SINTESIS`} />
+            <Head title={`Laporan ${classroom.name}`} />
 
             <div className="py-6 sm:py-8 relative z-10 min-h-screen">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pb-12">

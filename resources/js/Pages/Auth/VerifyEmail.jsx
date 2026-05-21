@@ -13,7 +13,7 @@ export default function VerifyEmail({ status }) {
 
     return (
         <GuestLayout>
-            <Head title="Verifikasi Email - SINTESIS" />
+            <Head title="Verifikasi Email" />
 
             <div className="mb-4 text-sm text-gray-600">
                 Thanks for signing up! Before getting started, could you verify

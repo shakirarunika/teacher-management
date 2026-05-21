@@ -23,7 +23,7 @@ export default function Register() {
 
     return (
         <GuestLayout>
-            <Head title="Daftar - SINTESIS" />
+            <Head title="Daftar" />
 
             <form onSubmit={submit}>
                 <div>

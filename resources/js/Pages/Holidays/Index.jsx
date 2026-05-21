@@ -125,7 +125,7 @@ export default function HolidaysIndex({ holidays, filters }) {
 
     return (
         <AuthenticatedLayout>
-            <Head title="Hari Libur - SINTESIS" />
+            <Head title="Hari Libur" />
 
             <div className="py-6 sm:py-8 relative z-10 min-h-screen">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">

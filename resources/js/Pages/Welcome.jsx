@@ -138,7 +138,7 @@ export default function Welcome({ auth }) {
 
     return (
         <>
-            <Head title="SINTESIS - Sistem Integrasi Tenaga Edukasi & Sekolah" />
+            <Head title="Sistem Integrasi Tenaga Edukasi &amp; Sekolah" />
 
             <div style={{
                 minHeight: '100vh',

@@ -210,7 +210,7 @@ export default function Login({ status, canResetPassword }) {
 
     return (
         <>
-            <Head title="Masuk - SINTESIS" />
+            <Head title="Masuk" />
 
             {/* ── Page wrapper ── */}
             <div style={{
