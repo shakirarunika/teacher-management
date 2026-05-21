@@ -259,7 +259,7 @@ export default function Login({ status, canResetPassword }) {
                 </div>
 
                 {/* Theme Switcher Toggle (Floating top-right) */}
-                <div style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', zIndex: 100 }}>
+                <div style={{ position: 'fixed', top: '1.5rem', right: '1.5rem', zIndex: 100 }}>
                     <button
                         onClick={toggleTheme}
                         style={{
