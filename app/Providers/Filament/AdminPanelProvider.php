@@ -33,7 +33,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->darkMode(true)
-            ->brandName('SINTESIS Admin')
+            ->brandName('SINTESIS')
             ->login(Login::class)
             ->colors([
                 'primary' => Color::Indigo,

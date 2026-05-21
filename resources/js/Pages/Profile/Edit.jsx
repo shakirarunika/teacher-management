@@ -20,7 +20,7 @@ export default function Edit({ mustVerifyEmail, status }) {
 
     return (
         <AuthenticatedLayout>
-            <Head title="Profile" />
+            <Head title="Profil - SINTESIS" />
 
             <div className="py-6 sm:py-8 relative z-10 min-h-screen">
                 <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">

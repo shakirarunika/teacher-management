@@ -39,7 +39,7 @@ export default function Dashboard({ stats, classrooms, academicYear }) {
 
     return (
         <AuthenticatedLayout>
-            <Head title="Teacher Dashboard" />
+            <Head title="Dashboard - SINTESIS" />
 
             <div className="py-2 sm:py-8 relative z-10">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">

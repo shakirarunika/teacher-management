@@ -122,7 +122,7 @@ export default function AttendanceIndex({ classroom, date, students, holiday }) 
 
     return (
         <AuthenticatedLayout>
-            <Head title={`Attendance - ${classroom.name}`} />
+            <Head title={`Absensi ${classroom.name} - SINTESIS`} />
 
             <div className="py-6 sm:py-8 relative z-10 min-h-screen">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
