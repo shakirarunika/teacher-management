@@ -36,6 +36,10 @@ class HolidayController extends Controller
      */
     public function store(Request $request)
     {
+        if ($request->user()->role !== 'admin') {
+            abort(403, 'Unauthorized action.');
+        }
+
         $validated = $request->validate([
             'date' => 'required|date|unique:holidays,date',
             'name' => 'required|string|max:255',
@@ -54,6 +58,10 @@ class HolidayController extends Controller
      */
     public function destroy(Holiday $holiday)
     {
+        if (auth()->user()->role !== 'admin') {
+            abort(403, 'Unauthorized action.');
+        }
+
         $holiday->delete();
 
         return redirect()->back()->with('success', 'Hari libur berhasil dihapus!');
@@ -64,6 +72,10 @@ class HolidayController extends Controller
      */
     public function sync(Request $request)
     {
+        if ($request->user()->role !== 'admin') {
+            abort(403, 'Unauthorized action.');
+        }
+
         $validated = $request->validate([
             'year' => 'required|integer|min:2000|max:2100',
         ]);

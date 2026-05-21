@@ -1,5 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, router, useForm } from '@inertiajs/react';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     CalendarDaysIcon, PlusIcon, TrashIcon,
@@ -66,6 +66,9 @@ function FilterDropdown({ value, options, onChange, width = 'w-36' }) {
 }
 
 export default function HolidaysIndex({ holidays, filters }) {
+    const { auth } = usePage().props;
+    const isAdmin = auth.user.role === 'admin';
+
     const [deleteModal, setDeleteModal] = useState({ isOpen: false, holiday: null });
     const [syncing, setSyncing] = useState(false);
 
@@ -161,17 +164,19 @@ export default function HolidaysIndex({ holidays, filters }) {
                                         width="w-28"
                                     />
                                 </div>
-                                <motion.button
-                                    type="button"
-                                    onClick={syncNationalHolidays}
-                                    disabled={syncing}
-                                    whileTap={{ scale: 0.96 }}
-                                    whileHover={{ scale: 1.02 }}
-                                    className="bg-indigo-50 dark:bg-indigo-950/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 disabled:opacity-50 text-indigo-700 dark:text-indigo-300 font-bold py-3 px-4 rounded-2xl text-sm transition-all border border-indigo-100 dark:border-indigo-900/40 flex items-center gap-2 shadow-sm"
-                                >
-                                    <SparklesIcon className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
-                                    {syncing ? 'Memproses...' : `Sync Libur ${filters.year}`}
-                                </motion.button>
+                                {isAdmin && (
+                                    <motion.button
+                                        type="button"
+                                        onClick={syncNationalHolidays}
+                                        disabled={syncing}
+                                        whileTap={{ scale: 0.96 }}
+                                        whileHover={{ scale: 1.02 }}
+                                        className="bg-indigo-50 dark:bg-indigo-950/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 disabled:opacity-50 text-indigo-700 dark:text-indigo-300 font-bold py-3 px-4 rounded-2xl text-sm transition-all border border-indigo-100 dark:border-indigo-900/40 flex items-center gap-2 shadow-sm"
+                                    >
+                                        <SparklesIcon className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
+                                        {syncing ? 'Memproses...' : `Sync Libur ${filters.year}`}
+                                    </motion.button>
+                                )}
                             </div>
                         </div>
                     </motion.div>
@@ -180,91 +185,93 @@ export default function HolidaysIndex({ holidays, filters }) {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         
                         {/* Form Card (1/3 width) */}
-                        <motion.div
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            className="bg-white/70 dark:bg-slate-900/45 backdrop-blur-xl border border-white dark:border-slate-800/80 rounded-[2rem] p-6 shadow-xl shadow-gray-100/50 dark:shadow-none h-fit transition-colors duration-300"
-                        >
-                            <h3 className="text-lg font-black text-gray-900 dark:text-slate-100 mb-4 flex items-center gap-2">
-                                <PlusIcon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-                                Tambah Hari Libur
-                            </h3>
+                        {isAdmin && (
+                            <motion.div
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                className="bg-white/70 dark:bg-slate-900/45 backdrop-blur-xl border border-white dark:border-slate-800/80 rounded-[2rem] p-6 shadow-xl shadow-gray-100/50 dark:shadow-none h-fit transition-colors duration-300"
+                            >
+                                <h3 className="text-lg font-black text-gray-900 dark:text-slate-100 mb-4 flex items-center gap-2">
+                                    <PlusIcon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                                    Tambah Hari Libur
+                                </h3>
 
-                            <form onSubmit={submitForm} className="space-y-4">
-                                <div>
-                                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-slate-400 mb-1">Tanggal</label>
-                                    <input
-                                        type="date"
-                                        value={data.date}
-                                        onChange={e => setData('date', e.target.value)}
-                                        className="w-full rounded-xl border-gray-200 dark:border-slate-800 bg-white/50 dark:bg-slate-950/50 border-2 py-3 px-4 text-sm font-bold text-gray-700 dark:text-slate-200 focus:border-indigo-500 dark:focus:border-indigo-700 focus:ring-0 transition-colors"
-                                        required
-                                    />
-                                    {errors.date && (
-                                        <p className="text-xs text-rose-500 font-bold mt-1">{errors.date}</p>
-                                    )}
-                                </div>
-
-                                <div>
-                                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-slate-400 mb-1">Nama Hari Libur</label>
-                                    <input
-                                        type="text"
-                                        placeholder="Contoh: Hari Raya Nyepi, Libur Semester"
-                                        value={data.name}
-                                        onChange={e => setData('name', e.target.value)}
-                                        className="w-full rounded-xl border-gray-200 dark:border-slate-800 bg-white/50 dark:bg-slate-950/50 border-2 py-3 px-4 text-sm font-semibold text-gray-700 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-600 focus:border-indigo-500 dark:focus:border-indigo-700 focus:ring-0 transition-colors"
-                                        required
-                                    />
-                                    {errors.name && (
-                                        <p className="text-xs text-rose-500 font-bold mt-1">{errors.name}</p>
-                                    )}
-                                </div>
-
-                                <div>
-                                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-slate-400 mb-1">Tipe Libur</label>
-                                    <div className="flex gap-2">
-                                        {[
-                                            { id: 'Nasional', label: 'Nasional', color: 'border-rose-100 hover:bg-rose-50/50 checked:bg-rose-600 active:bg-rose-500 text-rose-600' },
-                                            { id: 'Internal', label: 'Internal Sekolah', color: 'border-amber-100 hover:bg-amber-50/50 checked:bg-amber-600 active:bg-amber-500 text-amber-600' },
-                                        ].map(t => (
-                                            <button
-                                                key={t.id}
-                                                type="button"
-                                                onClick={() => setData('type', t.id)}
-                                                className={`flex-1 py-3 px-4 rounded-xl border-2 text-sm font-bold transition-all ${
-                                                    data.type === t.id
-                                                        ? t.id === 'Nasional'
-                                                            ? 'bg-rose-50 dark:bg-rose-950/30 border-rose-500 dark:border-rose-700 text-rose-700 dark:text-rose-450'
-                                                            : 'bg-amber-50 dark:bg-amber-950/30 border-amber-500 dark:border-amber-700 text-amber-700 dark:text-amber-450'
-                                                        : 'bg-white/40 dark:bg-slate-900/40 border-gray-200 dark:border-slate-800 text-gray-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-900'
-                                                }`}
-                                            >
-                                                {t.label}
-                                            </button>
-                                        ))}
+                                <form onSubmit={submitForm} className="space-y-4">
+                                    <div>
+                                        <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-slate-400 mb-1">Tanggal</label>
+                                        <input
+                                            type="date"
+                                            value={data.date}
+                                            onChange={e => setData('date', e.target.value)}
+                                            className="w-full rounded-xl border-gray-200 dark:border-slate-800 bg-white/50 dark:bg-slate-950/50 border-2 py-3 px-4 text-sm font-bold text-gray-700 dark:text-slate-200 focus:border-indigo-500 dark:focus:border-indigo-700 focus:ring-0 transition-colors"
+                                            required
+                                        />
+                                        {errors.date && (
+                                            <p className="text-xs text-rose-500 font-bold mt-1">{errors.date}</p>
+                                        )}
                                     </div>
-                                    {errors.type && (
-                                        <p className="text-xs text-rose-500 font-bold mt-1">{errors.type}</p>
-                                    )}
-                                </div>
 
-                                <motion.button
-                                    type="submit"
-                                    disabled={processing}
-                                    whileTap={{ scale: 0.97 }}
-                                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg shadow-indigo-100/50 dark:shadow-none flex items-center justify-center gap-2 mt-6"
-                                >
-                                    <PlusIcon className="w-5 h-5" />
-                                    Simpan Libur
-                                </motion.button>
-                            </form>
-                        </motion.div>
+                                    <div>
+                                        <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-slate-400 mb-1">Nama Hari Libur</label>
+                                        <input
+                                            type="text"
+                                            placeholder="Contoh: Hari Raya Nyepi, Libur Semester"
+                                            value={data.name}
+                                            onChange={e => setData('name', e.target.value)}
+                                            className="w-full rounded-xl border-gray-200 dark:border-slate-800 bg-white/50 dark:bg-slate-950/50 border-2 py-3 px-4 text-sm font-semibold text-gray-700 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-600 focus:border-indigo-500 dark:focus:border-indigo-700 focus:ring-0 transition-colors"
+                                            required
+                                        />
+                                        {errors.name && (
+                                            <p className="text-xs text-rose-500 font-bold mt-1">{errors.name}</p>
+                                        )}
+                                    </div>
 
-                        {/* List/Calendar View (2/3 width) */}
+                                    <div>
+                                        <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-slate-400 mb-1">Tipe Libur</label>
+                                        <div className="flex gap-2">
+                                            {[
+                                                { id: 'Nasional', label: 'Nasional', color: 'border-rose-100 hover:bg-rose-50/50 checked:bg-rose-600 active:bg-rose-500 text-rose-600' },
+                                                { id: 'Internal', label: 'Internal Sekolah', color: 'border-amber-100 hover:bg-amber-50/50 checked:bg-amber-600 active:bg-amber-500 text-amber-600' },
+                                            ].map(t => (
+                                                <button
+                                                    key={t.id}
+                                                    type="button"
+                                                    onClick={() => setData('type', t.id)}
+                                                    className={`flex-1 py-3 px-4 rounded-xl border-2 text-sm font-bold transition-all ${
+                                                        data.type === t.id
+                                                            ? t.id === 'Nasional'
+                                                                ? 'bg-rose-50 dark:bg-rose-950/30 border-rose-500 dark:border-rose-700 text-rose-700 dark:text-rose-450'
+                                                                : 'bg-amber-50 dark:bg-amber-950/30 border-amber-500 dark:border-amber-700 text-amber-700 dark:text-amber-450'
+                                                            : 'bg-white/40 dark:bg-slate-900/40 border-gray-200 dark:border-slate-800 text-gray-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-900'
+                                                    }`}
+                                                >
+                                                    {t.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        {errors.type && (
+                                            <p className="text-xs text-rose-500 font-bold mt-1">{errors.type}</p>
+                                        )}
+                                    </div>
+
+                                    <motion.button
+                                        type="submit"
+                                        disabled={processing}
+                                        whileTap={{ scale: 0.97 }}
+                                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg shadow-indigo-100/50 dark:shadow-none flex items-center justify-center gap-2 mt-6"
+                                    >
+                                        <PlusIcon className="w-5 h-5" />
+                                        Simpan Libur
+                                    </motion.button>
+                                </form>
+                            </motion.div>
+                        )}
+
+                        {/* List/Calendar View (2/3 or 3/3 width) */}
                         <motion.div
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
-                            className="lg:col-span-2 bg-white/70 dark:bg-slate-900/45 backdrop-blur-xl border border-white dark:border-slate-800/80 rounded-[2rem] p-6 shadow-xl shadow-gray-100/50 dark:shadow-none min-h-[300px] transition-colors duration-300"
+                            className={`${isAdmin ? 'lg:col-span-2' : 'lg:col-span-3'} bg-white/70 dark:bg-slate-900/45 backdrop-blur-xl border border-white dark:border-slate-800/80 rounded-[2rem] p-6 shadow-xl shadow-gray-100/50 dark:shadow-none min-h-[300px] transition-colors duration-300`}
                         >
                             <h3 className="text-lg font-black text-gray-900 dark:text-slate-100 mb-4">
                                 Hari Libur Terdaftar — {monthLabel} {filters.year}
@@ -323,14 +330,16 @@ export default function HolidaysIndex({ holidays, filters }) {
                                                         {h.type}
                                                     </span>
 
-                                                    <motion.button
-                                                        type="button"
-                                                        onClick={() => confirmDelete(h)}
-                                                        whileTap={{ scale: 0.9 }}
-                                                        className="w-8 h-8 rounded-lg text-gray-400 dark:text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 flex items-center justify-center transition-colors"
-                                                    >
-                                                        <TrashIcon className="w-5 h-5" />
-                                                    </motion.button>
+                                                    {isAdmin && (
+                                                        <motion.button
+                                                            type="button"
+                                                            onClick={() => confirmDelete(h)}
+                                                            whileTap={{ scale: 0.9 }}
+                                                            className="w-8 h-8 rounded-lg text-gray-400 dark:text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 flex items-center justify-center transition-colors"
+                                                        >
+                                                            <TrashIcon className="w-5 h-5" />
+                                                        </motion.button>
+                                                    )}
                                                 </div>
                                             </motion.div>
                                         );
