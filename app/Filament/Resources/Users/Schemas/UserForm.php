@@ -22,11 +22,19 @@ class UserForm
                 DateTimePicker::make('email_verified_at'),
                 TextInput::make('password')
                     ->password()
-                    ->required(),
+                    // Wajib hanya saat membuat user; saat edit, kosongkan jika tak ingin mengubah
+                    ->required(fn (string $operation): bool => $operation === 'create')
+                    ->dehydrated(fn (?string $state): bool => filled($state)),
                 Select::make('role')
                     ->options(['admin' => 'Admin', 'teacher' => 'Teacher'])
                     ->default('teacher')
                     ->required(),
+                DateTimePicker::make('trial_ends_at')
+                    ->label('Masa coba s/d')
+                    ->helperText('Kosongkan jika tidak memakai masa coba.'),
+                DateTimePicker::make('subscription_ends_at')
+                    ->label('Langganan aktif s/d')
+                    ->helperText('Set tanggal di masa depan untuk mengaktifkan akun guru.'),
             ]);
     }
 }
