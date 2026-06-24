@@ -1,7 +1,9 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link } from '@inertiajs/react';
+import Modal from '@/Components/Modal';
+import { Head, Link, useForm, router } from '@inertiajs/react';
 import { motion } from 'framer-motion';
-import { ClipboardDocumentCheckIcon, CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
+import { useState } from 'react';
+import { ClipboardDocumentCheckIcon, CheckCircleIcon, ExclamationCircleIcon, PlusIcon, PencilSquareIcon, TrashIcon, UsersIcon } from '@heroicons/react/24/outline';
 
 // Dynamic badge based on rate value
 function AttendanceBadge({ rate }) {
@@ -35,6 +37,32 @@ export default function Dashboard({ stats, classrooms, academicYear }) {
     const item = {
         hidden: { opacity: 0, y: 20 },
         show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } },
+    };
+
+    // Modal tambah/edit kelas
+    const [classModal, setClassModal] = useState({ open: false, editing: null });
+    const [deleteTarget, setDeleteTarget] = useState(null);
+    const form = useForm({ name: '' });
+
+    const openCreate = () => { form.clearErrors(); form.setData('name', ''); setClassModal({ open: true, editing: null }); };
+    const openEdit = (classroom) => { form.clearErrors(); form.setData('name', classroom.name); setClassModal({ open: true, editing: classroom }); };
+    const closeModal = () => setClassModal({ open: false, editing: null });
+
+    const submitClass = (e) => {
+        e.preventDefault();
+        const opts = { preserveScroll: true, onSuccess: closeModal };
+        if (classModal.editing) {
+            form.put(route('classrooms.update', classModal.editing.id), opts);
+        } else {
+            form.post(route('classrooms.store'), opts);
+        }
+    };
+
+    const confirmDelete = () => {
+        router.delete(route('classrooms.destroy', deleteTarget.id), {
+            preserveScroll: true,
+            onFinish: () => setDeleteTarget(null),
+        });
     };
 
     return (
@@ -116,11 +144,19 @@ export default function Dashboard({ stats, classrooms, academicYear }) {
 
                     {/* Classrooms Grid */}
                     <div>
-                        <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center justify-between mb-6 gap-3">
                             <h3 className="text-2xl font-extrabold text-gray-900 dark:text-slate-100 tracking-tight">Kelas Anda</h3>
-                            <span className="bg-indigo-100 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 py-1 px-4 rounded-full text-xs sm:text-sm font-bold shadow-sm">
-                                TA {academicYear}
-                            </span>
+                            <div className="flex items-center gap-3">
+                                <span className="hidden sm:inline bg-indigo-100 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 py-1 px-4 rounded-full text-xs sm:text-sm font-bold shadow-sm">
+                                    TA {academicYear}
+                                </span>
+                                <button
+                                    onClick={openCreate}
+                                    className="inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm py-2.5 px-4 rounded-xl shadow-md shadow-indigo-500/30 transition-all active:scale-95"
+                                >
+                                    <PlusIcon className="w-4 h-4" /> Tambah Kelas
+                                </button>
+                            </div>
                         </div>
 
                         {classrooms.length === 0 ? (
@@ -133,7 +169,13 @@ export default function Dashboard({ stats, classrooms, academicYear }) {
                                     <ClipboardDocumentCheckIcon className="w-8 h-8 text-indigo-300 dark:text-indigo-400" />
                                 </div>
                                 <h4 className="text-xl font-bold text-gray-400 dark:text-slate-400">Belum ada kelas</h4>
-                                <p className="text-gray-400 dark:text-slate-500 mt-1 text-sm">Hubungi admin untuk menambahkan kelas.</p>
+                                <p className="text-gray-400 dark:text-slate-500 mt-1 text-sm">Mulai dengan menambahkan kelas pertama Anda.</p>
+                                <button
+                                    onClick={openCreate}
+                                    className="mt-5 inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm py-2.5 px-5 rounded-xl shadow-md shadow-indigo-500/30 transition-all active:scale-95"
+                                >
+                                    <PlusIcon className="w-4 h-4" /> Tambah Kelas
+                                </button>
                             </motion.div>
                         ) : (
                             <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-10">
@@ -215,6 +257,30 @@ export default function Dashboard({ stats, classrooms, academicYear }) {
                                                     Laporan
                                                 </Link>
                                             </div>
+
+                                            {/* Kelola kelas & siswa */}
+                                            <div className="mt-2 flex items-center gap-2">
+                                                <Link
+                                                    href={`/classrooms/${classroom.id}/students`}
+                                                    className="flex-1 inline-flex items-center justify-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 font-bold py-2.5 px-3 rounded-xl transition-all active:scale-95 text-sm"
+                                                >
+                                                    <UsersIcon className="w-4 h-4" /> Kelola Siswa
+                                                </Link>
+                                                <button
+                                                    onClick={() => openEdit(classroom)}
+                                                    title="Edit nama kelas"
+                                                    className="p-2.5 rounded-xl bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-500 dark:text-slate-300 transition-all active:scale-95"
+                                                >
+                                                    <PencilSquareIcon className="w-4 h-4" />
+                                                </button>
+                                                <button
+                                                    onClick={() => setDeleteTarget(classroom)}
+                                                    title="Hapus kelas"
+                                                    className="p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/40 text-rose-600 dark:text-rose-400 transition-all active:scale-95"
+                                                >
+                                                    <TrashIcon className="w-4 h-4" />
+                                                </button>
+                                            </div>
                                         </motion.div>
                                     );
                                 })}
@@ -224,6 +290,47 @@ export default function Dashboard({ stats, classrooms, academicYear }) {
 
                 </div>
             </div>
+
+            {/* Modal Tambah/Edit Kelas */}
+            <Modal show={classModal.open} onClose={closeModal} maxWidth="md">
+                <form onSubmit={submitClass} className="p-6">
+                    <h2 className="text-lg font-bold text-gray-900">
+                        {classModal.editing ? 'Edit Kelas' : 'Tambah Kelas Baru'}
+                    </h2>
+                    <div className="mt-4">
+                        <label className="block text-sm font-medium text-gray-700">Nama Kelas</label>
+                        <input
+                            type="text"
+                            value={form.data.name}
+                            onChange={(e) => form.setData('name', e.target.value)}
+                            placeholder="Contoh: Kelas 10A"
+                            autoFocus
+                            className="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        />
+                        {form.errors.name && <p className="mt-1 text-sm text-rose-600">{form.errors.name}</p>}
+                    </div>
+                    <div className="mt-6 flex justify-end gap-3">
+                        <button type="button" onClick={closeModal} className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 font-semibold text-gray-700 transition">Batal</button>
+                        <button type="submit" disabled={form.processing} className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 font-semibold text-white shadow-md shadow-indigo-500/30 transition disabled:opacity-50">
+                            {classModal.editing ? 'Simpan' : 'Tambah'}
+                        </button>
+                    </div>
+                </form>
+            </Modal>
+
+            {/* Modal Konfirmasi Hapus Kelas */}
+            <Modal show={!!deleteTarget} onClose={() => setDeleteTarget(null)} maxWidth="md">
+                <div className="p-6">
+                    <h2 className="text-lg font-bold text-gray-900">Hapus kelas "{deleteTarget?.name}"?</h2>
+                    <p className="mt-2 text-sm text-gray-600">
+                        Semua data absensi & nilai di kelas ini akan ikut terhapus permanen. Tindakan ini tidak bisa dibatalkan.
+                    </p>
+                    <div className="mt-6 flex justify-end gap-3">
+                        <button onClick={() => setDeleteTarget(null)} className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 font-semibold text-gray-700 transition">Batal</button>
+                        <button onClick={confirmDelete} className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 font-semibold text-white shadow-md shadow-rose-500/30 transition">Ya, Hapus</button>
+                    </div>
+                </div>
+            </Modal>
         </AuthenticatedLayout>
     );
 }

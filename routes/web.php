@@ -8,6 +8,8 @@ use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AttendanceReportController;
 use App\Http\Controllers\ScoreController;
 use App\Http\Controllers\HolidayController;
+use App\Http\Controllers\ClassroomController;
+use App\Http\Controllers\StudentController;
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -19,7 +21,18 @@ Route::get('/', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    
+
+    // Classroom self-service (guru kelola kelasnya sendiri)
+    Route::post('/classrooms', [ClassroomController::class, 'store'])->name('classrooms.store');
+    Route::put('/classrooms/{classroom}', [ClassroomController::class, 'update'])->name('classrooms.update');
+    Route::delete('/classrooms/{classroom}', [ClassroomController::class, 'destroy'])->name('classrooms.destroy');
+
+    // Student self-service (kelola siswa per kelas)
+    Route::get('/classrooms/{classroom}/students', [StudentController::class, 'index'])->name('students.index');
+    Route::post('/classrooms/{classroom}/students', [StudentController::class, 'store'])->name('students.store');
+    Route::put('/classrooms/{classroom}/students/{student}', [StudentController::class, 'update'])->name('students.update');
+    Route::delete('/classrooms/{classroom}/students/{student}', [StudentController::class, 'destroy'])->name('students.destroy');
+
     // Attendance Routes
     Route::get('/classrooms/{classroom}/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
     Route::post('/classrooms/{classroom}/attendance', [AttendanceController::class, 'store'])->name('attendance.store');

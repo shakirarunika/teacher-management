@@ -24,7 +24,7 @@ class StudentForm
                             ->label('NIS')
                             ->required()
                             ->unique(ignoreRecord: true)
-                            ->default(fn () => static::generateNis())
+                            ->default(fn () => Student::generateNis())
                             ->dehydrated()
                             ->readOnly(fn (?Student $record) => $record === null)
                             ->helperText(fn (?Student $record) => $record === null
@@ -64,28 +64,5 @@ class StudentForm
                     ->columns(2)
                     ->visibleOn('create'),
             ]);
-    }
-
-    /**
-     * Generate NIS otomatis dengan format: TAHUN + 4 digit urutan
-     * Contoh: 20260001, 20260002, dst.
-     */
-    public static function generateNis(): string
-    {
-        $year = date('Y');
-        $prefix = $year;
-
-        $lastStudent = Student::where('nis', 'like', $prefix . '%')
-            ->orderByRaw('CAST(nis AS UNSIGNED) DESC')
-            ->first();
-
-        if ($lastStudent) {
-            $lastNumber = (int) substr($lastStudent->nis, strlen($prefix));
-            $nextNumber = $lastNumber + 1;
-        } else {
-            $nextNumber = 1;
-        }
-
-        return $prefix . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
     }
 }

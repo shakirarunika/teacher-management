@@ -12,6 +12,21 @@ class Student extends Model
 
     protected $guarded = [];
 
+    /**
+     * Generate NIS otomatis: TAHUN + 4 digit urutan (mis. 20260001).
+     * Urutan dihitung per guru karena NIS unik per guru (OwnerScope aktif).
+     */
+    public static function generateNis(): string
+    {
+        $prefix = date('Y');
+        $last = static::where('nis', 'like', $prefix . '%')
+            ->orderByRaw('CAST(nis AS UNSIGNED) DESC')
+            ->first();
+        $next = $last ? ((int) substr($last->nis, strlen($prefix))) + 1 : 1;
+
+        return $prefix . str_pad($next, 4, '0', STR_PAD_LEFT);
+    }
+
     public function classrooms()
     {
         return $this->belongsToMany(Classroom::class, 'classroom_student')
