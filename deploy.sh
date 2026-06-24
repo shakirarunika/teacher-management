@@ -10,7 +10,7 @@ echo ">> Jalankan migration..."
 php artisan migrate --force
 
 echo ">> Build asset frontend..."
-npm install
+npm ci
 npm run build
 
 echo ">> Refresh cache Laravel + Filament..."
