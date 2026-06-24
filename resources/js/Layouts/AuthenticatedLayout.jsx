@@ -74,6 +74,21 @@ export default function AuthenticatedLayout({ header, children }) {
         { href: route('profile.edit'), label: 'Profil', match: 'profile.edit', icon: UserIcon, iconSolid: UserIconSolid },
     ];
 
+    // Banner peringatan: tampil saat akses (trial/langganan) tersisa <= 7 hari
+    const accessNotice = (() => {
+        if (!user || user.role !== 'teacher') return null;
+        const now = new Date();
+        const sub = user.subscription_ends_at ? new Date(user.subscription_ends_at) : null;
+        const trial = user.trial_ends_at ? new Date(user.trial_ends_at) : null;
+        const subActive = sub && sub > now;
+        const trialActive = trial && trial > now;
+        if (!subActive && !trialActive) return null; // sudah terkunci (diarahkan ke /billing)
+        const end = subActive ? sub : trial;
+        const days = Math.ceil((end - now) / 86400000);
+        if (days > 7) return null;
+        return { days, isTrial: !subActive, urgent: days <= 3 };
+    })();
+
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-[#0b0f19] text-slate-800 dark:text-slate-100 transition-colors duration-300 relative overflow-hidden pb-20 sm:pb-0">
             {/* Abstract Background Elements */}
@@ -202,6 +217,24 @@ export default function AuthenticatedLayout({ header, children }) {
                         </div>
                     </div>
                 </div>
+
+                {accessNotice && (
+                    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-4">
+                        <Link
+                            href={route('billing')}
+                            className={`flex items-center justify-between gap-3 rounded-2xl px-5 py-3.5 border shadow-sm transition-all hover:shadow-md ${
+                                accessNotice.urgent
+                                    ? 'bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-900/60 text-rose-700 dark:text-rose-300'
+                                    : 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-900/60 text-amber-700 dark:text-amber-300'
+                            }`}
+                        >
+                            <span className="text-sm font-bold">
+                                {accessNotice.isTrial ? 'Masa coba' : 'Langganan'} berakhir dalam {accessNotice.days} hari. Perpanjang agar akses tidak terputus.
+                            </span>
+                            <span className="shrink-0 text-sm font-extrabold whitespace-nowrap">Langganan →</span>
+                        </Link>
+                    </div>
+                )}
 
                 {header && (
                     <header className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 mt-2 sm:mt-4">
