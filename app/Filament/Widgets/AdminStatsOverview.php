@@ -24,21 +24,22 @@ class AdminStatsOverview extends BaseWidget
         $attendanceRate = $totalAttendance > 0 ? round(($totalHadir / $totalAttendance) * 100) : 0;
 
         // Students below KKM (final score < 77)
-        // We calculate per score record
-        $belowKkmCount = 0;
-        $scoreRecords = Score::with('student')->get();
-        $processedStudents = [];
-        foreach ($scoreRecords as $score) {
-            $key = $score->student_id . '_' . $score->subject_id;
-            if (in_array($key, $processedStudents)) continue;
-            $processedStudents[] = $key;
+        // Agregasi absensi per (classroom_id, student_id) dalam satu query, lalu hitung di memory
+        $attAgg = Attendance::selectRaw('classroom_id, student_id,
+                COUNT(*) as total_days,
+                SUM(status = \'Hadir\') as total_hadir,
+                SUM(status = \'Alpha\') as total_alpha')
+            ->groupBy('classroom_id', 'student_id')
+            ->get()
+            ->keyBy(fn ($r) => $r->classroom_id . '_' . $r->student_id);
 
-            $totalDays = Attendance::where('classroom_id', $score->classroom_id)
-                ->where('student_id', $score->student_id)->count();
-            $totalHadirS = Attendance::where('classroom_id', $score->classroom_id)
-                ->where('student_id', $score->student_id)->where('status', 'Hadir')->count();
-            $totalAlpha = Attendance::where('classroom_id', $score->classroom_id)
-                ->where('student_id', $score->student_id)->where('status', 'Alpha')->count();
+        $belowKkmCount = 0;
+        $scoreRecords = Score::all();
+        foreach ($scoreRecords as $score) {
+            $att = $attAgg->get($score->classroom_id . '_' . $score->student_id);
+            $totalDays = (int) ($att->total_days ?? 0);
+            $totalHadirS = (int) ($att->total_hadir ?? 0);
+            $totalAlpha = (int) ($att->total_alpha ?? 0);
 
             if ($totalAlpha >= 3) {
                 $belowKkmCount++;

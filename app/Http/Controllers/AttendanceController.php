@@ -23,18 +23,18 @@ class AttendanceController extends Controller
 
         $date = $request->query('date', Carbon::today()->format('Y-m-d'));
 
-        // Eager load murid yang ada di kelas ini beserta status absensinya pada tanggal tersebut
-        $students = $classroom->students()->orderBy('name')->get()->map(function ($student) use ($classroom, $date) {
-            $attendance = Attendance::where('classroom_id', $classroom->id)
-                ->where('student_id', $student->id)
-                ->where('date', $date)
-                ->first();
+        // Ambil semua absensi kelas ini pada tanggal tsb dalam satu query, lalu key by student_id
+        $attendances = Attendance::where('classroom_id', $classroom->id)
+            ->where('date', $date)
+            ->get()
+            ->keyBy('student_id');
 
+        $students = $classroom->students()->orderBy('name')->get()->map(function ($student) use ($attendances) {
             return [
                 'id' => $student->id,
                 'name' => $student->name,
                 'nis' => $student->nis,
-                'status' => $attendance ? $attendance->status : null,
+                'status' => $attendances->get($student->id)?->status,
             ];
         });
 
