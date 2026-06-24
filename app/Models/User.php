@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password', 'role', 'trial_ends_at', 'subscription_ends_at'])]
+#[Fillable(['name', 'email', 'password', 'role', 'trial_ends_at', 'subscription_ends_at', 'weight_kehadiran', 'weight_tugas', 'weight_pts', 'weight_pas'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements FilamentUser
 {
@@ -31,6 +31,21 @@ class User extends Authenticatable implements FilamentUser
             'password' => 'hashed',
             'trial_ends_at' => 'datetime',
             'subscription_ends_at' => 'datetime',
+            'weight_kehadiran' => 'integer',
+            'weight_tugas' => 'integer',
+            'weight_pts' => 'integer',
+            'weight_pas' => 'integer',
+        ];
+    }
+
+    /** Bobot penilaian guru (persen). Default 30/20/10/40 jika belum diset. */
+    public function gradingWeights(): array
+    {
+        return [
+            'kehadiran' => $this->weight_kehadiran ?? 30,
+            'tugas' => $this->weight_tugas ?? 20,
+            'pts' => $this->weight_pts ?? 10,
+            'pas' => $this->weight_pas ?? 40,
         ];
     }
 

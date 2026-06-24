@@ -33,6 +33,11 @@ class AdminStatsOverview extends BaseWidget
             ->get()
             ->keyBy(fn ($r) => $r->classroom_id . '_' . $r->student_id);
 
+        // Bobot penilaian per guru (kelas -> guru -> bobot)
+        $classTeacher = Classroom::pluck('teacher_id', 'id');
+        $weightsByTeacher = User::whereIn('id', $classTeacher->unique()->values())->get()->keyBy('id');
+        $defaultWeights = ['kehadiran' => 30, 'tugas' => 20, 'pts' => 10, 'pas' => 40];
+
         $belowKkmCount = 0;
         $scoreRecords = Score::all();
         foreach ($scoreRecords as $score) {
@@ -46,7 +51,9 @@ class AdminStatsOverview extends BaseWidget
                 continue;
             }
             $kehadiran = $totalDays > 0 ? round(($totalHadirS / $totalDays) * 100) : 0;
-            $final = ($kehadiran * 0.3) + (($score->tugas ?? 0) * 0.2) + (($score->pts ?? 0) * 0.1) + (($score->pas ?? 0) * 0.4);
+            $teacherId = $classTeacher[$score->classroom_id] ?? null;
+            $w = $weightsByTeacher[$teacherId]?->gradingWeights() ?? $defaultWeights;
+            $final = ($kehadiran * $w['kehadiran'] + ($score->tugas ?? 0) * $w['tugas'] + ($score->pts ?? 0) * $w['pts'] + ($score->pas ?? 0) * $w['pas']) / 100;
             if (round($final) < 77) $belowKkmCount++;
         }
 

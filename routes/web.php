@@ -11,6 +11,7 @@ use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\ClassroomController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\BillingController;
+use App\Http\Controllers\GradingWeightController;
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -49,6 +50,7 @@ Route::middleware(['auth', 'verified', 'subscribed'])->group(function () {
     // Score Routes
     Route::get('/classrooms/{classroom}/scores', [ScoreController::class, 'index'])->name('scores.index');
     Route::post('/classrooms/{classroom}/scores', [ScoreController::class, 'store'])->name('scores.store');
+    Route::put('/grading-weights', [GradingWeightController::class, 'update'])->name('grading-weights.update');
 
     // Holiday Routes
     Route::get('/holidays', [HolidayController::class, 'index'])->name('holidays.index');

@@ -70,6 +70,7 @@ class ScoreController extends Controller
             'students' => $students,
             'existingScores' => $scores,
             'attendanceStats' => $attendanceStats,
+            'weights' => $request->user()->gradingWeights(),
             'filters' => [
                 'subject_id' => (int) $subjectId,
             ]

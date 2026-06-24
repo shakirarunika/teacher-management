@@ -1,7 +1,8 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, router } from '@inertiajs/react';
+import Modal from '@/Components/Modal';
+import { Head, router, useForm } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { DocumentPlusIcon, UserIcon, CheckCircleIcon, ExclamationTriangleIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import { DocumentPlusIcon, UserIcon, CheckCircleIcon, ExclamationTriangleIcon, ArrowPathIcon, AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline';
 import { Listbox, Transition } from '@headlessui/react';
 import { Fragment, useEffect, useState, useCallback } from 'react';
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid';
@@ -39,10 +40,29 @@ function FinalScoreDisplay({ score, isPenalty }) {
     );
 }
 
-export default function ScoreIndex({ classroom, subjects, students, existingScores, attendanceStats, filters }) {
+export default function ScoreIndex({ classroom, subjects, students, existingScores, attendanceStats, weights, filters }) {
+    const w = weights ?? { kehadiran: 30, tugas: 20, pts: 10, pas: 40 };
     const [selectedSubject, setSelectedSubject] = useState(filters.subject_id || (subjects.length > 0 ? subjects[0].id : null));
     const [processing, setProcessing] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
+    const [showWeightModal, setShowWeightModal] = useState(false);
+
+    // Form bobot penilaian
+    const weightForm = useForm({
+        weight_kehadiran: w.kehadiran,
+        weight_tugas: w.tugas,
+        weight_pts: w.pts,
+        weight_pas: w.pas,
+    });
+    const weightTotal = Number(weightForm.data.weight_kehadiran) + Number(weightForm.data.weight_tugas) + Number(weightForm.data.weight_pts) + Number(weightForm.data.weight_pas);
+
+    const submitWeights = (e) => {
+        e.preventDefault();
+        weightForm.put(route('grading-weights.update'), {
+            preserveScroll: true,
+            onSuccess: () => setShowWeightModal(false),
+        });
+    };
 
     // Local score state for live updates
     const [scores, setScores] = useState(() =>
@@ -97,8 +117,8 @@ export default function ScoreIndex({ classroom, subjects, students, existingScor
         const pts = studentScoreData.pts !== '' ? parseInt(studentScoreData.pts) : 0;
         const pas = studentScoreData.pas !== '' ? parseInt(studentScoreData.pas) : 0;
 
-        return Math.round((kehadiranScore * 0.3) + (tugas * 0.2) + (pts * 0.1) + (pas * 0.4));
-    }, [scores, attendanceStats]);
+        return Math.round((kehadiranScore * w.kehadiran + tugas * w.tugas + pts * w.pts + pas * w.pas) / 100);
+    }, [scores, attendanceStats, w]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -153,9 +173,18 @@ export default function ScoreIndex({ classroom, subjects, students, existingScor
                                     <span className="font-bold uppercase tracking-wider text-sm">Input Nilai</span>
                                 </div>
                                 <h2 className="text-3xl font-black text-gray-900 dark:text-slate-100 tracking-tight">{classroom.name}</h2>
-                                <p className="text-gray-500 dark:text-slate-400 font-medium mt-1 text-sm">
-                                    Kehadiran (30%) + Tugas (20%) + PTS (10%) + PAS (40%)
-                                </p>
+                                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                    <p className="text-gray-500 dark:text-slate-400 font-medium text-sm">
+                                        Kehadiran ({w.kehadiran}%) + Tugas ({w.tugas}%) + PTS ({w.pts}%) + PAS ({w.pas}%)
+                                    </p>
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowWeightModal(true)}
+                                        className="inline-flex items-center gap-1 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
+                                    >
+                                        <AdjustmentsHorizontalIcon className="w-4 h-4" /> Atur Bobot
+                                    </button>
+                                </div>
 
                                 {/* Live summary chips */}
                                 {selectedSubject && students.length > 0 && (
@@ -255,10 +284,10 @@ export default function ScoreIndex({ classroom, subjects, students, existingScor
                             {/* Desktop column headers */}
                             <div className="hidden lg:grid grid-cols-12 gap-4 px-6 pb-1 text-xs font-black text-gray-400 dark:text-slate-500 uppercase tracking-wider">
                                 <div className="col-span-3">Nama Siswa</div>
-                                <div className="col-span-2 text-center text-emerald-500 dark:text-emerald-400">Kehadiran (30%)</div>
-                                <div className="col-span-2 text-center text-indigo-500 dark:text-indigo-400">Tugas (20%)</div>
-                                <div className="col-span-1 text-center text-blue-500 dark:text-blue-400">PTS (10%)</div>
-                                <div className="col-span-2 text-center text-purple-500 dark:text-purple-400">PAS (40%)</div>
+                                <div className="col-span-2 text-center text-emerald-500 dark:text-emerald-400">Kehadiran ({w.kehadiran}%)</div>
+                                <div className="col-span-2 text-center text-indigo-500 dark:text-indigo-400">Tugas ({w.tugas}%)</div>
+                                <div className="col-span-1 text-center text-blue-500 dark:text-blue-400">PTS ({w.pts}%)</div>
+                                <div className="col-span-2 text-center text-purple-500 dark:text-purple-400">PAS ({w.pas}%)</div>
                                 <div className="col-span-2 text-right text-gray-500 dark:text-slate-400">Nilai Akhir</div>
                             </div>
 
@@ -301,7 +330,7 @@ export default function ScoreIndex({ classroom, subjects, students, existingScor
 
                                         {/* Kehadiran (read-only) */}
                                         <div className="col-span-2 flex flex-col lg:items-center relative z-10">
-                                            <span className="lg:hidden text-xs font-bold text-emerald-500 dark:text-emerald-400 mb-1 uppercase tracking-wider">Kehadiran (30%)</span>
+                                            <span className="lg:hidden text-xs font-bold text-emerald-500 dark:text-emerald-400 mb-1 uppercase tracking-wider">Kehadiran ({w.kehadiran}%)</span>
                                             <div className="w-full lg:w-24 text-center text-lg font-black text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/30 rounded-xl py-2.5 select-none">
                                                 {stats?.kehadiran_score ?? 0}
                                             </div>
@@ -309,7 +338,7 @@ export default function ScoreIndex({ classroom, subjects, students, existingScor
 
                                         {/* Tugas */}
                                         <div className="col-span-2 flex flex-col lg:items-center relative z-10">
-                                            <span className="lg:hidden text-xs font-bold text-indigo-500 dark:text-indigo-400 mb-1 uppercase tracking-wider">Tugas (20%)</span>
+                                            <span className="lg:hidden text-xs font-bold text-indigo-500 dark:text-indigo-400 mb-1 uppercase tracking-wider">Tugas ({w.tugas}%)</span>
                                             <input
                                                 type="number" min="0" max="100"
                                                 placeholder="—"
@@ -321,7 +350,7 @@ export default function ScoreIndex({ classroom, subjects, students, existingScor
 
                                         {/* PTS */}
                                         <div className="col-span-1 flex flex-col lg:items-center relative z-10">
-                                            <span className="lg:hidden text-xs font-bold text-blue-500 dark:text-blue-400 mb-1 uppercase tracking-wider">PTS (10%)</span>
+                                            <span className="lg:hidden text-xs font-bold text-blue-500 dark:text-blue-400 mb-1 uppercase tracking-wider">PTS ({w.pts}%)</span>
                                             <input
                                                 type="number" min="0" max="100"
                                                 placeholder="—"
@@ -333,7 +362,7 @@ export default function ScoreIndex({ classroom, subjects, students, existingScor
 
                                         {/* PAS */}
                                         <div className="col-span-2 flex flex-col lg:items-center relative z-10">
-                                            <span className="lg:hidden text-xs font-bold text-purple-500 dark:text-purple-400 mb-1 uppercase tracking-wider">PAS (40%)</span>
+                                            <span className="lg:hidden text-xs font-bold text-purple-500 dark:text-purple-400 mb-1 uppercase tracking-wider">PAS ({w.pas}%)</span>
                                             <input
                                                 type="number" min="0" max="100"
                                                 placeholder="—"
@@ -395,6 +424,49 @@ export default function ScoreIndex({ classroom, subjects, students, existingScor
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            {/* Modal Atur Bobot Penilaian */}
+            <Modal show={showWeightModal} onClose={() => setShowWeightModal(false)} maxWidth="md">
+                <form onSubmit={submitWeights} className="p-6">
+                    <h2 className="text-lg font-bold text-gray-900">Atur Bobot Penilaian</h2>
+                    <p className="mt-1 text-sm text-gray-500">Sesuaikan persentase tiap komponen. Total harus 100%.</p>
+
+                    <div className="mt-5 space-y-3">
+                        {[
+                            { key: 'weight_kehadiran', label: 'Kehadiran' },
+                            { key: 'weight_tugas', label: 'Tugas' },
+                            { key: 'weight_pts', label: 'PTS' },
+                            { key: 'weight_pas', label: 'PAS' },
+                        ].map((f) => (
+                            <div key={f.key} className="flex items-center justify-between gap-4">
+                                <label className="text-sm font-semibold text-gray-700">{f.label}</label>
+                                <div className="flex items-center gap-1">
+                                    <input
+                                        type="number" min="0" max="100"
+                                        value={weightForm.data[f.key]}
+                                        onChange={(e) => weightForm.setData(f.key, e.target.value === '' ? '' : parseInt(e.target.value, 10))}
+                                        className="w-24 text-center rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    />
+                                    <span className="text-gray-400 font-bold">%</span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className={`mt-4 flex items-center justify-between rounded-xl px-4 py-2.5 text-sm font-bold ${weightTotal === 100 ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>
+                        <span>Total</span>
+                        <span>{weightTotal}%{weightTotal !== 100 && ' (harus 100%)'}</span>
+                    </div>
+                    {weightForm.errors.weight_pas && <p className="mt-1 text-sm text-rose-600">{weightForm.errors.weight_pas}</p>}
+
+                    <div className="mt-6 flex justify-end gap-3">
+                        <button type="button" onClick={() => setShowWeightModal(false)} className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 font-semibold text-gray-700 transition">Batal</button>
+                        <button type="submit" disabled={weightForm.processing || weightTotal !== 100} className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 font-semibold text-white shadow-md shadow-indigo-500/30 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                            Simpan
+                        </button>
+                    </div>
+                </form>
+            </Modal>
         </AuthenticatedLayout>
     );
 }
