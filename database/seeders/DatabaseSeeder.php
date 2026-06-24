@@ -29,16 +29,17 @@ class DatabaseSeeder extends Seeder
             'role' => 'teacher',
         ]);
 
-        // 2. Academic Year
+        // 2. Academic Year (milik guru)
         $academicYear = AcademicYear::create([
             'name' => '2023/2024',
             'is_active' => true,
+            'user_id' => $teacher->id,
         ]);
 
-        // 3. Subjects
-        $math = Subject::create(['name' => 'Matematika', 'code' => 'MAT']);
-        $eng = Subject::create(['name' => 'Bahasa Inggris', 'code' => 'ENG']);
-        $science = Subject::create(['name' => 'IPA', 'code' => 'IPA']);
+        // 3. Subjects (milik guru)
+        $math = Subject::create(['name' => 'Matematika', 'code' => 'MAT', 'user_id' => $teacher->id]);
+        $eng = Subject::create(['name' => 'Bahasa Inggris', 'code' => 'ENG', 'user_id' => $teacher->id]);
+        $science = Subject::create(['name' => 'IPA', 'code' => 'IPA', 'user_id' => $teacher->id]);
 
         // 4. Assessment Types (Removed)
 
@@ -52,7 +53,7 @@ class DatabaseSeeder extends Seeder
         }
 
         // 6. Generate 100 Students and attach them to classrooms, and generate scores/attendances
-        $students = Student::factory(100)->create();
+        $students = Student::factory(100)->create(['user_id' => $teacher->id]);
 
         foreach ($students as $student) {
             // Assign to a random classroom
