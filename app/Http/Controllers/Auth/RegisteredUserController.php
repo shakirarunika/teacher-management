@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\AcademicYear;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -16,21 +17,56 @@ use Inertia\Response;
 
 class RegisteredUserController extends Controller
 {
-    /**
-     * Display the registration view.
-     */
+    /** Lama masa coba gratis untuk guru baru (hari). */
+    private const TRIAL_DAYS = 14;
+
     public function create(): Response
     {
-        abort(404);
+        return Inertia::render('Auth/Register');
     }
 
     /**
-     * Handle an incoming registration request.
-     *
      * @throws ValidationException
      */
     public function store(Request $request): RedirectResponse
     {
-        abort(404);
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|lowercase|email|max:255|unique:users,email',
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ]);
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => 'teacher',
+        ]);
+
+        // Mulai masa coba gratis
+        $user->trial_ends_at = now()->addDays(self::TRIAL_DAYS);
+        $user->save();
+
+        // Onboarding: buat tahun ajaran aktif default agar dashboard & input langsung jalan
+        AcademicYear::create([
+            'name' => $this->currentSchoolYear(),
+            'is_active' => true,
+            'user_id' => $user->id,
+        ]);
+
+        event(new Registered($user));
+
+        Auth::login($user);
+
+        return redirect()->route('dashboard');
+    }
+
+    /** Tahun ajaran berjalan, mis. "2026/2027" (tahun ajaran dimulai Juli). */
+    private function currentSchoolYear(): string
+    {
+        $year = (int) date('Y');
+        $start = (int) date('n') >= 7 ? $year : $year - 1;
+
+        return $start . '/' . ($start + 1);
     }
 }

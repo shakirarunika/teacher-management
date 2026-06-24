@@ -16,6 +16,10 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
         ]);
 
+        $middleware->alias([
+            'subscribed' => \App\Http\Middleware\EnsureActiveSubscription::class,
+        ]);
+
         $middleware->redirectUsersTo(function (\Illuminate\Http\Request $request) {
             if ($request->user() && $request->user()->role === 'admin') {
                 return '/admin';

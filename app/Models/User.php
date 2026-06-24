@@ -29,12 +29,27 @@ class User extends Authenticatable implements FilamentUser
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'trial_ends_at' => 'datetime',
+            'subscription_ends_at' => 'datetime',
         ];
     }
 
     public function classrooms()
     {
         return $this->hasMany(Classroom::class, 'teacher_id');
+    }
+
+    /**
+     * Apakah guru masih boleh mengakses aplikasi: trial belum habis atau
+     * langganan masih aktif. Admin selalu boleh.
+     */
+    public function hasActiveAccess(): bool
+    {
+        if ($this->role === 'admin') {
+            return true;
+        }
+
+        return (bool) ($this->trial_ends_at?->isFuture() || $this->subscription_ends_at?->isFuture());
     }
 
     /**

@@ -10,6 +10,7 @@ use App\Http\Controllers\ScoreController;
 use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\ClassroomController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\BillingController;
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -19,7 +20,12 @@ Route::get('/', function () {
     ]);
 });
 
-Route::middleware(['auth', 'verified'])->group(function () {
+// Halaman billing tetap bisa diakses walau langganan habis (tanpa gate 'subscribed')
+Route::middleware('auth')->group(function () {
+    Route::get('/billing', [BillingController::class, 'index'])->name('billing');
+});
+
+Route::middleware(['auth', 'verified', 'subscribed'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Classroom self-service (guru kelola kelasnya sendiri)
