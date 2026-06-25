@@ -2,7 +2,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import Modal from '@/Components/Modal';
 import { Head, router, useForm } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { DocumentPlusIcon, UserIcon, CheckCircleIcon, ExclamationTriangleIcon, ArrowPathIcon, AdjustmentsHorizontalIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
+import { DocumentPlusIcon, UserIcon, CheckCircleIcon, ExclamationTriangleIcon, ArrowPathIcon, AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline';
 import { Listbox, Transition } from '@headlessui/react';
 import { Fragment, useEffect, useState, useCallback } from 'react';
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid';
@@ -254,18 +254,6 @@ export default function ScoreIndex({ classroom, subjects, students, existingScor
                                         </Transition>
                                     </div>
                                 </Listbox>
-
-                                <a
-                                    href={(selectedSubject && students.length > 0) ? route('scores.export', { classroom: classroom.id, subject_id: selectedSubject }) : undefined}
-                                    className={`mt-2 w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl font-bold text-sm transition-colors shadow-sm ${
-                                        (selectedSubject && students.length > 0)
-                                            ? 'bg-gray-900 dark:bg-indigo-600 hover:bg-indigo-600 dark:hover:bg-indigo-500 text-white'
-                                            : 'bg-gray-200 dark:bg-slate-800 text-gray-400 dark:text-slate-600 pointer-events-none'
-                                    }`}
-                                >
-                                    <ArrowDownTrayIcon className="w-4 h-4" />
-                                    Export Excel
-                                </a>
                             </div>
                         </div>
                     </motion.div>

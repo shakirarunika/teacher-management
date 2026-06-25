@@ -167,7 +167,7 @@ export default function AttendanceReport({ classroom, filters, summary, detail, 
                                         }`}
                                     >
                                         <ArrowDownTrayIcon className="w-4 h-4" />
-                                        Export Excel
+                                        Export Data Kelas
                                     </motion.a>
                                 </div>
                             </div>
