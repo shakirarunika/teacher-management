@@ -6,6 +6,9 @@ set -e
 echo ">> Pull dari GitHub..."
 git pull
 
+echo ">> Install dependency PHP..."
+composer install --no-dev --optimize-autoloader
+
 echo ">> Jalankan migration..."
 php artisan migrate --force
 

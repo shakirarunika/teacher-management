@@ -86,32 +86,11 @@ export default function AttendanceReport({ classroom, filters, summary, detail, 
         });
     };
 
-    // CSV helpers
-    const downloadCSV = (content, filename) => {
-        const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        link.setAttribute('href', URL.createObjectURL(blob));
-        link.setAttribute('download', filename);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    };
-
-    const exportClassSummary = () => {
-        let csv = "NIS,Nama Siswa,Hadir,Sakit,Izin,Alpha\n";
-        summary.forEach(r => { csv += `${r.nis},"${r.name}",${r.hadir},${r.sakit},${r.izin},${r.alpha}\n`; });
-        downloadCSV(csv, `Rekap_${classroom.name}_${filters.year}_${filters.month}.csv`);
-    };
-
-    const exportStudentDetail = () => {
-        let csv = "NIS,Nama Siswa," + recordedDates.join(",") + "\n";
-        detail.forEach(s => {
-            let row = `${s.nis},"${s.name}"`;
-            recordedDates.forEach(d => { row += `,${s.logs[d] || '-'}`; });
-            csv += row + "\n";
-        });
-        downloadCSV(csv, `Detail_Harian_${classroom.name}_${filters.year}_${filters.month}.csv`);
-    };
+    const exportUrl = route('attendance.report.export', {
+        classroom: classroom.id,
+        month: filters.month,
+        year: filters.year,
+    });
 
     // Aggregate stats
     const totalStudents = summary.length;
@@ -177,29 +156,19 @@ export default function AttendanceReport({ classroom, filters, summary, detail, 
                                     />
                                 </div>
                                 <div className="flex gap-2">
-                                    <motion.button
-                                        type="button"
-                                        onClick={exportClassSummary}
+                                    <motion.a
+                                        href={summary.length === 0 ? undefined : exportUrl}
                                         whileTap={{ scale: 0.96 }}
                                         whileHover={{ scale: 1.02 }}
-                                        disabled={summary.length === 0}
-                                        className="bg-indigo-50 dark:bg-indigo-950/20 hover:bg-indigo-100 dark:hover:bg-indigo-950/40 disabled:opacity-40 text-indigo-700 dark:text-indigo-350 px-4 py-3 rounded-xl font-bold text-sm transition-colors flex items-center gap-2 shadow-sm border border-indigo-100/30 dark:border-indigo-900/30"
+                                        className={`px-5 py-3 rounded-xl font-bold text-sm transition-colors flex items-center gap-2 shadow-lg dark:shadow-none ${
+                                            summary.length === 0
+                                                ? 'bg-gray-200 dark:bg-slate-800 text-gray-400 dark:text-slate-600 pointer-events-none'
+                                                : 'bg-gray-900 dark:bg-indigo-600 hover:bg-indigo-600 dark:hover:bg-indigo-500 text-white'
+                                        }`}
                                     >
-                                        <ChartPieIcon className="w-4 h-4" />
-                                        Ekspor Rekap
-                                    </motion.button>
-                                    <motion.button
-                                        type="button"
-                                        onClick={exportStudentDetail}
-                                        whileTap={{ scale: 0.96 }}
-                                        whileHover={{ scale: 1.02 }}
-                                        disabled={detail.length === 0 || recordedDates.length === 0}
-                                        className="bg-gray-900 dark:bg-indigo-600 hover:bg-indigo-600 dark:hover:bg-indigo-500 disabled:opacity-40 text-white px-4 py-3 rounded-xl font-bold text-sm transition-colors flex items-center gap-2 shadow-lg dark:shadow-none"
-                                    >
-                                        <TableCellsIcon className="w-4 h-4" />
                                         <ArrowDownTrayIcon className="w-4 h-4" />
-                                        Ekspor Detail
-                                    </motion.button>
+                                        Export Excel
+                                    </motion.a>
                                 </div>
                             </div>
                         </div>

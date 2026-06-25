@@ -46,6 +46,7 @@ Route::middleware(['auth', 'verified', 'subscribed'])->group(function () {
     
     // Attendance Report Route
     Route::get('/classrooms/{classroom}/attendance/report', [AttendanceReportController::class, 'show'])->name('attendance.report');
+    Route::get('/classrooms/{classroom}/attendance/report/export', [AttendanceReportController::class, 'export'])->name('attendance.report.export');
 
     // Score Routes
     Route::get('/classrooms/{classroom}/scores', [ScoreController::class, 'index'])->name('scores.index');
