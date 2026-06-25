@@ -193,6 +193,7 @@ export default function Dashboard({ stats, classrooms, academicYear, subjects = 
 
                         {classrooms.length === 0 ? (
                             <motion.div
+                                key="empty"
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 className="bg-white/70 dark:bg-slate-900/45 backdrop-blur-xl border border-white dark:border-slate-800/80 rounded-[2rem] p-12 text-center shadow-xl dark:shadow-none"
@@ -210,7 +211,7 @@ export default function Dashboard({ stats, classrooms, academicYear, subjects = 
                                 </button>
                             </motion.div>
                         ) : (
-                            <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-10">
+                            <motion.div key={classrooms.map((c) => c.id).join('_')} variants={container} initial="hidden" animate="show" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-10">
                                 {classrooms.map((classroom) => {
                                     const isRecorded = classroom.attendance_today.recorded;
                                     const presentPct = classroom.students_count > 0
