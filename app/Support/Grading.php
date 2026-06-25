@@ -43,7 +43,8 @@ class Grading
     public static function finalScore(array $stat, $tugas, $pts, $pas, array $w): array
     {
         if ($stat['total_alpha'] >= 3) {
-            return ['final' => 76, 'predikat' => 'Penalti', 'penalty' => true];
+            // Penalti: tepat di bawah KKM guru
+            return ['final' => ($w['kkm'] ?? 77) - 1, 'predikat' => 'Penalti', 'penalty' => true];
         }
 
         $final = (int) round(

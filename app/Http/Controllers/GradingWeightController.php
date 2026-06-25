@@ -13,14 +13,16 @@ class GradingWeightController extends Controller
             'weight_tugas' => 'required|integer|min:0|max:100',
             'weight_pts' => 'required|integer|min:0|max:100',
             'weight_pas' => 'required|integer|min:0|max:100',
+            'kkm' => 'required|integer|min:1|max:100',
         ]);
 
-        if (array_sum($data) !== 100) {
+        $weightTotal = $data['weight_kehadiran'] + $data['weight_tugas'] + $data['weight_pts'] + $data['weight_pas'];
+        if ($weightTotal !== 100) {
             return back()->withErrors(['weight_pas' => 'Total bobot harus tepat 100%.']);
         }
 
         $request->user()->update($data);
 
-        return back()->with('success', 'Bobot penilaian berhasil diperbarui!');
+        return back()->with('success', 'Setelan penilaian berhasil diperbarui!');
     }
 }

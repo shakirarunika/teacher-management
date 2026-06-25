@@ -53,6 +53,7 @@ export default function ScoreIndex({ classroom, subjects, students, existingScor
         weight_tugas: w.tugas,
         weight_pts: w.pts,
         weight_pas: w.pas,
+        kkm: w.kkm ?? 77,
     });
     const weightTotal = Number(weightForm.data.weight_kehadiran) + Number(weightForm.data.weight_tugas) + Number(weightForm.data.weight_pts) + Number(weightForm.data.weight_pas);
 
@@ -112,7 +113,7 @@ export default function ScoreIndex({ classroom, subjects, students, existingScor
         const studentScoreData = scores.find(s => s.student_id === studentId);
         if (!studentScoreData) return 0;
 
-        if (stats && stats.total_alpha >= 3) return 76;
+        if (stats && stats.total_alpha >= 3) return (w.kkm ?? 77) - 1;
 
         const kehadiranScore = stats?.kehadiran_score ?? 0;
         const tugas = studentScoreData.tugas !== '' ? parseInt(studentScoreData.tugas) : 0;
@@ -469,6 +470,20 @@ export default function ScoreIndex({ classroom, subjects, students, existingScor
                         <span>{weightTotal}%{weightTotal !== 100 && ' (harus 100%)'}</span>
                     </div>
                     {weightForm.errors.weight_pas && <p className="mt-1 text-sm text-rose-600">{weightForm.errors.weight_pas}</p>}
+
+                    <div className="mt-4 flex items-center justify-between gap-4 border-t border-gray-100 dark:border-slate-800 pt-4">
+                        <div>
+                            <label className="text-sm font-semibold text-gray-700 dark:text-slate-300">KKM</label>
+                            <p className="text-xs text-gray-400 dark:text-slate-500">Batas nilai tuntas (penalti Alpha = KKM−1)</p>
+                        </div>
+                        <input
+                            type="number" min="1" max="100"
+                            value={weightForm.data.kkm}
+                            onChange={(e) => weightForm.setData('kkm', e.target.value === '' ? '' : parseInt(e.target.value, 10))}
+                            className="w-24 text-center rounded-lg border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 py-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        />
+                    </div>
+                    {weightForm.errors.kkm && <p className="mt-1 text-sm text-rose-600">{weightForm.errors.kkm}</p>}
 
                     <div className="mt-6 flex justify-end gap-3">
                         <button type="button" onClick={() => setShowWeightModal(false)} className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-slate-800 dark:hover:bg-slate-700 font-semibold text-gray-700 dark:text-slate-200 transition">Batal</button>
