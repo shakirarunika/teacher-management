@@ -26,7 +26,7 @@ function CountUp({ value, duration = 1.2 }) {
     );
 }
 
-export default function Dashboard({ stats, classrooms, academicYear, subjects = [] }) {
+export default function Dashboard({ stats, classrooms, academicYear, subjects = [], academicYears = [] }) {
     const recordedToday = classrooms.filter(c => c.attendance_today.recorded).length;
     const unrecordedToday = classrooms.length - recordedToday;
 
@@ -90,6 +90,24 @@ export default function Dashboard({ stats, classrooms, academicYear, subjects = 
             onFinish: () => setConfirmDelSubject(null),
         });
     };
+
+    // Kelola tahun ajaran (hanya 1 aktif per guru)
+    const [showTaModal, setShowTaModal] = useState(false);
+    const [editingTaId, setEditingTaId] = useState(null);
+    const [confirmDelTa, setConfirmDelTa] = useState(null);
+    const taForm = useForm({ name: '' });
+    const reloadTa = () => router.reload({ only: ['academicYears', 'academicYear'] });
+
+    const resetTaForm = () => { taForm.reset(); taForm.clearErrors(); setEditingTaId(null); };
+    const startEditTa = (ta) => { taForm.clearErrors(); taForm.setData('name', ta.name); setEditingTaId(ta.id); };
+    const submitTa = (e) => {
+        e.preventDefault();
+        const opts = { preserveScroll: true, onSuccess: () => { resetTaForm(); reloadTa(); } };
+        if (editingTaId) taForm.put(route('academic-years.update', editingTaId), opts);
+        else taForm.post(route('academic-years.store'), opts);
+    };
+    const activateTa = (id) => router.put(route('academic-years.activate', id), {}, { preserveScroll: true, onSuccess: reloadTa });
+    const deleteTa = (id) => router.delete(route('academic-years.destroy', id), { preserveScroll: true, onSuccess: reloadTa, onFinish: () => setConfirmDelTa(null) });
 
     return (
         <AuthenticatedLayout>
@@ -173,9 +191,13 @@ export default function Dashboard({ stats, classrooms, academicYear, subjects = 
                         <div className="flex items-center justify-between mb-6 gap-3">
                             <h3 className="text-2xl font-extrabold text-gray-900 dark:text-slate-100 tracking-tight">Kelas Anda</h3>
                             <div className="flex items-center gap-3">
-                                <span className="hidden sm:inline bg-indigo-100 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 py-1 px-4 rounded-full text-xs sm:text-sm font-bold shadow-sm">
+                                <button
+                                    onClick={() => setShowTaModal(true)}
+                                    title="Kelola tahun ajaran"
+                                    className="hidden sm:inline bg-indigo-100 dark:bg-indigo-950/40 hover:bg-indigo-200 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 py-1 px-4 rounded-full text-xs sm:text-sm font-bold shadow-sm transition-colors"
+                                >
                                     TA {academicYear}
-                                </span>
+                                </button>
                                 <button
                                     onClick={() => setShowSubjectModal(true)}
                                     className="inline-flex items-center gap-1.5 bg-white/70 dark:bg-slate-900/45 border border-gray-200 dark:border-slate-800/80 hover:bg-white text-gray-700 dark:text-slate-200 font-bold text-sm py-2.5 px-4 rounded-xl shadow-sm transition-all active:scale-95"
@@ -429,6 +451,72 @@ export default function Dashboard({ stats, classrooms, academicYear, subjects = 
 
                     <div className="mt-6 flex justify-end">
                         <button onClick={() => { setShowSubjectModal(false); resetSubjectForm(); setConfirmDelSubject(null); }} className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-slate-800 dark:hover:bg-slate-700 font-semibold text-gray-700 dark:text-slate-200 transition">Tutup</button>
+                    </div>
+                </div>
+            </Modal>
+
+            {/* Modal Kelola Tahun Ajaran */}
+            <Modal show={showTaModal} onClose={() => { setShowTaModal(false); resetTaForm(); setConfirmDelTa(null); }} maxWidth="md">
+                <div className="p-6">
+                    <h2 className="text-lg font-bold text-gray-900 dark:text-slate-100">Kelola Tahun Ajaran</h2>
+                    <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">Hanya satu tahun ajaran aktif. Data lama tetap aman saat berganti tahun.</p>
+
+                    <form onSubmit={submitTa} className="mt-4 flex items-start gap-2">
+                        <div className="flex-1">
+                            <input
+                                type="text"
+                                value={taForm.data.name}
+                                onChange={(e) => taForm.setData('name', e.target.value)}
+                                placeholder="Contoh: 2026/2027"
+                                className="block w-full rounded-lg border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500 px-4 py-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                            />
+                            {taForm.errors.name && <p className="mt-1 text-sm text-rose-600">{taForm.errors.name}</p>}
+                        </div>
+                        <button type="submit" disabled={taForm.processing} className="px-4 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm transition disabled:opacity-50 shrink-0">
+                            {editingTaId ? 'Simpan' : 'Tambah'}
+                        </button>
+                        {editingTaId && (
+                            <button type="button" onClick={resetTaForm} className="px-3 py-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-gray-600 dark:text-slate-300 font-bold text-sm transition shrink-0">×</button>
+                        )}
+                    </form>
+
+                    <div className="mt-4 max-h-72 overflow-auto divide-y divide-gray-100 dark:divide-slate-800 border-t border-gray-100 dark:border-slate-800">
+                        {academicYears.length === 0 && (
+                            <p className="py-6 text-center text-sm text-gray-400 dark:text-slate-500">Belum ada tahun ajaran.</p>
+                        )}
+                        {academicYears.map((ta) => (
+                            <div key={ta.id} className="flex items-center justify-between py-2.5 gap-2">
+                                <span className="font-semibold text-gray-800 dark:text-slate-200 flex items-center gap-2">
+                                    {ta.name}
+                                    {ta.is_active && <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-full">Aktif</span>}
+                                </span>
+                                {confirmDelTa === ta.id ? (
+                                    <span className="flex items-center gap-2 text-sm">
+                                        <span className="text-rose-600 dark:text-rose-400 font-semibold">Hapus?</span>
+                                        <button onClick={() => deleteTa(ta.id)} className="px-2 py-1 rounded-lg bg-rose-600 text-white font-bold text-xs">Ya</button>
+                                        <button onClick={() => setConfirmDelTa(null)} className="px-2 py-1 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 font-bold text-xs">Batal</button>
+                                    </span>
+                                ) : (
+                                    <span className="flex items-center gap-1">
+                                        {!ta.is_active && (
+                                            <button onClick={() => activateTa(ta.id)} title="Jadikan aktif" className="px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 font-bold text-xs transition">
+                                                Jadikan Aktif
+                                            </button>
+                                        )}
+                                        <button onClick={() => startEditTa(ta)} title="Edit" className="p-2 rounded-lg bg-gray-50 hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-gray-500 dark:text-slate-300 transition">
+                                            <PencilSquareIcon className="w-4 h-4" />
+                                        </button>
+                                        <button onClick={() => setConfirmDelTa(ta.id)} title="Hapus" className="p-2 rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/40 text-rose-600 dark:text-rose-400 transition">
+                                            <TrashIcon className="w-4 h-4" />
+                                        </button>
+                                    </span>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="mt-6 flex justify-end">
+                        <button onClick={() => { setShowTaModal(false); resetTaForm(); setConfirmDelTa(null); }} className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-slate-800 dark:hover:bg-slate-700 font-semibold text-gray-700 dark:text-slate-200 transition">Tutup</button>
                     </div>
                 </div>
             </Modal>

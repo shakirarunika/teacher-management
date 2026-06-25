@@ -13,6 +13,7 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\GradingWeightController;
 use App\Http\Controllers\SubjectController;
+use App\Http\Controllers\AcademicYearController;
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -58,6 +59,12 @@ Route::middleware(['auth', 'verified', 'subscribed'])->group(function () {
     Route::post('/subjects', [SubjectController::class, 'store'])->name('subjects.store');
     Route::put('/subjects/{subject}', [SubjectController::class, 'update'])->name('subjects.update');
     Route::delete('/subjects/{subject}', [SubjectController::class, 'destroy'])->name('subjects.destroy');
+
+    // Tahun ajaran self-service
+    Route::post('/academic-years', [AcademicYearController::class, 'store'])->name('academic-years.store');
+    Route::put('/academic-years/{academicYear}', [AcademicYearController::class, 'update'])->name('academic-years.update');
+    Route::put('/academic-years/{academicYear}/activate', [AcademicYearController::class, 'activate'])->name('academic-years.activate');
+    Route::delete('/academic-years/{academicYear}', [AcademicYearController::class, 'destroy'])->name('academic-years.destroy');
 
     // Holiday Routes
     Route::get('/holidays', [HolidayController::class, 'index'])->name('holidays.index');
