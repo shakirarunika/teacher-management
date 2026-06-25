@@ -305,7 +305,7 @@ export default function Dashboard({ stats, classrooms, academicYear }) {
                             onChange={(e) => form.setData('name', e.target.value)}
                             placeholder="Contoh: Kelas 10A"
                             autoFocus
-                            className="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                            className="mt-1 block w-full rounded-lg border-gray-300 px-4 py-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                         />
                         {form.errors.name && <p className="mt-1 text-sm text-rose-600">{form.errors.name}</p>}
                     </div>

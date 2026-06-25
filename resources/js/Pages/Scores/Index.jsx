@@ -445,7 +445,7 @@ export default function ScoreIndex({ classroom, subjects, students, existingScor
                                         type="number" min="0" max="100"
                                         value={weightForm.data[f.key]}
                                         onChange={(e) => weightForm.setData(f.key, e.target.value === '' ? '' : parseInt(e.target.value, 10))}
-                                        className="w-24 text-center rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                        className="w-24 text-center rounded-lg border-gray-300 py-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                     />
                                     <span className="text-gray-400 font-bold">%</span>
                                 </div>
