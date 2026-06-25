@@ -1,5 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { Head, router, useForm } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     CalendarDaysIcon, PlusIcon, TrashIcon,
@@ -66,8 +66,6 @@ function FilterDropdown({ value, options, onChange, width = 'w-36' }) {
 }
 
 export default function HolidaysIndex({ holidays, filters }) {
-    const { auth } = usePage().props;
-    const isAdmin = auth.user.role === 'admin';
 
     const [deleteModal, setDeleteModal] = useState({ isOpen: false, holiday: null });
     const [syncing, setSyncing] = useState(false);
@@ -164,19 +162,17 @@ export default function HolidaysIndex({ holidays, filters }) {
                                         width="w-28"
                                     />
                                 </div>
-                                {isAdmin && (
-                                    <motion.button
-                                        type="button"
-                                        onClick={syncNationalHolidays}
-                                        disabled={syncing}
-                                        whileTap={{ scale: 0.96 }}
-                                        whileHover={{ scale: 1.02 }}
-                                        className="bg-indigo-50 dark:bg-indigo-950/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 disabled:opacity-50 text-indigo-700 dark:text-indigo-300 font-bold py-3 px-4 rounded-2xl text-sm transition-all border border-indigo-100 dark:border-indigo-900/40 flex items-center gap-2 shadow-sm"
-                                    >
-                                        <SparklesIcon className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
-                                        {syncing ? 'Memproses...' : `Sync Libur ${filters.year}`}
-                                    </motion.button>
-                                )}
+                                <motion.button
+                                    type="button"
+                                    onClick={syncNationalHolidays}
+                                    disabled={syncing}
+                                    whileTap={{ scale: 0.96 }}
+                                    whileHover={{ scale: 1.02 }}
+                                    className="bg-indigo-50 dark:bg-indigo-950/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 disabled:opacity-50 text-indigo-700 dark:text-indigo-300 font-bold py-3 px-4 rounded-2xl text-sm transition-all border border-indigo-100 dark:border-indigo-900/40 flex items-center gap-2 shadow-sm"
+                                >
+                                    <SparklesIcon className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
+                                    {syncing ? 'Memproses...' : `Sync Libur ${filters.year}`}
+                                </motion.button>
                             </div>
                         </div>
                     </motion.div>
@@ -185,12 +181,11 @@ export default function HolidaysIndex({ holidays, filters }) {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         
                         {/* Form Card (1/3 width) */}
-                        {isAdmin && (
-                            <motion.div
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                className="bg-white/70 dark:bg-slate-900/45 backdrop-blur-xl border border-white dark:border-slate-800/80 rounded-[2rem] p-6 shadow-xl shadow-gray-100/50 dark:shadow-none h-fit transition-colors duration-300"
-                            >
+                        <motion.div
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="bg-white/70 dark:bg-slate-900/45 backdrop-blur-xl border border-white dark:border-slate-800/80 rounded-[2rem] p-6 shadow-xl shadow-gray-100/50 dark:shadow-none h-fit transition-colors duration-300"
+                        >
                                 <h3 className="text-lg font-black text-gray-900 dark:text-slate-100 mb-4 flex items-center gap-2">
                                     <PlusIcon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                                     Tambah Hari Libur
@@ -264,14 +259,13 @@ export default function HolidaysIndex({ holidays, filters }) {
                                         Simpan Libur
                                     </motion.button>
                                 </form>
-                            </motion.div>
-                        )}
+                        </motion.div>
 
-                        {/* List/Calendar View (2/3 or 3/3 width) */}
+                        {/* List/Calendar View (2/3 width) */}
                         <motion.div
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
-                            className={`${isAdmin ? 'lg:col-span-2' : 'lg:col-span-3'} bg-white/70 dark:bg-slate-900/45 backdrop-blur-xl border border-white dark:border-slate-800/80 rounded-[2rem] p-6 shadow-xl shadow-gray-100/50 dark:shadow-none min-h-[300px] transition-colors duration-300`}
+                            className="lg:col-span-2 bg-white/70 dark:bg-slate-900/45 backdrop-blur-xl border border-white dark:border-slate-800/80 rounded-[2rem] p-6 shadow-xl shadow-gray-100/50 dark:shadow-none min-h-[300px] transition-colors duration-300"
                         >
                             <h3 className="text-lg font-black text-gray-900 dark:text-slate-100 mb-4">
                                 Hari Libur Terdaftar — {monthLabel} {filters.year}
@@ -330,16 +324,14 @@ export default function HolidaysIndex({ holidays, filters }) {
                                                         {h.type}
                                                     </span>
 
-                                                    {isAdmin && (
-                                                        <motion.button
-                                                            type="button"
-                                                            onClick={() => confirmDelete(h)}
-                                                            whileTap={{ scale: 0.9 }}
-                                                            className="w-8 h-8 rounded-lg text-gray-400 dark:text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 flex items-center justify-center transition-colors"
-                                                        >
-                                                            <TrashIcon className="w-5 h-5" />
-                                                        </motion.button>
-                                                    )}
+                                                    <motion.button
+                                                        type="button"
+                                                        onClick={() => confirmDelete(h)}
+                                                        whileTap={{ scale: 0.9 }}
+                                                        className="w-8 h-8 rounded-lg text-gray-400 dark:text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 flex items-center justify-center transition-colors"
+                                                    >
+                                                        <TrashIcon className="w-5 h-5" />
+                                                    </motion.button>
                                                 </div>
                                             </motion.div>
                                         );
