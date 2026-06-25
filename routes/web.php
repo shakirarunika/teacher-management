@@ -50,6 +50,7 @@ Route::middleware(['auth', 'verified', 'subscribed'])->group(function () {
 
     // Score Routes
     Route::get('/classrooms/{classroom}/scores', [ScoreController::class, 'index'])->name('scores.index');
+    Route::get('/classrooms/{classroom}/scores/export', [ScoreController::class, 'export'])->name('scores.export');
     Route::post('/classrooms/{classroom}/scores', [ScoreController::class, 'store'])->name('scores.store');
     Route::put('/grading-weights', [GradingWeightController::class, 'update'])->name('grading-weights.update');
 

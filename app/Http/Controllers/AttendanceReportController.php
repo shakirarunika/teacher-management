@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\StylesSpreadsheet;
 use App\Models\Classroom;
 use App\Models\Attendance;
 use App\Models\Holiday;
@@ -12,11 +13,12 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
-use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
 class AttendanceReportController extends Controller
 {
+    use StylesSpreadsheet;
+
     public function show(Request $request, Classroom $classroom)
     {
         if ($classroom->teacher_id !== $request->user()->id) {
@@ -220,20 +222,6 @@ class AttendanceReportController extends Controller
             ->values();
 
         return compact('summary', 'detail', 'recordedDates', 'holidays');
-    }
-
-    private function styleHeader($sheet, string $range): void
-    {
-        $sheet->getStyle($range)->getFont()->setBold(true)->getColor()->setRGB('FFFFFF');
-        $sheet->getStyle($range)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('4F46E5');
-        $sheet->getStyle($range)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
-        $this->styleBorders($sheet, $range);
-    }
-
-    private function styleBorders($sheet, string $range): void
-    {
-        $sheet->getStyle($range)->getBorders()->getAllBorders()
-            ->setBorderStyle(Border::BORDER_THIN)->getColor()->setRGB('D1D5DB');
     }
 
     private function monthName($month): string
