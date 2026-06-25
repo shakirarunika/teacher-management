@@ -102,20 +102,20 @@ export default function StudentsIndex({ classroom, students }) {
             {/* Modal Tambah/Edit Siswa */}
             <Modal show={modal.open} onClose={closeModal} maxWidth="md">
                 <form onSubmit={submit} className="p-6">
-                    <h2 className="text-lg font-bold text-gray-900">{modal.editing ? 'Edit Siswa' : 'Tambah Siswa'}</h2>
+                    <h2 className="text-lg font-bold text-gray-900 dark:text-slate-100">{modal.editing ? 'Edit Siswa' : 'Tambah Siswa'}</h2>
 
                     <div className="mt-4 space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Nama Siswa</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">Nama Siswa</label>
                             <input type="text" value={form.data.name} onChange={(e) => form.setData('name', e.target.value)} autoFocus
-                                className="mt-1 block w-full rounded-lg border-gray-300 px-4 py-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" />
+                                className="mt-1 block w-full rounded-lg border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500 px-4 py-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" />
                             {form.errors.name && <p className="mt-1 text-sm text-rose-600">{form.errors.name}</p>}
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Jenis Kelamin</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">Jenis Kelamin</label>
                             <select value={form.data.gender} onChange={(e) => form.setData('gender', e.target.value)}
-                                className="mt-1 block w-full rounded-lg border-gray-300 px-4 py-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                className="mt-1 block w-full rounded-lg border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500 px-4 py-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 <option value="L">Laki-laki</option>
                                 <option value="P">Perempuan</option>
                             </select>
@@ -123,16 +123,16 @@ export default function StudentsIndex({ classroom, students }) {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">NIS</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">NIS</label>
                             <input type="text" value={form.data.nis} onChange={(e) => form.setData('nis', e.target.value)}
                                 placeholder="Kosongkan untuk dibuat otomatis"
-                                className="mt-1 block w-full rounded-lg border-gray-300 px-4 py-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" />
+                                className="mt-1 block w-full rounded-lg border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500 px-4 py-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" />
                             {form.errors.nis && <p className="mt-1 text-sm text-rose-600">{form.errors.nis}</p>}
                         </div>
                     </div>
 
                     <div className="mt-6 flex justify-end gap-3">
-                        <button type="button" onClick={closeModal} className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 font-semibold text-gray-700 transition">Batal</button>
+                        <button type="button" onClick={closeModal} className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-slate-800 dark:hover:bg-slate-700 font-semibold text-gray-700 dark:text-slate-200 transition">Batal</button>
                         <button type="submit" disabled={form.processing} className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 font-semibold text-white shadow-md shadow-indigo-500/30 transition disabled:opacity-50">
                             {modal.editing ? 'Simpan' : 'Tambah'}
                         </button>
@@ -143,10 +143,10 @@ export default function StudentsIndex({ classroom, students }) {
             {/* Modal Konfirmasi Hapus Siswa */}
             <Modal show={!!deleteTarget} onClose={() => setDeleteTarget(null)} maxWidth="md">
                 <div className="p-6">
-                    <h2 className="text-lg font-bold text-gray-900">Hapus siswa "{deleteTarget?.name}"?</h2>
-                    <p className="mt-2 text-sm text-gray-600">Data nilai & absensi siswa ini akan ikut terhapus permanen.</p>
+                    <h2 className="text-lg font-bold text-gray-900 dark:text-slate-100">Hapus siswa "{deleteTarget?.name}"?</h2>
+                    <p className="mt-2 text-sm text-gray-600 dark:text-slate-400">Data nilai & absensi siswa ini akan ikut terhapus permanen.</p>
                     <div className="mt-6 flex justify-end gap-3">
-                        <button onClick={() => setDeleteTarget(null)} className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 font-semibold text-gray-700 transition">Batal</button>
+                        <button onClick={() => setDeleteTarget(null)} className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-slate-800 dark:hover:bg-slate-700 font-semibold text-gray-700 dark:text-slate-200 transition">Batal</button>
                         <button onClick={confirmDelete} className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 font-semibold text-white shadow-md shadow-rose-500/30 transition">Ya, Hapus</button>
                     </div>
                 </div>

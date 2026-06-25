@@ -33,6 +33,11 @@ class Grading
 
     /**
      * Hitung nilai akhir + predikat. Alpha >= 3 kali = penalti (76).
+     *
+     * PENTING: formula ini HARUS sama dengan calculateFinalScore di
+     * resources/js/Pages/Scores/Index.jsx (kalkulasi live di layar input).
+     * Jika rumus/penalti/bobot berubah, ubah di KEDUA tempat.
+     *
      * @return array{final:int, predikat:string, penalty:bool}
      */
     public static function finalScore(array $stat, $tugas, $pts, $pas, array $w): array

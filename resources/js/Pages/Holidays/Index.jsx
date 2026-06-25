@@ -198,7 +198,7 @@ export default function HolidaysIndex({ holidays, filters }) {
                                             type="date"
                                             value={data.date}
                                             onChange={e => setData('date', e.target.value)}
-                                            className="w-full rounded-xl border-gray-200 dark:border-slate-800 bg-white/50 dark:bg-slate-950/50 border-2 py-3 px-4 text-sm font-bold text-gray-700 dark:text-slate-200 focus:border-indigo-500 dark:focus:border-indigo-700 focus:ring-0 transition-colors"
+                                            className="w-full rounded-lg border-gray-200 dark:border-slate-800 bg-white/50 dark:bg-slate-950/50 border-2 py-3 px-4 text-sm font-bold text-gray-700 dark:text-slate-200 focus:border-indigo-500 dark:focus:border-indigo-700 focus:ring-0 transition-colors"
                                             required
                                         />
                                         {errors.date && (
@@ -213,7 +213,7 @@ export default function HolidaysIndex({ holidays, filters }) {
                                             placeholder="Contoh: Hari Raya Nyepi, Libur Semester"
                                             value={data.name}
                                             onChange={e => setData('name', e.target.value)}
-                                            className="w-full rounded-xl border-gray-200 dark:border-slate-800 bg-white/50 dark:bg-slate-950/50 border-2 py-3 px-4 text-sm font-semibold text-gray-700 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-600 focus:border-indigo-500 dark:focus:border-indigo-700 focus:ring-0 transition-colors"
+                                            className="w-full rounded-lg border-gray-200 dark:border-slate-800 bg-white/50 dark:bg-slate-950/50 border-2 py-3 px-4 text-sm font-semibold text-gray-700 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-600 focus:border-indigo-500 dark:focus:border-indigo-700 focus:ring-0 transition-colors"
                                             required
                                         />
                                         {errors.name && (

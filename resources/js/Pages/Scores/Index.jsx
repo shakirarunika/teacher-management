@@ -104,7 +104,9 @@ export default function ScoreIndex({ classroom, subjects, students, existingScor
         }
     }, []);
 
-    // Live final score calculation
+    // Live final score calculation.
+    // PENTING: formula ini HARUS sama dengan App\Support\Grading::finalScore (PHP, dipakai export).
+    // Jika rumus/penalti/bobot berubah, ubah di KEDUA tempat.
     const calculateFinalScore = useCallback((studentId) => {
         const stats = attendanceStats[studentId];
         const studentScoreData = scores.find(s => s.student_id === studentId);
@@ -437,8 +439,8 @@ export default function ScoreIndex({ classroom, subjects, students, existingScor
             {/* Modal Atur Bobot Penilaian */}
             <Modal show={showWeightModal} onClose={() => setShowWeightModal(false)} maxWidth="md">
                 <form onSubmit={submitWeights} className="p-6">
-                    <h2 className="text-lg font-bold text-gray-900">Atur Bobot Penilaian</h2>
-                    <p className="mt-1 text-sm text-gray-500">Sesuaikan persentase tiap komponen. Total harus 100%.</p>
+                    <h2 className="text-lg font-bold text-gray-900 dark:text-slate-100">Atur Bobot Penilaian</h2>
+                    <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">Sesuaikan persentase tiap komponen. Total harus 100%.</p>
 
                     <div className="mt-5 space-y-3">
                         {[
@@ -448,28 +450,28 @@ export default function ScoreIndex({ classroom, subjects, students, existingScor
                             { key: 'weight_pas', label: 'PAS' },
                         ].map((f) => (
                             <div key={f.key} className="flex items-center justify-between gap-4">
-                                <label className="text-sm font-semibold text-gray-700">{f.label}</label>
+                                <label className="text-sm font-semibold text-gray-700 dark:text-slate-300">{f.label}</label>
                                 <div className="flex items-center gap-1">
                                     <input
                                         type="number" min="0" max="100"
                                         value={weightForm.data[f.key]}
                                         onChange={(e) => weightForm.setData(f.key, e.target.value === '' ? '' : parseInt(e.target.value, 10))}
-                                        className="w-24 text-center rounded-lg border-gray-300 py-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                        className="w-24 text-center rounded-lg border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 py-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                     />
-                                    <span className="text-gray-400 font-bold">%</span>
+                                    <span className="text-gray-400 dark:text-slate-500 font-bold">%</span>
                                 </div>
                             </div>
                         ))}
                     </div>
 
-                    <div className={`mt-4 flex items-center justify-between rounded-xl px-4 py-2.5 text-sm font-bold ${weightTotal === 100 ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>
+                    <div className={`mt-4 flex items-center justify-between rounded-xl px-4 py-2.5 text-sm font-bold ${weightTotal === 100 ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300' : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300'}`}>
                         <span>Total</span>
                         <span>{weightTotal}%{weightTotal !== 100 && ' (harus 100%)'}</span>
                     </div>
                     {weightForm.errors.weight_pas && <p className="mt-1 text-sm text-rose-600">{weightForm.errors.weight_pas}</p>}
 
                     <div className="mt-6 flex justify-end gap-3">
-                        <button type="button" onClick={() => setShowWeightModal(false)} className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 font-semibold text-gray-700 transition">Batal</button>
+                        <button type="button" onClick={() => setShowWeightModal(false)} className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-slate-800 dark:hover:bg-slate-700 font-semibold text-gray-700 dark:text-slate-200 transition">Batal</button>
                         <button type="submit" disabled={weightForm.processing || weightTotal !== 100} className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 font-semibold text-white shadow-md shadow-indigo-500/30 transition disabled:opacity-50 disabled:cursor-not-allowed">
                             Simpan
                         </button>

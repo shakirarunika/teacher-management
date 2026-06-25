@@ -40,7 +40,7 @@ export default function Modal({
                             animate={{ scale: 1, opacity: 1, y: 0 }}
                             exit={{ scale: 0.95, opacity: 0, y: 20 }}
                             transition={{ duration: 0.2 }}
-                            className={`relative w-full ${maxWidthClass} overflow-hidden rounded-2xl bg-white shadow-2xl`}
+                            className={`relative w-full ${maxWidthClass} overflow-hidden rounded-2xl bg-white dark:bg-slate-900 dark:border dark:border-slate-800 shadow-2xl`}
                         >
                             {children}
                         </motion.div>
