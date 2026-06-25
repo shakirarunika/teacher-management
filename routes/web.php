@@ -12,6 +12,7 @@ use App\Http\Controllers\ClassroomController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\GradingWeightController;
+use App\Http\Controllers\SubjectController;
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -52,6 +53,11 @@ Route::middleware(['auth', 'verified', 'subscribed'])->group(function () {
     Route::get('/classrooms/{classroom}/scores', [ScoreController::class, 'index'])->name('scores.index');
     Route::post('/classrooms/{classroom}/scores', [ScoreController::class, 'store'])->name('scores.store');
     Route::put('/grading-weights', [GradingWeightController::class, 'update'])->name('grading-weights.update');
+
+    // Mata pelajaran self-service (guru kelola mapelnya sendiri)
+    Route::post('/subjects', [SubjectController::class, 'store'])->name('subjects.store');
+    Route::put('/subjects/{subject}', [SubjectController::class, 'update'])->name('subjects.update');
+    Route::delete('/subjects/{subject}', [SubjectController::class, 'destroy'])->name('subjects.destroy');
 
     // Holiday Routes
     Route::get('/holidays', [HolidayController::class, 'index'])->name('holidays.index');
