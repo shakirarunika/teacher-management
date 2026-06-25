@@ -65,6 +65,7 @@ class DashboardController extends Controller
             ],
             'classrooms' => $classroomsData,
             'academicYear' => $activeYear?->name ?? 'N/A',
+            'subjects' => \App\Models\Subject::orderBy('name')->get(['id', 'name', 'code']),
         ]);
     }
 }

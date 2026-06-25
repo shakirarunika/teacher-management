@@ -2,7 +2,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import Modal from '@/Components/Modal';
 import { Head, router, useForm } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { DocumentPlusIcon, UserIcon, CheckCircleIcon, ExclamationTriangleIcon, ArrowPathIcon, AdjustmentsHorizontalIcon, PencilSquareIcon, TrashIcon, PlusIcon, BookOpenIcon } from '@heroicons/react/24/outline';
+import { DocumentPlusIcon, UserIcon, CheckCircleIcon, ExclamationTriangleIcon, ArrowPathIcon, AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline';
 import { Listbox, Transition } from '@headlessui/react';
 import { Fragment, useEffect, useState, useCallback } from 'react';
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid';
@@ -62,24 +62,6 @@ export default function ScoreIndex({ classroom, subjects, students, existingScor
             preserveScroll: true,
             onSuccess: () => setShowWeightModal(false),
         });
-    };
-
-    // Kelola mata pelajaran
-    const [showSubjectModal, setShowSubjectModal] = useState(false);
-    const [editingSubjectId, setEditingSubjectId] = useState(null);
-    const [confirmDelSubject, setConfirmDelSubject] = useState(null);
-    const subjectForm = useForm({ name: '', code: '' });
-
-    const resetSubjectForm = () => { subjectForm.reset(); subjectForm.clearErrors(); setEditingSubjectId(null); };
-    const startEditSubject = (s) => { subjectForm.clearErrors(); subjectForm.setData({ name: s.name, code: s.code || '' }); setEditingSubjectId(s.id); };
-    const submitSubject = (e) => {
-        e.preventDefault();
-        const opts = { preserveScroll: true, onSuccess: resetSubjectForm };
-        if (editingSubjectId) subjectForm.put(route('subjects.update', editingSubjectId), opts);
-        else subjectForm.post(route('subjects.store'), opts);
-    };
-    const deleteSubject = (id) => {
-        router.delete(route('subjects.destroy', id), { preserveScroll: true, onFinish: () => setConfirmDelSubject(null) });
     };
 
     // Local score state for live updates
@@ -228,16 +210,7 @@ export default function ScoreIndex({ classroom, subjects, students, existingScor
 
                             {/* Subject dropdown */}
                             <div className="w-full lg:w-72 flex-shrink-0">
-                                <div className="flex items-center justify-between mb-2">
-                                    <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Mata Pelajaran</p>
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowSubjectModal(true)}
-                                        className="inline-flex items-center gap-1 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
-                                    >
-                                        <BookOpenIcon className="w-4 h-4" /> Kelola Mapel
-                                    </button>
-                                </div>
+                                <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-2">Mata Pelajaran</p>
                                 <Listbox value={selectedSubject} onChange={setSelectedSubject}>
                                     <div className="relative">
                                         <Listbox.Button className="relative w-full cursor-pointer rounded-2xl bg-white/70 dark:bg-slate-900/45 backdrop-blur-xl py-3.5 pl-5 pr-10 text-left border border-gray-200 dark:border-slate-800/80 shadow-sm dark:shadow-none text-gray-800 dark:text-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 transition-all hover:border-indigo-300 dark:hover:border-indigo-700">
@@ -296,13 +269,7 @@ export default function ScoreIndex({ classroom, subjects, students, existingScor
                             {subjects.length === 0 ? (
                                 <>
                                     <h3 className="text-xl font-bold text-gray-500 dark:text-slate-300">Belum Ada Mata Pelajaran</h3>
-                                    <p className="text-gray-400 dark:text-slate-500 mt-1 text-sm">Tambahkan mata pelajaran dulu untuk mulai menilai.</p>
-                                    <button
-                                        onClick={() => setShowSubjectModal(true)}
-                                        className="mt-5 inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm py-2.5 px-5 rounded-xl shadow-md shadow-indigo-500/30 transition-all active:scale-95"
-                                    >
-                                        <PlusIcon className="w-4 h-4" /> Tambah Mata Pelajaran
-                                    </button>
+                                    <p className="text-gray-400 dark:text-slate-500 mt-1 text-sm">Tambahkan mata pelajaran dulu lewat <span className="font-bold">Dashboard → Kelola Mapel</span>.</p>
                                 </>
                             ) : (
                                 <>
@@ -508,74 +475,6 @@ export default function ScoreIndex({ classroom, subjects, students, existingScor
                         </button>
                     </div>
                 </form>
-            </Modal>
-
-            {/* Modal Kelola Mata Pelajaran */}
-            <Modal show={showSubjectModal} onClose={() => { setShowSubjectModal(false); resetSubjectForm(); setConfirmDelSubject(null); }} maxWidth="md">
-                <div className="p-6">
-                    <h2 className="text-lg font-bold text-gray-900">Kelola Mata Pelajaran</h2>
-                    <p className="mt-1 text-sm text-gray-500">Tambah, ubah, atau hapus mata pelajaran Anda sendiri.</p>
-
-                    <form onSubmit={submitSubject} className="mt-4 flex items-start gap-2">
-                        <div className="flex-1">
-                            <input
-                                type="text"
-                                value={subjectForm.data.name}
-                                onChange={(e) => subjectForm.setData('name', e.target.value)}
-                                placeholder="Nama mapel (mis. Matematika)"
-                                className="block w-full rounded-lg border-gray-300 px-4 py-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                            />
-                            {subjectForm.errors.name && <p className="mt-1 text-sm text-rose-600">{subjectForm.errors.name}</p>}
-                        </div>
-                        <input
-                            type="text"
-                            value={subjectForm.data.code}
-                            onChange={(e) => subjectForm.setData('code', e.target.value)}
-                            placeholder="Kode"
-                            className="w-20 rounded-lg border-gray-300 px-3 py-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                        />
-                        <button type="submit" disabled={subjectForm.processing} className="px-4 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm transition disabled:opacity-50 shrink-0">
-                            {editingSubjectId ? 'Simpan' : 'Tambah'}
-                        </button>
-                        {editingSubjectId && (
-                            <button type="button" onClick={resetSubjectForm} className="px-3 py-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold text-sm transition shrink-0">×</button>
-                        )}
-                    </form>
-
-                    <div className="mt-4 max-h-72 overflow-auto divide-y divide-gray-100 border-t border-gray-100">
-                        {subjects.length === 0 && (
-                            <p className="py-6 text-center text-sm text-gray-400">Belum ada mata pelajaran.</p>
-                        )}
-                        {subjects.map((s) => (
-                            <div key={s.id} className="flex items-center justify-between py-2.5">
-                                <span className="font-semibold text-gray-800">
-                                    {s.name}
-                                    {s.code && <span className="ml-2 text-xs font-mono text-gray-400">{s.code}</span>}
-                                </span>
-                                {confirmDelSubject === s.id ? (
-                                    <span className="flex items-center gap-2 text-sm">
-                                        <span className="text-rose-600 font-semibold">Hapus + nilainya?</span>
-                                        <button onClick={() => deleteSubject(s.id)} className="px-2 py-1 rounded-lg bg-rose-600 text-white font-bold text-xs">Ya</button>
-                                        <button onClick={() => setConfirmDelSubject(null)} className="px-2 py-1 rounded-lg bg-gray-100 text-gray-600 font-bold text-xs">Batal</button>
-                                    </span>
-                                ) : (
-                                    <span className="flex items-center gap-1">
-                                        <button onClick={() => startEditSubject(s)} title="Edit" className="p-2 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-500 transition">
-                                            <PencilSquareIcon className="w-4 h-4" />
-                                        </button>
-                                        <button onClick={() => setConfirmDelSubject(s.id)} title="Hapus" className="p-2 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 transition">
-                                            <TrashIcon className="w-4 h-4" />
-                                        </button>
-                                    </span>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-
-                    <div className="mt-6 flex justify-end">
-                        <button onClick={() => { setShowSubjectModal(false); resetSubjectForm(); setConfirmDelSubject(null); }} className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 font-semibold text-gray-700 transition">Tutup</button>
-                    </div>
-                </div>
             </Modal>
         </AuthenticatedLayout>
     );

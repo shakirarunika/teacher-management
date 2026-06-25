@@ -3,7 +3,7 @@ import Modal from '@/Components/Modal';
 import { Head, Link, useForm, router } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import { ClipboardDocumentCheckIcon, CheckCircleIcon, ExclamationCircleIcon, PlusIcon, PencilSquareIcon, TrashIcon, UsersIcon } from '@heroicons/react/24/outline';
+import { ClipboardDocumentCheckIcon, CheckCircleIcon, ExclamationCircleIcon, PlusIcon, PencilSquareIcon, TrashIcon, UsersIcon, BookOpenIcon } from '@heroicons/react/24/outline';
 
 // Dynamic badge based on rate value
 function AttendanceBadge({ rate }) {
@@ -26,7 +26,7 @@ function CountUp({ value, duration = 1.2 }) {
     );
 }
 
-export default function Dashboard({ stats, classrooms, academicYear }) {
+export default function Dashboard({ stats, classrooms, academicYear, subjects = [] }) {
     const recordedToday = classrooms.filter(c => c.attendance_today.recorded).length;
     const unrecordedToday = classrooms.length - recordedToday;
 
@@ -44,13 +44,16 @@ export default function Dashboard({ stats, classrooms, academicYear }) {
     const [deleteTarget, setDeleteTarget] = useState(null);
     const form = useForm({ name: '' });
 
+    // Refresh data dashboard setelah mutasi (redirect back() Inertia v2 tidak selalu re-apply list)
+    const refreshClasses = () => router.reload({ only: ['classrooms', 'stats'] });
+
     const openCreate = () => { form.clearErrors(); form.setData('name', ''); setClassModal({ open: true, editing: null }); };
     const openEdit = (classroom) => { form.clearErrors(); form.setData('name', classroom.name); setClassModal({ open: true, editing: classroom }); };
     const closeModal = () => setClassModal({ open: false, editing: null });
 
     const submitClass = (e) => {
         e.preventDefault();
-        const opts = { preserveScroll: true, onSuccess: closeModal };
+        const opts = { preserveScroll: true, onSuccess: () => { closeModal(); refreshClasses(); } };
         if (classModal.editing) {
             form.put(route('classrooms.update', classModal.editing.id), opts);
         } else {
@@ -61,7 +64,30 @@ export default function Dashboard({ stats, classrooms, academicYear }) {
     const confirmDelete = () => {
         router.delete(route('classrooms.destroy', deleteTarget.id), {
             preserveScroll: true,
+            onSuccess: refreshClasses,
             onFinish: () => setDeleteTarget(null),
+        });
+    };
+
+    // Kelola mata pelajaran (master data guru, global per guru)
+    const [showSubjectModal, setShowSubjectModal] = useState(false);
+    const [editingSubjectId, setEditingSubjectId] = useState(null);
+    const [confirmDelSubject, setConfirmDelSubject] = useState(null);
+    const subjectForm = useForm({ name: '', code: '' });
+
+    const resetSubjectForm = () => { subjectForm.reset(); subjectForm.clearErrors(); setEditingSubjectId(null); };
+    const startEditSubject = (s) => { subjectForm.clearErrors(); subjectForm.setData({ name: s.name, code: s.code || '' }); setEditingSubjectId(s.id); };
+    const submitSubject = (e) => {
+        e.preventDefault();
+        const opts = { preserveScroll: true, onSuccess: () => { resetSubjectForm(); router.reload({ only: ['subjects'] }); } };
+        if (editingSubjectId) subjectForm.put(route('subjects.update', editingSubjectId), opts);
+        else subjectForm.post(route('subjects.store'), opts);
+    };
+    const deleteSubject = (id) => {
+        router.delete(route('subjects.destroy', id), {
+            preserveScroll: true,
+            onSuccess: () => router.reload({ only: ['subjects'] }),
+            onFinish: () => setConfirmDelSubject(null),
         });
     };
 
@@ -150,6 +176,12 @@ export default function Dashboard({ stats, classrooms, academicYear }) {
                                 <span className="hidden sm:inline bg-indigo-100 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 py-1 px-4 rounded-full text-xs sm:text-sm font-bold shadow-sm">
                                     TA {academicYear}
                                 </span>
+                                <button
+                                    onClick={() => setShowSubjectModal(true)}
+                                    className="inline-flex items-center gap-1.5 bg-white/70 dark:bg-slate-900/45 border border-gray-200 dark:border-slate-800/80 hover:bg-white text-gray-700 dark:text-slate-200 font-bold text-sm py-2.5 px-4 rounded-xl shadow-sm transition-all active:scale-95"
+                                >
+                                    <BookOpenIcon className="w-4 h-4" /> Kelola Mapel
+                                </button>
                                 <button
                                     onClick={openCreate}
                                     className="inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm py-2.5 px-4 rounded-xl shadow-md shadow-indigo-500/30 transition-all active:scale-95"
@@ -328,6 +360,74 @@ export default function Dashboard({ stats, classrooms, academicYear }) {
                     <div className="mt-6 flex justify-end gap-3">
                         <button onClick={() => setDeleteTarget(null)} className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 font-semibold text-gray-700 transition">Batal</button>
                         <button onClick={confirmDelete} className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 font-semibold text-white shadow-md shadow-rose-500/30 transition">Ya, Hapus</button>
+                    </div>
+                </div>
+            </Modal>
+
+            {/* Modal Kelola Mata Pelajaran */}
+            <Modal show={showSubjectModal} onClose={() => { setShowSubjectModal(false); resetSubjectForm(); setConfirmDelSubject(null); }} maxWidth="md">
+                <div className="p-6">
+                    <h2 className="text-lg font-bold text-gray-900">Kelola Mata Pelajaran</h2>
+                    <p className="mt-1 text-sm text-gray-500">Mapel berlaku untuk semua kelas Anda. Tambah, ubah, atau hapus di sini.</p>
+
+                    <form onSubmit={submitSubject} className="mt-4 flex items-start gap-2">
+                        <div className="flex-1">
+                            <input
+                                type="text"
+                                value={subjectForm.data.name}
+                                onChange={(e) => subjectForm.setData('name', e.target.value)}
+                                placeholder="Nama mapel (mis. Matematika)"
+                                className="block w-full rounded-lg border-gray-300 px-4 py-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                            />
+                            {subjectForm.errors.name && <p className="mt-1 text-sm text-rose-600">{subjectForm.errors.name}</p>}
+                        </div>
+                        <input
+                            type="text"
+                            value={subjectForm.data.code}
+                            onChange={(e) => subjectForm.setData('code', e.target.value)}
+                            placeholder="Kode"
+                            className="w-20 rounded-lg border-gray-300 px-3 py-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        />
+                        <button type="submit" disabled={subjectForm.processing} className="px-4 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm transition disabled:opacity-50 shrink-0">
+                            {editingSubjectId ? 'Simpan' : 'Tambah'}
+                        </button>
+                        {editingSubjectId && (
+                            <button type="button" onClick={resetSubjectForm} className="px-3 py-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold text-sm transition shrink-0">×</button>
+                        )}
+                    </form>
+
+                    <div className="mt-4 max-h-72 overflow-auto divide-y divide-gray-100 border-t border-gray-100">
+                        {subjects.length === 0 && (
+                            <p className="py-6 text-center text-sm text-gray-400">Belum ada mata pelajaran.</p>
+                        )}
+                        {subjects.map((s) => (
+                            <div key={s.id} className="flex items-center justify-between py-2.5">
+                                <span className="font-semibold text-gray-800">
+                                    {s.name}
+                                    {s.code && <span className="ml-2 text-xs font-mono text-gray-400">{s.code}</span>}
+                                </span>
+                                {confirmDelSubject === s.id ? (
+                                    <span className="flex items-center gap-2 text-sm">
+                                        <span className="text-rose-600 font-semibold">Hapus + nilainya?</span>
+                                        <button onClick={() => deleteSubject(s.id)} className="px-2 py-1 rounded-lg bg-rose-600 text-white font-bold text-xs">Ya</button>
+                                        <button onClick={() => setConfirmDelSubject(null)} className="px-2 py-1 rounded-lg bg-gray-100 text-gray-600 font-bold text-xs">Batal</button>
+                                    </span>
+                                ) : (
+                                    <span className="flex items-center gap-1">
+                                        <button onClick={() => startEditSubject(s)} title="Edit" className="p-2 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-500 transition">
+                                            <PencilSquareIcon className="w-4 h-4" />
+                                        </button>
+                                        <button onClick={() => setConfirmDelSubject(s.id)} title="Hapus" className="p-2 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 transition">
+                                            <TrashIcon className="w-4 h-4" />
+                                        </button>
+                                    </span>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="mt-6 flex justify-end">
+                        <button onClick={() => { setShowSubjectModal(false); resetSubjectForm(); setConfirmDelSubject(null); }} className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 font-semibold text-gray-700 transition">Tutup</button>
                     </div>
                 </div>
             </Modal>
