@@ -10,7 +10,7 @@ class Classroom extends Model
 {
     use HasFactory, BelongsToOwner;
 
-    protected $guarded = [];
+    protected $guarded = ['id'];
 
     public function ownerColumn(): string
     {

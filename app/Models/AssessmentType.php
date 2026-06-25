@@ -9,7 +9,7 @@ class AssessmentType extends Model
 {
     use BelongsToOwner;
 
-    protected $guarded = [];
+    protected $guarded = ['id'];
 
     public function scores()
     {

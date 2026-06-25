@@ -10,7 +10,7 @@ class Student extends Model
 {
     use HasFactory, BelongsToOwner;
 
-    protected $guarded = [];
+    protected $guarded = ['id'];
 
     /**
      * Generate NIS otomatis: TAHUN + 4 digit urutan (mis. 20260001).

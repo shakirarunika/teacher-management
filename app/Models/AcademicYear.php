@@ -9,7 +9,7 @@ class AcademicYear extends Model
 {
     use BelongsToOwner;
 
-    protected $guarded = [];
+    protected $guarded = ['id'];
 
     public function students()
     {

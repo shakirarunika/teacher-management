@@ -19,7 +19,10 @@ trait BelongsToOwner
             $user = auth()->user();
             $column = $model->ownerColumn();
 
-            if ($user && $user->role === 'teacher' && empty($model->{$column})) {
+            // Otoritatif: dalam konteks guru, pemilik SELALU dipaksa ke id guru
+            // yang login, mengabaikan nilai apa pun yang dikirim (anti hijack).
+            // Konteks admin/CLI/seeder (tanpa guru login) memakai nilai eksplisit.
+            if ($user && $user->role === 'teacher') {
                 $model->{$column} = $user->id;
             }
         });

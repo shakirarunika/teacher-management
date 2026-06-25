@@ -7,6 +7,7 @@ use App\Models\Subject;
 use App\Models\Score;
 use App\Support\Grading;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class ScoreController extends Controller
@@ -55,7 +56,7 @@ class ScoreController extends Controller
         }
 
         $validated = $request->validate([
-            'subject_id' => 'required|exists:subjects,id',
+            'subject_id' => ['required', Rule::exists('subjects', 'id')->where('user_id', $request->user()->id)],
             'scores' => 'required|array',
             'scores.*.student_id' => 'required|exists:students,id',
             'scores.*.tugas' => 'nullable|integer|min:0|max:100',
