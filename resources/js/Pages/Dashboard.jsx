@@ -116,6 +116,76 @@ export default function Dashboard({ stats, classrooms, academicYear, subjects = 
             <div className="py-2 sm:py-8 relative z-10">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 
+                    {/* Onboarding checklist — tampil sampai setup dasar selesai */}
+                    {(classrooms.length === 0 || stats.totalStudents === 0 || subjects.length === 0) && (
+                        <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="bg-white/70 dark:bg-slate-900/45 backdrop-blur-xl border border-white dark:border-slate-800/80 rounded-[2rem] p-6 sm:p-8 shadow-xl shadow-indigo-100/50 dark:shadow-none"
+                        >
+                            <h3 className="text-xl font-black text-gray-900 dark:text-slate-100 tracking-tight">Selamat datang! 👋</h3>
+                            <p className="text-sm text-gray-500 dark:text-slate-400 mt-1 font-medium">3 langkah singkat sebelum mulai mengabsen dan menilai:</p>
+                            <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                {[
+                                    {
+                                        done: classrooms.length > 0,
+                                        label: '1. Buat kelas',
+                                        desc: 'Contoh: Kelas 10A',
+                                        action: openCreate,
+                                        cta: 'Tambah Kelas',
+                                        enabled: true,
+                                    },
+                                    {
+                                        done: stats.totalStudents > 0,
+                                        label: '2. Tambah siswa',
+                                        desc: 'Input manual atau import Excel',
+                                        action: () => router.visit(`/classrooms/${classrooms[0]?.id}/students`),
+                                        cta: 'Kelola Siswa',
+                                        enabled: classrooms.length > 0,
+                                    },
+                                    {
+                                        done: subjects.length > 0,
+                                        label: '3. Tambah mapel',
+                                        desc: 'Untuk pencatatan nilai',
+                                        action: () => setShowSubjectModal(true),
+                                        cta: 'Kelola Mapel',
+                                        enabled: true,
+                                    },
+                                ].map((step) => (
+                                    <div
+                                        key={step.label}
+                                        className={`rounded-2xl border-2 p-4 flex flex-col ${
+                                            step.done
+                                                ? 'border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/60 dark:bg-emerald-950/20'
+                                                : 'border-gray-100 dark:border-slate-800 bg-white/60 dark:bg-slate-900/40'
+                                        }`}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            {step.done ? (
+                                                <CheckCircleIcon className="w-5 h-5 text-emerald-500 shrink-0" />
+                                            ) : (
+                                                <span className="w-5 h-5 rounded-full border-2 border-gray-300 dark:border-slate-600 shrink-0" />
+                                            )}
+                                            <span className={`font-bold text-sm ${step.done ? 'text-emerald-700 dark:text-emerald-300 line-through' : 'text-gray-800 dark:text-slate-200'}`}>
+                                                {step.label}
+                                            </span>
+                                        </div>
+                                        <p className="text-xs text-gray-500 dark:text-slate-400 mt-1 ml-7">{step.desc}</p>
+                                        {!step.done && (
+                                            <button
+                                                onClick={step.action}
+                                                disabled={!step.enabled}
+                                                className="mt-3 ml-7 self-start text-xs font-bold px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white transition disabled:opacity-40 disabled:cursor-not-allowed"
+                                            >
+                                                {step.cta}
+                                            </button>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </motion.div>
+                    )}
+
                     {/* Stats Grid */}
                     <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
 

@@ -1,14 +1,25 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import Modal from '@/Components/Modal';
-import { Head, Link, useForm, router } from '@inertiajs/react';
+import { Head, Link, useForm, router, usePage } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import { PlusIcon, PencilSquareIcon, TrashIcon, ArrowLeftIcon, UserGroupIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, PencilSquareIcon, TrashIcon, ArrowLeftIcon, UserGroupIcon, ArrowUpTrayIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 
 export default function StudentsIndex({ classroom, students }) {
+    const { flash } = usePage().props;
     const [modal, setModal] = useState({ open: false, editing: null });
     const [deleteTarget, setDeleteTarget] = useState(null);
+    const [showImport, setShowImport] = useState(false);
     const form = useForm({ name: '', gender: 'L', nis: '' });
+    const importForm = useForm({ file: null });
+
+    const submitImport = (e) => {
+        e.preventDefault();
+        importForm.post(route('students.import', classroom.id), {
+            preserveScroll: true,
+            onSuccess: () => { setShowImport(false); importForm.reset(); },
+        });
+    };
 
     const openCreate = () => { form.clearErrors(); form.setData({ name: '', gender: 'L', nis: '' }); setModal({ open: true, editing: null }); };
     const openEdit = (s) => { form.clearErrors(); form.setData({ name: s.name, gender: s.gender, nis: s.nis }); setModal({ open: true, editing: s }); };
@@ -49,10 +60,29 @@ export default function StudentsIndex({ classroom, students }) {
                                 <p className="text-sm text-gray-500 dark:text-slate-400 font-semibold">{students.length} siswa</p>
                             </div>
                         </div>
-                        <button onClick={openCreate} className="inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm py-2.5 px-4 rounded-xl shadow-md shadow-indigo-500/30 transition-all active:scale-95">
-                            <PlusIcon className="w-4 h-4" /> Tambah Siswa
-                        </button>
+                        <div className="flex items-center gap-2">
+                            <button onClick={() => setShowImport(true)} className="inline-flex items-center gap-1.5 bg-white/70 dark:bg-slate-900/45 border border-gray-200 dark:border-slate-800/80 hover:bg-white text-gray-700 dark:text-slate-200 font-bold text-sm py-2.5 px-4 rounded-xl shadow-sm transition-all active:scale-95">
+                                <ArrowUpTrayIcon className="w-4 h-4" /> Import Excel
+                            </button>
+                            <button onClick={openCreate} className="inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm py-2.5 px-4 rounded-xl shadow-md shadow-indigo-500/30 transition-all active:scale-95">
+                                <PlusIcon className="w-4 h-4" /> Tambah Siswa
+                            </button>
+                        </div>
                     </div>
+
+                    {/* Flash hasil import / aksi */}
+                    {flash?.success && (
+                        <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/40 rounded-2xl p-4">
+                            <p className="flex items-center gap-2 font-bold text-emerald-700 dark:text-emerald-300 text-sm">
+                                <CheckCircleIcon className="w-5 h-5 shrink-0" /> {flash.success}
+                            </p>
+                            {flash.import_skipped?.length > 0 && (
+                                <ul className="mt-2 ml-7 text-xs text-emerald-800/80 dark:text-emerald-400/80 list-disc space-y-0.5">
+                                    {flash.import_skipped.map((msg, i) => <li key={i}>{msg}</li>)}
+                                </ul>
+                            )}
+                        </div>
+                    )}
 
                     {/* List */}
                     {students.length === 0 ? (
@@ -135,6 +165,52 @@ export default function StudentsIndex({ classroom, students }) {
                         <button type="button" onClick={closeModal} className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-slate-800 dark:hover:bg-slate-700 font-semibold text-gray-700 dark:text-slate-200 transition">Batal</button>
                         <button type="submit" disabled={form.processing} className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 font-semibold text-white shadow-md shadow-indigo-500/30 transition disabled:opacity-50">
                             {modal.editing ? 'Simpan' : 'Tambah'}
+                        </button>
+                    </div>
+                </form>
+            </Modal>
+
+            {/* Modal Import Excel/CSV */}
+            <Modal show={showImport} onClose={() => setShowImport(false)} maxWidth="md">
+                <form onSubmit={submitImport} className="p-6">
+                    <h2 className="text-lg font-bold text-gray-900 dark:text-slate-100">Import Siswa dari Excel/CSV</h2>
+                    <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
+                        Siswa akan langsung masuk ke kelas <span className="font-semibold">{classroom.name}</span>.
+                    </p>
+
+                    <div className="mt-4 rounded-xl bg-gray-50 dark:bg-slate-800/60 p-4 text-sm">
+                        <p className="font-semibold text-gray-700 dark:text-slate-300 mb-2">Format: 3 kolom, tanpa perlu judul kolom</p>
+                        <table className="w-full text-xs border-collapse">
+                            <tbody className="text-gray-600 dark:text-slate-400">
+                                <tr className="border-b border-gray-200 dark:border-slate-700">
+                                    <td className="py-1 pr-3 font-mono">Budi Santoso</td>
+                                    <td className="py-1 pr-3 font-mono">L</td>
+                                    <td className="py-1 font-mono text-gray-400">20260012</td>
+                                </tr>
+                                <tr>
+                                    <td className="py-1 pr-3 font-mono">Siti Aminah</td>
+                                    <td className="py-1 pr-3 font-mono">P</td>
+                                    <td className="py-1 font-mono text-gray-400 italic">(kosong = otomatis)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p className="mt-2 text-xs text-gray-500 dark:text-slate-500">Kolom: Nama, L/P, NIS (opsional). Maksimal 500 baris.</p>
+                    </div>
+
+                    <div className="mt-4">
+                        <input
+                            type="file"
+                            accept=".xlsx,.xls,.csv"
+                            onChange={(e) => importForm.setData('file', e.target.files[0])}
+                            className="block w-full text-sm text-gray-600 dark:text-slate-300 file:mr-3 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:bg-indigo-50 dark:file:bg-indigo-950/40 file:text-indigo-700 dark:file:text-indigo-300 file:font-bold file:text-sm hover:file:bg-indigo-100 file:cursor-pointer cursor-pointer"
+                        />
+                        {importForm.errors.file && <p className="mt-2 text-sm text-rose-600">{importForm.errors.file}</p>}
+                    </div>
+
+                    <div className="mt-6 flex justify-end gap-3">
+                        <button type="button" onClick={() => setShowImport(false)} className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-slate-800 dark:hover:bg-slate-700 font-semibold text-gray-700 dark:text-slate-200 transition">Batal</button>
+                        <button type="submit" disabled={importForm.processing || !importForm.data.file} className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 font-semibold text-white shadow-md shadow-indigo-500/30 transition disabled:opacity-50">
+                            {importForm.processing ? 'Mengimpor...' : 'Import'}
                         </button>
                     </div>
                 </form>

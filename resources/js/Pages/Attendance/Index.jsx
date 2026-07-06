@@ -137,10 +137,10 @@ export default function AttendanceIndex({ classroom, date, students, holiday }) 
                             <div>
                                 <div className="flex items-center gap-3 text-indigo-600 dark:text-indigo-400 mb-2">
                                     <UserGroupIcon className="w-6 h-6" />
-                                    <span className="font-bold uppercase tracking-wider text-sm">Attendance Input</span>
+                                    <span className="font-bold uppercase tracking-wider text-sm">Input Absensi</span>
                                 </div>
                                 <h2 className="text-3xl font-black text-gray-900 dark:text-slate-100 tracking-tight">{classroom.name}</h2>
-                                <p className="text-gray-500 dark:text-slate-400 font-medium mt-1">{students.length} Students Enrolled</p>
+                                <p className="text-gray-500 dark:text-slate-400 font-medium mt-1">{students.length} Siswa Terdaftar</p>
                             </div>
 
                             <div className="flex items-center gap-3 bg-white/50 dark:bg-slate-950/50 p-2 rounded-2xl border border-white dark:border-slate-850 shadow-inner">
@@ -236,7 +236,7 @@ export default function AttendanceIndex({ classroom, date, students, holiday }) 
                             className="bg-rose-50 dark:bg-rose-950/30 hover:bg-rose-100 dark:hover:bg-rose-900/30 text-rose-600 dark:text-rose-400 font-bold py-2 px-4 rounded-xl transition-colors shadow-sm text-sm flex items-center gap-2 border border-rose-200 dark:border-rose-900/30"
                         >
                             <TrashIcon className="w-4 h-4" />
-                            Clear All
+                            Kosongkan
                         </motion.button>
                         <motion.button
                             type="button"
@@ -246,7 +246,7 @@ export default function AttendanceIndex({ classroom, date, students, holiday }) 
                             className="bg-indigo-100 dark:bg-indigo-950/40 hover:bg-indigo-200 dark:hover:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 font-bold py-2 px-4 rounded-xl transition-colors shadow-sm text-sm flex items-center gap-2 border border-transparent dark:border-indigo-900/30"
                         >
                             <CheckIcon className="w-4 h-4" />
-                            Mark All Present
+                            Semua Hadir
                         </motion.button>
                     </div>
 
@@ -406,7 +406,7 @@ export default function AttendanceIndex({ classroom, date, students, holiday }) 
                                 ) : (
                                     <>
                                         <CheckCircleIcon className="w-6 h-6" />
-                                        {allFilled ? 'Simpan Absensi ✓' : 'Save Attendance'}
+                                        {allFilled ? 'Simpan Absensi ✓' : 'Simpan Absensi'}
                                     </>
                                 )}
                             </motion.button>
@@ -425,7 +425,7 @@ export default function AttendanceIndex({ classroom, date, students, holiday }) 
                         className="fixed top-20 right-4 sm:top-8 sm:right-8 z-50 bg-emerald-500 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 font-bold"
                     >
                         <CheckCircleIcon className="w-6 h-6" />
-                        Attendance saved successfully!
+                        Absensi berhasil disimpan!
                     </motion.div>
                 )}
             </AnimatePresence>
@@ -455,7 +455,7 @@ export default function AttendanceIndex({ classroom, date, students, holiday }) 
                             >
                                 <TrashIcon className="w-7 h-7" />
                             </motion.div>
-                            <h3 className="text-xl font-black text-gray-900 dark:text-slate-100 text-center mb-2">Clear Semua Status?</h3>
+                            <h3 className="text-xl font-black text-gray-900 dark:text-slate-100 text-center mb-2">Kosongkan Semua Status?</h3>
                             <p className="text-gray-500 dark:text-slate-400 text-center text-sm mb-6">
                                 Semua status absensi akan dikosongkan.<br />Tindakan ini tidak dapat dibatalkan.
                             </p>
@@ -478,7 +478,7 @@ export default function AttendanceIndex({ classroom, date, students, holiday }) 
                                     className="flex-1 py-3 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white font-bold transition-colors flex items-center justify-center gap-2 shadow-lg dark:shadow-none shadow-rose-200"
                                 >
                                     <TrashIcon className="w-4 h-4" />
-                                    Ya, Clear
+                                    Ya, Kosongkan
                                 </motion.button>
                             </div>
                         </motion.div>

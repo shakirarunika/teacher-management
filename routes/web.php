@@ -39,6 +39,7 @@ Route::middleware(['auth', 'verified', 'subscribed'])->group(function () {
     // Student self-service (kelola siswa per kelas)
     Route::get('/classrooms/{classroom}/students', [StudentController::class, 'index'])->name('students.index');
     Route::post('/classrooms/{classroom}/students', [StudentController::class, 'store'])->name('students.store');
+    Route::post('/classrooms/{classroom}/students/import', [StudentController::class, 'import'])->name('students.import');
     Route::put('/classrooms/{classroom}/students/{student}', [StudentController::class, 'update'])->name('students.update');
     Route::delete('/classrooms/{classroom}/students/{student}', [StudentController::class, 'destroy'])->name('students.destroy');
 

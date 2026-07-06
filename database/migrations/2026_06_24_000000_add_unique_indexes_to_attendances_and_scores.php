@@ -9,18 +9,13 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Bersihkan duplikat lama (simpan baris id terbesar) agar unique index bisa dibuat
-        DB::statement('DELETE a1 FROM attendances a1 INNER JOIN attendances a2
-            WHERE a1.id < a2.id
-            AND a1.classroom_id = a2.classroom_id
-            AND a1.student_id = a2.student_id
-            AND a1.date = a2.date');
+        // Bersihkan duplikat lama (simpan baris id terbesar) agar unique index bisa dibuat.
+        // Sintaks portabel MySQL + SQLite (DELETE JOIN tidak jalan di sqlite/test).
+        DB::statement('DELETE FROM attendances WHERE id NOT IN (
+            SELECT * FROM (SELECT MAX(id) FROM attendances GROUP BY classroom_id, student_id, date) t)');
 
-        DB::statement('DELETE s1 FROM scores s1 INNER JOIN scores s2
-            WHERE s1.id < s2.id
-            AND s1.classroom_id = s2.classroom_id
-            AND s1.student_id = s2.student_id
-            AND s1.subject_id = s2.subject_id');
+        DB::statement('DELETE FROM scores WHERE id NOT IN (
+            SELECT * FROM (SELECT MAX(id) FROM scores GROUP BY classroom_id, student_id, subject_id) t)');
 
         Schema::table('attendances', function (Blueprint $table) {
             $table->unique(['classroom_id', 'student_id', 'date']);
