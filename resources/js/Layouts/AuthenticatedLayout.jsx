@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import {
     HomeIcon, UserIcon, CheckCircleIcon,
     ClipboardDocumentListIcon, ChartBarIcon, AcademicCapIcon,
-    CalendarDaysIcon,
+    CalendarDaysIcon, ArchiveBoxIcon,
 } from '@heroicons/react/24/outline';
 import {
     HomeIcon as HomeIconSolid,
@@ -14,6 +14,7 @@ import {
     ClipboardDocumentListIcon as ClipboardSolid,
     ChartBarIcon as ChartBarSolid,
     CalendarDaysIcon as CalendarDaysIconSolid,
+    ArchiveBoxIcon as ArchiveBoxIconSolid,
 } from '@heroicons/react/24/solid';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -65,11 +66,13 @@ export default function AuthenticatedLayout({ header, children }) {
 
     const navItems = [
         { href: route('dashboard'), label: 'Dashboard', match: 'dashboard', icon: HomeIcon, iconSolid: HomeIconSolid },
+        { href: route('bank-questions.index'), label: 'Bank Soal', match: 'bank-questions.index', icon: ArchiveBoxIcon, iconSolid: ArchiveBoxIconSolid },
         { href: route('holidays.index'), label: 'Hari Libur', match: 'holidays.index', icon: CalendarDaysIcon, iconSolid: CalendarDaysIconSolid },
     ];
 
     const mobileNavItems = [
         { href: route('dashboard'), label: 'Home', match: 'dashboard', icon: HomeIcon, iconSolid: HomeIconSolid },
+        { href: route('bank-questions.index'), label: 'Soal', match: 'bank-questions.index', icon: ArchiveBoxIcon, iconSolid: ArchiveBoxIconSolid },
         { href: route('holidays.index'), label: 'Libur', match: 'holidays.index', icon: CalendarDaysIcon, iconSolid: CalendarDaysIconSolid },
         { href: route('profile.edit'), label: 'Profil', match: 'profile.edit', icon: UserIcon, iconSolid: UserIconSolid },
     ];

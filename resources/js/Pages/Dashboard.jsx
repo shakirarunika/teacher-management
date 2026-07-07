@@ -376,6 +376,12 @@ export default function Dashboard({ stats, classrooms, academicYear, subjects = 
                                                     Nilai
                                                 </Link>
                                                 <Link
+                                                    href={`/classrooms/${classroom.id}/quizzes`}
+                                                    className="flex-1 bg-fuchsia-50 dark:bg-fuchsia-950/40 hover:bg-fuchsia-100 dark:hover:bg-fuchsia-900/40 text-fuchsia-700 dark:text-fuchsia-300 text-center font-bold py-2.5 px-3 rounded-xl transition-all active:scale-95 block text-sm"
+                                                >
+                                                    Kuis
+                                                </Link>
+                                                <Link
                                                     href={`/classrooms/${classroom.id}/attendance/report`}
                                                     className="flex-1 bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-850 text-gray-600 dark:text-slate-350 text-center border-2 border-gray-100 dark:border-slate-800 hover:border-gray-200 dark:hover:border-slate-700 font-bold py-2.5 px-3 rounded-xl transition-all active:scale-95 block text-sm"
                                                 >

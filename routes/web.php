@@ -14,6 +14,9 @@ use App\Http\Controllers\BillingController;
 use App\Http\Controllers\GradingWeightController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\AcademicYearController;
+use App\Http\Controllers\QuizController;
+use App\Http\Controllers\PublicQuizController;
+use App\Http\Controllers\BankQuestionController;
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -67,12 +70,34 @@ Route::middleware(['auth', 'verified', 'subscribed'])->group(function () {
     Route::put('/academic-years/{academicYear}/activate', [AcademicYearController::class, 'activate'])->name('academic-years.activate');
     Route::delete('/academic-years/{academicYear}', [AcademicYearController::class, 'destroy'])->name('academic-years.destroy');
 
+    // Kuis online (guru kelola, siswa kerjakan via link publik)
+    Route::get('/classrooms/{classroom}/quizzes', [QuizController::class, 'index'])->name('quizzes.index');
+    Route::post('/classrooms/{classroom}/quizzes', [QuizController::class, 'store'])->name('quizzes.store');
+    Route::put('/quizzes/{quiz}', [QuizController::class, 'update'])->name('quizzes.update');
+    Route::delete('/quizzes/{quiz}', [QuizController::class, 'destroy'])->name('quizzes.destroy');
+    Route::get('/quizzes/{quiz}/results', [QuizController::class, 'results'])->name('quizzes.results');
+    Route::post('/quizzes/{quiz}/copy-scores', [QuizController::class, 'copyScores'])->name('quizzes.copy-scores');
+    Route::post('/quizzes/{quiz}/duplicate', [QuizController::class, 'duplicate'])->name('quizzes.duplicate');
+
+    // Bank Soal (global per guru, tidak terikat kelas)
+    Route::get('/bank-soal', [BankQuestionController::class, 'index'])->name('bank-questions.index');
+    Route::get('/bank-soal/list', [BankQuestionController::class, 'list'])->name('bank-questions.list');
+    Route::post('/bank-soal', [BankQuestionController::class, 'store'])->name('bank-questions.store');
+    Route::put('/bank-soal/{bankQuestion}', [BankQuestionController::class, 'update'])->name('bank-questions.update');
+    Route::delete('/bank-soal/{bankQuestion}', [BankQuestionController::class, 'destroy'])->name('bank-questions.destroy');
+
     // Holiday Routes
     Route::get('/holidays', [HolidayController::class, 'index'])->name('holidays.index');
     Route::post('/holidays', [HolidayController::class, 'store'])->name('holidays.store');
     Route::post('/holidays/sync', [HolidayController::class, 'sync'])->name('holidays.sync');
     Route::delete('/holidays/{holiday}', [HolidayController::class, 'destroy'])->name('holidays.destroy');
 });
+
+// Kuis publik — siswa akses tanpa login via token acak
+Route::get('/kuis/{token}', [PublicQuizController::class, 'show'])->name('quiz.take');
+Route::post('/kuis/{token}', [PublicQuizController::class, 'submit'])
+    ->middleware('throttle:20,1')
+    ->name('quiz.submit');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
