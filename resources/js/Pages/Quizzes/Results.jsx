@@ -1,5 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import Modal from '@/Components/Modal';
+import MathText from '@/Components/MathText';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
@@ -177,7 +178,7 @@ export default function QuizResults({ quiz, classroom, subject, attempts, questi
                                 return (
                                     <div key={i}>
                                         <div className="flex items-center justify-between gap-3 mb-2">
-                                            <p className="text-sm font-bold text-gray-800 dark:text-slate-200">{i + 1}. {stat.q}</p>
+                                            <p className="text-sm font-bold text-gray-800 dark:text-slate-200">{i + 1}. <MathText text={stat.q} /></p>
                                             <span className={`text-xs font-black shrink-0 ${pct >= 60 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>{pct}% benar</span>
                                         </div>
                                         {/* Distribusi pilihan jawaban */}
@@ -194,7 +195,7 @@ export default function QuizResults({ quiz, classroom, subject, attempts, questi
                                                             <div className={`h-full rounded ${isKey ? 'bg-emerald-400' : 'bg-gray-300 dark:bg-slate-600'}`}
                                                                 style={{ width: `${(count / attempts.length) * 100}%` }} />
                                                         </div>
-                                                        <span className="w-24 shrink-0 truncate text-gray-500 dark:text-slate-400" title={opt}>{opt}</span>
+                                                        <span className="w-24 shrink-0 truncate text-gray-500 dark:text-slate-400" title={opt}><MathText text={opt} /></span>
                                                         <span className="w-6 shrink-0 text-right font-bold text-gray-600 dark:text-slate-300">{count}</span>
                                                     </div>
                                                 );

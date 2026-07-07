@@ -1,6 +1,7 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
+import MathText from '@/Components/MathText';
 
 // Warna tombol pilihan gaya Quizizz
 const OPTION_COLORS = [
@@ -117,9 +118,9 @@ export default function QuizTake({ quiz, students, doneStudentIds }) {
                                     const keyText = q.options.find((o) => o.i === r.answer)?.text;
                                     return (
                                         <div key={q.i} className={`rounded-xl p-3 text-sm border ${r.correct ? 'bg-emerald-50 border-emerald-200' : 'bg-rose-50 border-rose-200'}`}>
-                                            <p className="font-bold text-gray-800">{r.correct ? '✅' : '❌'} {q.q}</p>
+                                            <p className="font-bold text-gray-800">{r.correct ? '✅' : '❌'} <MathText text={q.q} /></p>
                                             {!r.correct && keyText && (
-                                                <p className="mt-1 text-emerald-700 font-semibold">Jawaban benar: {keyText}</p>
+                                                <p className="mt-1 text-emerald-700 font-semibold">Jawaban benar: <MathText text={keyText} /></p>
                                             )}
                                         </div>
                                     );
@@ -168,19 +169,27 @@ export default function QuizTake({ quiz, students, doneStudentIds }) {
                                     <span className="text-xs font-bold text-gray-400">{studentName}</span>
                                 </div>
                             </div>
-                            <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden mb-5">
-                                <motion.div className="h-full rounded-full bg-indigo-500"
-                                    animate={{ width: `${((step + 1) / quiz.questions.length) * 100}%` }} />
+                            {/* Navigasi nomor soal: hijau = sudah dijawab, klik untuk lompat */}
+                            <div className="flex flex-wrap gap-1.5 mb-5">
+                                {quiz.questions.map((q, k) => (
+                                    <button key={k} onClick={() => setStep(k)}
+                                        className={`w-8 h-8 rounded-lg text-xs font-black transition active:scale-90 ${
+                                            k === step ? 'bg-indigo-600 text-white ring-2 ring-indigo-300'
+                                            : answers[q.i] !== undefined ? 'bg-emerald-100 text-emerald-700'
+                                            : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}>
+                                        {k + 1}
+                                    </button>
+                                ))}
                             </div>
 
                             <AnimatePresence mode="wait">
                                 <motion.div key={step} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} transition={{ duration: 0.15 }}>
-                                    <h2 className="text-lg sm:text-xl font-black text-gray-900 mb-5">{quiz.questions[step].q}</h2>
+                                    <h2 className="text-lg sm:text-xl font-black text-gray-900 mb-5"><MathText text={quiz.questions[step].q} /></h2>
                                     <div className="grid gap-3 sm:grid-cols-2">
                                         {quiz.questions[step].options.map((opt, j) => (
                                             <button key={opt.i} onClick={() => pick(step, quiz.questions[step].i, opt.i)}
                                                 className={`${OPTION_COLORS[j]} text-white font-bold text-left px-4 py-4 rounded-xl shadow-md transition active:scale-95 ${answers[quiz.questions[step].i] === opt.i ? 'ring-4 ring-gray-900/60 scale-[0.98]' : ''}`}>
-                                                {opt.text}
+                                                <MathText text={opt.text} />
                                             </button>
                                         ))}
                                     </div>
@@ -199,12 +208,17 @@ export default function QuizTake({ quiz, students, doneStudentIds }) {
                                         {form.processing ? 'Mengirim...' : 'Kumpulkan! ✨'}
                                     </button>
                                 ) : (
-                                    <button onClick={() => setStep(step + 1)} disabled={answers[quiz.questions[step].i] === undefined}
-                                        className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm transition disabled:opacity-30">
-                                        Berikutnya →
+                                    <button onClick={() => setStep(step + 1)}
+                                        className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm transition">
+                                        {answers[quiz.questions[step].i] === undefined ? 'Lewati →' : 'Berikutnya →'}
                                     </button>
                                 )}
                             </div>
+                            {step === quiz.questions.length - 1 && answeredCount < total && (
+                                <p className="mt-3 text-xs font-bold text-amber-600 text-center">
+                                    Masih ada {total - answeredCount} soal belum dijawab — klik nomor abu-abu di atas.
+                                </p>
+                            )}
                             {flash?.error && <p className="mt-3 text-sm font-bold text-rose-600 text-center">{flash.error}</p>}
                         </div>
                     )}

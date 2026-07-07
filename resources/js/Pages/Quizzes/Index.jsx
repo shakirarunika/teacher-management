@@ -1,5 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import Modal from '@/Components/Modal';
+import MathText, { hasMath } from '@/Components/MathText';
 import { Head, Link, useForm, router, usePage } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
@@ -339,6 +340,9 @@ export default function QuizzesIndex({ classroom, quizzes, subjects, studentsCou
                                     <ArchiveBoxIcon className="w-4 h-4" /> Ambil dari Bank Soal
                                 </button>
                             </div>
+                            <p className="mt-1 text-xs text-gray-400 dark:text-slate-500">
+                                💡 Rumus matematika: apit dengan tanda dolar, mis. <code className="font-mono">{'$\\frac{1}{2}x^2$'}</code> — preview muncul otomatis.
+                            </p>
                             <div className="mt-2 space-y-5">
                                 {form.data.questions.map((question, i) => (
                                     <div key={i} className="rounded-2xl border border-gray-200 dark:border-slate-700 bg-gray-50/60 dark:bg-slate-800/40 p-4">
@@ -382,6 +386,21 @@ export default function QuizzesIndex({ classroom, quizzes, subjects, studentsCou
                                             ) : <span />}
                                             <span className="text-xs text-gray-400 dark:text-slate-500">Klik bulatan = kunci jawaban</span>
                                         </div>
+
+                                        {/* Preview rumus (muncul kalau ada $...$) */}
+                                        {hasMath(question.q, question.options) && (
+                                            <div className="mt-3 rounded-xl border border-indigo-200 dark:border-indigo-900/50 bg-white dark:bg-slate-900 p-3">
+                                                <p className="text-[10px] font-black uppercase tracking-wide text-indigo-400 mb-1.5">Preview tampilan siswa</p>
+                                                <p className="text-sm font-semibold text-gray-800 dark:text-slate-200"><MathText text={question.q} /></p>
+                                                <ul className="mt-1.5 space-y-0.5">
+                                                    {question.options.map((opt, j) => (
+                                                        <li key={j} className="text-sm text-gray-600 dark:text-slate-400">
+                                                            {String.fromCharCode(65 + j)}. <MathText text={opt} />
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
                             </div>
@@ -430,7 +449,7 @@ export default function QuizzesIndex({ classroom, quizzes, subjects, studentsCou
                                     onChange={(e) => setBank((b) => ({ ...b, checked: { ...b.checked, [it.id]: e.target.checked } }))}
                                     className="mt-1 rounded border-gray-300 dark:border-slate-600 text-indigo-600 focus:ring-indigo-500" />
                                 <div className="min-w-0">
-                                    <p className="text-sm font-semibold text-gray-800 dark:text-slate-200">{it.q}</p>
+                                    <p className="text-sm font-semibold text-gray-800 dark:text-slate-200"><MathText text={it.q} /></p>
                                     <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
                                         {it.subject?.name}{it.materi ? ` · ${it.materi}` : ''}{it.difficulty ? ` · ${it.difficulty}` : ''} · {it.options.length} pilihan
                                     </p>

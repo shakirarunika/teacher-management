@@ -1,5 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import Modal from '@/Components/Modal';
+import MathText, { hasMath } from '@/Components/MathText';
 import { Head, useForm, router, usePage } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
@@ -124,13 +125,13 @@ export default function BankQuestionsIndex({ questions, subjects }) {
                                 <motion.div key={it.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                                     className="bg-white/70 dark:bg-slate-900/45 backdrop-blur-xl border border-white dark:border-slate-800/80 rounded-2xl p-4 shadow-xl dark:shadow-none flex items-start gap-3">
                                     <div className="flex-1 min-w-0">
-                                        <p className="font-semibold text-gray-800 dark:text-slate-200">{it.q}</p>
+                                        <p className="font-semibold text-gray-800 dark:text-slate-200"><MathText text={it.q} /></p>
                                         <div className="mt-1.5 flex items-center gap-2 flex-wrap text-xs">
                                             <span className="font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/45 px-2.5 py-0.5 rounded-full">{it.subject?.name}</span>
                                             {it.materi && <span className="font-bold text-gray-500 dark:text-slate-400 bg-gray-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-full">{it.materi}</span>}
                                             {it.difficulty && <span className={`font-bold px-2.5 py-0.5 rounded-full ${DIFF_BADGE[it.difficulty]}`}>{it.difficulty}</span>}
                                             <span className="text-gray-400 dark:text-slate-500">
-                                                Kunci: {String.fromCharCode(65 + it.answer)}. {it.options[it.answer]}
+                                                Kunci: {String.fromCharCode(65 + it.answer)}. <MathText text={it.options[it.answer]} />
                                             </span>
                                         </div>
                                     </div>
@@ -216,6 +217,24 @@ export default function BankQuestionsIndex({ questions, subjects }) {
                         ) : <span />}
                         <span className="text-xs text-gray-400 dark:text-slate-500">Klik bulatan = kunci jawaban</span>
                     </div>
+                    <p className="mt-2 text-xs text-gray-400 dark:text-slate-500">
+                        💡 Rumus matematika: apit dengan tanda dolar, mis. <code className="font-mono">{'$\\frac{1}{2}x^2$'}</code>
+                    </p>
+
+                    {/* Preview rumus (muncul kalau ada $...$) */}
+                    {hasMath(form.data.q, form.data.options) && (
+                        <div className="mt-3 rounded-xl border border-indigo-200 dark:border-indigo-900/50 bg-white dark:bg-slate-900 p-3">
+                            <p className="text-[10px] font-black uppercase tracking-wide text-indigo-400 mb-1.5">Preview tampilan siswa</p>
+                            <p className="text-sm font-semibold text-gray-800 dark:text-slate-200"><MathText text={form.data.q} /></p>
+                            <ul className="mt-1.5 space-y-0.5">
+                                {form.data.options.map((opt, j) => (
+                                    <li key={j} className="text-sm text-gray-600 dark:text-slate-400">
+                                        {String.fromCharCode(65 + j)}. <MathText text={opt} />
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
 
                     <div className="mt-6 flex justify-end gap-3">
                         <button type="button" onClick={closeModal} className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-slate-800 dark:hover:bg-slate-700 font-semibold text-gray-700 dark:text-slate-200 transition">Batal</button>
