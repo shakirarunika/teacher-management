@@ -4,6 +4,9 @@
 set -e
 
 echo ">> Pull dari GitHub..."
+# Lockfile itu file generate — perubahan lokal di server (mis. npm install
+# manual) dibuang supaya tidak memblokir pull.
+git checkout -- package-lock.json composer.lock 2>/dev/null || true
 git pull
 
 echo ">> Install dependency PHP..."
