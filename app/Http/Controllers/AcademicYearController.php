@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\AcademicYear;
+use App\Models\Attendance;
+use App\Models\Classroom;
+use App\Models\Score;
+use App\Models\Scopes\ActiveYearScope;
 use Illuminate\Http\Request;
 
 class AcademicYearController extends Controller
@@ -18,6 +22,16 @@ class AcademicYearController extends Controller
         // Jika guru belum punya tahun ajaran aktif, jadikan ini aktif.
         if (! AcademicYear::where('is_active', true)->where('id', '!=', $year->id)->exists()) {
             $year->update(['is_active' => true]);
+
+            // Adopsi data lama tanpa tahun (dibuat sebelum guru punya tahun ajaran)
+            // agar tidak tersembunyi oleh ActiveYearScope.
+            $classroomIds = Classroom::where('teacher_id', $request->user()->id)->pluck('id');
+            foreach ([Attendance::class, Score::class] as $model) {
+                $model::withoutGlobalScope(ActiveYearScope::class)
+                    ->whereNull('academic_year_id')
+                    ->whereIn('classroom_id', $classroomIds)
+                    ->update(['academic_year_id' => $year->id]);
+            }
         }
 
         return back()->with('success', 'Tahun ajaran ditambahkan!');
