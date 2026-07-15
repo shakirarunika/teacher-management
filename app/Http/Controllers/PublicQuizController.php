@@ -27,7 +27,13 @@ class PublicQuizController extends Controller
                     array_keys($q['options'])
                 );
                 if ($quiz->shuffle_options) shuffle($options);
-                $questions[] = ['i' => $i, 'q' => $q['q'], 'options' => $options];
+                $questions[] = [
+                    'i' => $i,
+                    'q' => $q['q'],
+                    'stimulus' => $q['stimulus'] ?? null,
+                    'media' => $q['media'] ?? null,
+                    'options' => $options,
+                ];
             }
             if ($quiz->shuffle_questions) shuffle($questions);
         }

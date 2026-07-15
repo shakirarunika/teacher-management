@@ -1,6 +1,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import Modal from '@/Components/Modal';
 import MathText, { hasMath } from '@/Components/MathText';
+import QuestionExtras from '@/Components/QuestionMedia';
 import { Head, Link, useForm, router, usePage } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { lazy, Suspense, useState } from 'react';
@@ -16,7 +17,7 @@ import {
     ArchiveBoxIcon, ClockIcon,
 } from '@heroicons/react/24/outline';
 
-const emptyQuestion = () => ({ q: '', options: ['', ''], answer: 0 });
+const emptyQuestion = () => ({ q: '', stimulus: '', media: null, options: ['', ''], answer: 0 });
 
 // datetime-local <-> ISO UTC (browser yang konversi zona waktu)
 const isoToLocal = (iso) => iso ? new Date(new Date(iso).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '';
@@ -115,7 +116,7 @@ export default function QuizzesIndex({ classroom, quizzes, subjects, studentsCou
         const current = form.data.questions.filter((q) => q.q.trim() !== '' || q.options.some((o) => o.trim() !== ''));
         form.setData('questions', [
             ...current,
-            ...picked.map((it) => ({ q: it.q, options: it.options, answer: it.answer })),
+            ...picked.map((it) => ({ q: it.q, stimulus: it.stimulus ?? '', media: it.media ?? null, options: it.options, answer: it.answer })),
         ]);
         setBank((b) => ({ ...b, open: false, checked: {} }));
     };
@@ -273,8 +274,8 @@ export default function QuizzesIndex({ classroom, quizzes, subjects, studentsCou
                 </div>
             </div>
 
-            {/* Modal Buat/Edit Kuis */}
-            <Modal show={modal.open} onClose={closeModal} maxWidth="2xl">
+            {/* Modal Buat/Edit Kuis — klik backdrop dikonfirmasi dulu biar ketikan soal tidak hilang */}
+            <Modal show={modal.open} onClose={() => { if (window.confirm('Tutup form? Perubahan yang belum disimpan akan hilang.')) closeModal(); }} maxWidth="2xl">
                 <form onSubmit={submit} className="p-6 max-h-[85vh] overflow-y-auto">
                     <h2 className="text-lg font-bold text-gray-900 dark:text-slate-100">{modal.editing ? 'Edit Kuis' : 'Buat Kuis Baru'}</h2>
 
@@ -374,6 +375,7 @@ export default function QuizzesIndex({ classroom, quizzes, subjects, studentsCou
                                             <button type="button" onClick={() => setMathTarget({ i, j: null })} title="Sisipkan rumus matematika"
                                                 className="shrink-0 px-3 py-2.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:hover:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 font-bold text-sm transition">Σ</button>
                                         </div>
+                                        <QuestionExtras q={question} onChange={(patch) => setQuestion(i, patch)} />
                                         {form.errors[`questions.${i}.q`] && <p className="mt-1 text-sm text-rose-600">{form.errors[`questions.${i}.q`]}</p>}
 
                                         <div className="mt-3 space-y-2">

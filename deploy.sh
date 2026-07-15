@@ -15,6 +15,9 @@ composer install --no-dev --optimize-autoloader
 echo ">> Jalankan migration..."
 php artisan migrate --force
 
+echo ">> Symlink storage (upload media soal)..."
+php artisan storage:link --force
+
 echo ">> Build asset frontend..."
 npm ci
 npm run build

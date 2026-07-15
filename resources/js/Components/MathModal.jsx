@@ -34,10 +34,14 @@ export default function MathModal({ show, onClose, onInsert }) {
                     class="mt-4 block w-full rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 px-3 py-2 text-xl shadow-sm"
                 />
 
-                <div className="mt-3 text-xs text-gray-400 dark:text-slate-500 space-y-0.5">
+                <div className="mt-3 text-xs text-gray-400 dark:text-slate-500">
                     <p>Tips: pakai virtual keyboard (ikon keyboard) atau ketik langsung:</p>
-                    <p><code className="font-mono">^</code> untuk pangkat (contoh: x^2) · <code className="font-mono">/</code> untuk pecahan (contoh: 1/2)</p>
-                    <p><code className="font-mono">sqrt</code> untuk akar kuadrat · <code className="font-mono">pi</code> untuk π</p>
+                    <ul className="mt-1 space-y-0.5 list-disc list-inside">
+                        <li><code className="font-mono">^</code> untuk pangkat (contoh: x^2)</li>
+                        <li><code className="font-mono">/</code> untuk pecahan (contoh: 1/2)</li>
+                        <li><code className="font-mono">sqrt</code> untuk akar kuadrat</li>
+                        <li><code className="font-mono">pi</code> untuk π</li>
+                    </ul>
                 </div>
 
                 <div className="mt-6 flex justify-end gap-3">

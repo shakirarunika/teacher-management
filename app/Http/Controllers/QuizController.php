@@ -147,6 +147,32 @@ class QuizController extends Controller
         return back()->with('success', "Skor kuis disalin ke kolom {$validated['column']}!");
     }
 
+    /**
+     * Upload media soal (gambar/audio) ke disk public.
+     * ponytail: file yatim (soal dihapus/diganti) dibiarkan menumpuk dulu;
+     * bikin pembersih terjadwal kalau storage jadi masalah.
+     */
+    public function uploadMedia(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:jpg,jpeg,png,webp,gif,mp3,m4a,ogg,wav,aac|max:10240',
+        ]);
+
+        $file = $request->file('file');
+        $isImage = str_starts_with($file->getMimeType(), 'image/');
+
+        if ($isImage && $file->getSize() > 2 * 1024 * 1024) {
+            return response()->json(['message' => 'Gambar maksimal 2MB.'], 422);
+        }
+
+        $path = $file->store('quiz-media', 'public');
+
+        return response()->json([
+            'url' => \Illuminate\Support\Facades\Storage::url($path),
+            'type' => $isImage ? 'image' : 'audio',
+        ]);
+    }
+
     private function validateQuiz(Request $request): array
     {
         $validated = $request->validate([
@@ -154,6 +180,10 @@ class QuizController extends Controller
             'subject_id' => ['required', Rule::exists('subjects', 'id')->where('user_id', $request->user()->id)],
             'questions' => 'required|array|min:1|max:100',
             'questions.*.q' => 'required|string|max:1000',
+            'questions.*.stimulus' => 'nullable|string|max:5000',
+            'questions.*.media' => 'nullable|array',
+            'questions.*.media.type' => 'required_with:questions.*.media|in:image,audio,youtube',
+            'questions.*.media.url' => 'required_with:questions.*.media|string|max:1000',
             'questions.*.options' => 'required|array|min:2|max:5',
             'questions.*.options.*' => 'required|string|max:500',
             'questions.*.answer' => 'required|integer|min:0',

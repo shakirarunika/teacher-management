@@ -135,6 +135,7 @@ export default function QuizResults({ quiz, classroom, subject, attempts, questi
                         {attempts.length === 0 ? (
                             <p className="p-8 text-center text-sm text-gray-400 dark:text-slate-500">Belum ada siswa yang mengerjakan.</p>
                         ) : (
+                            <div className="overflow-x-auto">
                             <table className="w-full text-left">
                                 <thead className="bg-gray-50/80 dark:bg-slate-800/50 text-xs uppercase tracking-wide text-gray-500 dark:text-slate-400 font-bold">
                                     <tr>
@@ -166,6 +167,7 @@ export default function QuizResults({ quiz, classroom, subject, attempts, questi
                                     ))}
                                 </tbody>
                             </table>
+                            </div>
                         )}
                     </div>
 

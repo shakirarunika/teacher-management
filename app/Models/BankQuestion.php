@@ -15,6 +15,7 @@ class BankQuestion extends Model
     protected $casts = [
         'options' => 'array',
         'answer' => 'integer',
+        'media' => 'array',
     ];
 
     public function subject()

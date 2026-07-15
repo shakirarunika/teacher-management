@@ -2,14 +2,16 @@ import { Head, useForm, usePage } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import MathText from '@/Components/MathText';
+import { MediaView } from '@/Components/QuestionMedia';
 
-// Warna tombol pilihan gaya Quizizz
+// Warna tombol pilihan gaya Quizizz — shade dipilih agar kontras teks lolos WCAG
+// (kuning pakai teks gelap, putih di atas kuning tidak terbaca)
 const OPTION_COLORS = [
-    'bg-rose-500 hover:bg-rose-600',
-    'bg-sky-500 hover:bg-sky-600',
-    'bg-amber-500 hover:bg-amber-600',
-    'bg-emerald-500 hover:bg-emerald-600',
-    'bg-violet-500 hover:bg-violet-600',
+    'bg-rose-600 hover:bg-rose-700 text-white',
+    'bg-sky-600 hover:bg-sky-700 text-white',
+    'bg-amber-400 hover:bg-amber-500 text-amber-950',
+    'bg-emerald-600 hover:bg-emerald-700 text-white',
+    'bg-violet-600 hover:bg-violet-700 text-white',
 ];
 
 const fmtClock = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
@@ -35,6 +37,42 @@ export default function QuizTake({ quiz, students, doneStudentIds }) {
     const total = quiz.total_questions;
     const answeredCount = Object.keys(answers).length;
     const studentName = students.find((s) => s.id === Number(form.data.student_id))?.name;
+
+    // Progres disimpan di localStorage: refresh tidak menghapus jawaban dan
+    // timer lanjut dari waktu mulai semula (tidak bisa di-reset via refresh).
+    const storeKey = `quiz-progress-${quiz.token}`;
+
+    useEffect(() => {
+        if (result || quiz.closed_reason) return;
+        try {
+            const saved = JSON.parse(localStorage.getItem(storeKey) || 'null');
+            if (!saved || !saved.startedAt) return;
+            if (doneStudentIds.includes(saved.student_id)) { localStorage.removeItem(storeKey); return; }
+            form.setData('student_id', String(saved.student_id));
+            setAnswers(saved.answers ?? {});
+            startedAtRef.current = saved.startedAt;
+            if (quiz.duration_minutes) {
+                // Sisa waktu dihitung dari waktu mulai asli; kalau sudah habis,
+                // countdown effect langsung auto-submit.
+                setTimeLeft(Math.max(0, quiz.duration_minutes * 60 - Math.round((Date.now() - saved.startedAt) / 1000)));
+            }
+            setStep(Math.min(saved.step ?? 0, quiz.questions.length - 1));
+        } catch { /* data korup → mulai normal */ }
+    }, []);
+
+    useEffect(() => {
+        if (step < 0 || result) return;
+        localStorage.setItem(storeKey, JSON.stringify({
+            student_id: Number(form.data.student_id),
+            startedAt: startedAtRef.current,
+            answers,
+            step,
+        }));
+    }, [answers, step]);
+
+    useEffect(() => {
+        if (result) localStorage.removeItem(storeKey);
+    }, [result]);
 
     const doSubmit = () => {
         if (submittedRef.current) return;
@@ -184,11 +222,21 @@ export default function QuizTake({ quiz, students, doneStudentIds }) {
 
                             <AnimatePresence mode="wait">
                                 <motion.div key={step} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} transition={{ duration: 0.15 }}>
+                                    {quiz.questions[step].stimulus && (
+                                        <div className="mb-4 rounded-xl bg-gray-50 border border-gray-200 p-4 text-sm text-gray-700 whitespace-pre-wrap max-h-48 overflow-y-auto">
+                                            {quiz.questions[step].stimulus}
+                                        </div>
+                                    )}
+                                    {quiz.questions[step].media && (
+                                        <div className="mb-4 flex justify-center">
+                                            <MediaView media={quiz.questions[step].media} className="w-full" />
+                                        </div>
+                                    )}
                                     <h2 className="text-lg sm:text-xl font-black text-gray-900 mb-5"><MathText text={quiz.questions[step].q} /></h2>
                                     <div className="grid gap-3 sm:grid-cols-2">
                                         {quiz.questions[step].options.map((opt, j) => (
                                             <button key={opt.i} onClick={() => pick(step, quiz.questions[step].i, opt.i)}
-                                                className={`${OPTION_COLORS[j]} text-white font-bold text-left px-4 py-4 rounded-xl shadow-md transition active:scale-95 ${answers[quiz.questions[step].i] === opt.i ? 'ring-4 ring-gray-900/60 scale-[0.98]' : ''}`}>
+                                                className={`${OPTION_COLORS[j]} font-bold text-left px-4 py-4 rounded-xl shadow-md transition active:scale-95 ${answers[quiz.questions[step].i] === opt.i ? 'ring-4 ring-gray-900/60 scale-[0.98]' : ''}`}>
                                                 <MathText text={opt.text} />
                                             </button>
                                         ))}

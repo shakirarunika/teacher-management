@@ -1,6 +1,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import Modal from '@/Components/Modal';
 import MathText, { hasMath } from '@/Components/MathText';
+import QuestionExtras from '@/Components/QuestionMedia';
 import { Head, useForm, router, usePage } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { lazy, Suspense, useState } from 'react';
@@ -14,7 +15,7 @@ import {
 
 const emptyForm = (subjects) => ({
     subject_id: subjects[0]?.id ?? '', materi: '', difficulty: '',
-    q: '', options: ['', ''], answer: 0,
+    q: '', stimulus: '', media: null, options: ['', ''], answer: 0,
 });
 
 const DIFF_BADGE = {
@@ -38,7 +39,7 @@ export default function BankQuestionsIndex({ questions, subjects }) {
     const openCreate = () => { form.clearErrors(); form.setData(emptyForm(subjects)); setModal({ open: true, editing: null }); };
     const openEdit = (it) => {
         form.clearErrors();
-        form.setData({ subject_id: it.subject_id, materi: it.materi ?? '', difficulty: it.difficulty ?? '', q: it.q, options: it.options, answer: it.answer });
+        form.setData({ subject_id: it.subject_id, materi: it.materi ?? '', difficulty: it.difficulty ?? '', q: it.q, stimulus: it.stimulus ?? '', media: it.media ?? null, options: it.options, answer: it.answer });
         setModal({ open: true, editing: it });
     };
     const closeModal = () => setModal({ open: false, editing: null });
@@ -162,8 +163,8 @@ export default function BankQuestionsIndex({ questions, subjects }) {
                 </div>
             </div>
 
-            {/* Modal Tambah/Edit Soal */}
-            <Modal show={modal.open} onClose={closeModal} maxWidth="xl">
+            {/* Modal Tambah/Edit Soal — klik backdrop dikonfirmasi dulu biar ketikan tidak hilang */}
+            <Modal show={modal.open} onClose={() => { if (window.confirm('Tutup form? Perubahan yang belum disimpan akan hilang.')) closeModal(); }} maxWidth="xl">
                 <form onSubmit={submit} className="p-6 max-h-[85vh] overflow-y-auto">
                     <h2 className="text-lg font-bold text-gray-900 dark:text-slate-100">{modal.editing ? 'Edit Soal' : 'Tambah Soal ke Bank'}</h2>
 
@@ -202,6 +203,7 @@ export default function BankQuestionsIndex({ questions, subjects }) {
                             <button type="button" onClick={() => setMathTarget('q')} title="Sisipkan rumus matematika"
                                 className="shrink-0 px-3 py-2.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:hover:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 font-bold text-sm transition">Σ</button>
                         </div>
+                        <QuestionExtras q={form.data} onChange={(patch) => form.setData({ ...form.data, ...patch })} />
                         {form.errors.q && <p className="mt-1 text-sm text-rose-600">{form.errors.q}</p>}
                     </div>
 

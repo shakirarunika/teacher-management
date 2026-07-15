@@ -78,6 +78,7 @@ Route::middleware(['auth', 'verified', 'subscribed'])->group(function () {
     Route::get('/quizzes/{quiz}/results', [QuizController::class, 'results'])->name('quizzes.results');
     Route::post('/quizzes/{quiz}/copy-scores', [QuizController::class, 'copyScores'])->name('quizzes.copy-scores');
     Route::post('/quizzes/{quiz}/duplicate', [QuizController::class, 'duplicate'])->name('quizzes.duplicate');
+    Route::post('/quiz-media', [QuizController::class, 'uploadMedia'])->name('quiz-media.upload');
 
     // Bank Soal (global per guru, tidak terikat kelas)
     Route::get('/bank-soal', [BankQuestionController::class, 'index'])->name('bank-questions.index');
