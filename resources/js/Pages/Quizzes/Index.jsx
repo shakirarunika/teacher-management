@@ -3,8 +3,11 @@ import Modal from '@/Components/Modal';
 import MathText, { hasMath } from '@/Components/MathText';
 import { Head, Link, useForm, router, usePage } from '@inertiajs/react';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import axios from 'axios';
+
+// MathLive berat (~220kB gzip) — muat hanya saat editor rumus dibuka
+const MathModal = lazy(() => import('@/Components/MathModal'));
 import QRCode from 'react-qr-code';
 import {
     PlusIcon, PencilSquareIcon, TrashIcon, ArrowLeftIcon, CheckCircleIcon,
@@ -87,6 +90,16 @@ export default function QuizzesIndex({ classroom, quizzes, subjects, studentsCou
         });
     };
     const removeQuestion = (i) => form.setData('questions', form.data.questions.filter((_, k) => k !== i));
+
+    // Editor rumus: target {i, j} — j null = pertanyaan, angka = opsi ke-j
+    const [mathTarget, setMathTarget] = useState(null);
+    // ponytail: rumus disisip di akhir teks; lacak posisi kursor kalau guru komplain
+    const insertMath = (latex) => {
+        const { i, j } = mathTarget;
+        const glue = (s) => (s.trim() ? `${s.trimEnd()} ${latex}` : latex);
+        if (j === null) setQuestion(i, { q: glue(form.data.questions[i].q) });
+        else setOption(i, j, glue(form.data.questions[i].options[j]));
+    };
 
     // --- Bank soal picker ---
     const openBank = async () => {
@@ -341,7 +354,7 @@ export default function QuizzesIndex({ classroom, quizzes, subjects, studentsCou
                                 </button>
                             </div>
                             <p className="mt-1 text-xs text-gray-400 dark:text-slate-500">
-                                💡 Rumus matematika: apit dengan tanda dolar, mis. <code className="font-mono">{'$\\frac{1}{2}x^2$'}</code> — preview muncul otomatis.
+                                💡 Rumus matematika: klik tombol <span className="font-bold text-indigo-500">Σ</span> untuk membuka editor rumus, atau ketik manual di antara tanda dolar mis. <code className="font-mono">{'$\\frac{1}{2}x^2$'}</code>.
                             </p>
                             <div className="mt-2 space-y-5">
                                 {form.data.questions.map((question, i) => (
@@ -354,9 +367,13 @@ export default function QuizzesIndex({ classroom, quizzes, subjects, studentsCou
                                                 </button>
                                             )}
                                         </div>
-                                        <textarea value={question.q} onChange={(e) => setQuestion(i, { q: e.target.value })} rows={2}
-                                            placeholder="Tulis pertanyaan di sini..."
-                                            className="mt-2 block w-full rounded-lg border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500 px-4 py-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
+                                        <div className="mt-2 flex items-start gap-2">
+                                            <textarea value={question.q} onChange={(e) => setQuestion(i, { q: e.target.value })} rows={2}
+                                                placeholder="Tulis pertanyaan di sini..."
+                                                className="block w-full rounded-lg border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500 px-4 py-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
+                                            <button type="button" onClick={() => setMathTarget({ i, j: null })} title="Sisipkan rumus matematika"
+                                                className="shrink-0 px-3 py-2.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:hover:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 font-bold text-sm transition">Σ</button>
+                                        </div>
                                         {form.errors[`questions.${i}.q`] && <p className="mt-1 text-sm text-rose-600">{form.errors[`questions.${i}.q`]}</p>}
 
                                         <div className="mt-3 space-y-2">
@@ -368,6 +385,8 @@ export default function QuizzesIndex({ classroom, quizzes, subjects, studentsCou
                                                     <input type="text" value={opt} onChange={(e) => setOption(i, j, e.target.value)}
                                                         placeholder={`Pilihan ${String.fromCharCode(65 + j)}`}
                                                         className={`flex-1 rounded-lg px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500 ${question.answer === j ? 'border-emerald-400 dark:border-emerald-700 bg-emerald-50/50 dark:bg-emerald-950/20' : 'border-gray-300 dark:border-slate-700'}`} />
+                                                    <button type="button" onClick={() => setMathTarget({ i, j })} title="Sisipkan rumus matematika"
+                                                        className="shrink-0 px-2.5 py-2 rounded-lg bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:hover:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 font-bold text-xs transition">Σ</button>
                                                     {question.options.length > 2 && (
                                                         <button type="button" onClick={() => removeOption(i, j)} className="p-1 rounded-md text-gray-400 hover:text-rose-500 transition">
                                                             <XMarkIcon className="w-4 h-4" />
@@ -491,6 +510,11 @@ export default function QuizzesIndex({ classroom, quizzes, subjects, studentsCou
                     </div>
                 </div>
             </Modal>
+
+            {/* Editor rumus matematika (MathLive) */}
+            <Suspense fallback={null}>
+                {mathTarget !== null && <MathModal show onClose={() => setMathTarget(null)} onInsert={insertMath} />}
+            </Suspense>
         </AuthenticatedLayout>
     );
 }

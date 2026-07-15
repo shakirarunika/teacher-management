@@ -33,3 +33,8 @@
     background-image: linear-gradient(135deg, #f1f5f9 0%, #a5b4fc 50%, #c084fc 100%) !important;
 }
 
+/* Virtual keyboard MathLive harus di atas Modal (z-[200]) */
+body {
+    --keyboard-zindex: 300;
+}
+

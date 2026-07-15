@@ -26,6 +26,7 @@
         "@heroicons/react": "^2.2.0",
         "framer-motion": "^12.38.0",
         "katex": "^0.17.0",
+        "mathlive": "^0.110.0",
         "react-qr-code": "^2.2.0"
     }
 }

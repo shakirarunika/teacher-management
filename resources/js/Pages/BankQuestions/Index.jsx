@@ -3,7 +3,10 @@ import Modal from '@/Components/Modal';
 import MathText, { hasMath } from '@/Components/MathText';
 import { Head, useForm, router, usePage } from '@inertiajs/react';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
+
+// MathLive berat (~220kB gzip) — muat hanya saat editor rumus dibuka
+const MathModal = lazy(() => import('@/Components/MathModal'));
 import {
     PlusIcon, PencilSquareIcon, TrashIcon, CheckCircleIcon,
     XMarkIcon, ArchiveBoxIcon,
@@ -59,6 +62,15 @@ export default function BankQuestionsIndex({ questions, subjects }) {
             options: form.data.options.filter((_, k) => k !== j),
             answer: form.data.answer === j ? 0 : form.data.answer > j ? form.data.answer - 1 : form.data.answer,
         });
+    };
+
+    // Editor rumus: target 'q' (pertanyaan) atau index opsi
+    const [mathTarget, setMathTarget] = useState(null);
+    // ponytail: rumus disisip di akhir teks; lacak posisi kursor kalau guru komplain
+    const insertMath = (latex) => {
+        const glue = (s) => (s.trim() ? `${s.trimEnd()} ${latex}` : latex);
+        if (mathTarget === 'q') form.setData('q', glue(form.data.q));
+        else setOption(mathTarget, glue(form.data.options[mathTarget]));
     };
 
     const confirmDelete = () => {
@@ -184,8 +196,12 @@ export default function BankQuestionsIndex({ questions, subjects }) {
 
                     <div className="mt-4">
                         <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">Pertanyaan</label>
-                        <textarea value={form.data.q} onChange={(e) => form.setData('q', e.target.value)} rows={2} autoFocus
-                            className="mt-1 block w-full rounded-lg border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 px-4 py-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
+                        <div className="mt-1 flex items-start gap-2">
+                            <textarea value={form.data.q} onChange={(e) => form.setData('q', e.target.value)} rows={2} autoFocus
+                                className="block w-full rounded-lg border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 px-4 py-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
+                            <button type="button" onClick={() => setMathTarget('q')} title="Sisipkan rumus matematika"
+                                className="shrink-0 px-3 py-2.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:hover:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 font-bold text-sm transition">Σ</button>
+                        </div>
                         {form.errors.q && <p className="mt-1 text-sm text-rose-600">{form.errors.q}</p>}
                     </div>
 
@@ -198,6 +214,8 @@ export default function BankQuestionsIndex({ questions, subjects }) {
                                 <input type="text" value={opt} onChange={(e) => setOption(j, e.target.value)}
                                     placeholder={`Pilihan ${String.fromCharCode(65 + j)}`}
                                     className={`flex-1 rounded-lg px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500 ${form.data.answer === j ? 'border-emerald-400 dark:border-emerald-700 bg-emerald-50/50 dark:bg-emerald-950/20' : 'border-gray-300 dark:border-slate-700'}`} />
+                                <button type="button" onClick={() => setMathTarget(j)} title="Sisipkan rumus matematika"
+                                    className="shrink-0 px-2.5 py-2 rounded-lg bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:hover:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 font-bold text-xs transition">Σ</button>
                                 {form.data.options.length > 2 && (
                                     <button type="button" onClick={() => removeOption(j)} className="p-1 rounded-md text-gray-400 hover:text-rose-500 transition">
                                         <XMarkIcon className="w-4 h-4" />
@@ -218,7 +236,7 @@ export default function BankQuestionsIndex({ questions, subjects }) {
                         <span className="text-xs text-gray-400 dark:text-slate-500">Klik bulatan = kunci jawaban</span>
                     </div>
                     <p className="mt-2 text-xs text-gray-400 dark:text-slate-500">
-                        💡 Rumus matematika: apit dengan tanda dolar, mis. <code className="font-mono">{'$\\frac{1}{2}x^2$'}</code>
+                        💡 Rumus matematika: klik tombol <span className="font-bold text-indigo-500">Σ</span> untuk membuka editor rumus, atau ketik manual di antara tanda dolar mis. <code className="font-mono">{'$\\frac{1}{2}x^2$'}</code>
                     </p>
 
                     {/* Preview rumus (muncul kalau ada $...$) */}
@@ -256,6 +274,11 @@ export default function BankQuestionsIndex({ questions, subjects }) {
                     </div>
                 </div>
             </Modal>
+
+            {/* Editor rumus matematika (MathLive) */}
+            <Suspense fallback={null}>
+                {mathTarget !== null && <MathModal show onClose={() => setMathTarget(null)} onInsert={insertMath} />}
+            </Suspense>
         </AuthenticatedLayout>
     );
 }
