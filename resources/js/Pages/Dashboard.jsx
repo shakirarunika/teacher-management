@@ -564,7 +564,7 @@ export default function Dashboard({ stats, classrooms, academicYear, subjects = 
                             <div key={ta.id} className="flex items-center justify-between py-2.5 gap-2">
                                 <span className="font-semibold text-gray-800 dark:text-slate-200 flex items-center gap-2">
                                     {ta.name}
-                                    {ta.is_active && <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-full">Aktif</span>}
+                                    {!!ta.is_active && <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-full">Aktif</span>}
                                 </span>
                                 {confirmDelTa === ta.id ? (
                                     <span className="flex items-center gap-2 text-sm">
