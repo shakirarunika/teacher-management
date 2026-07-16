@@ -1,12 +1,12 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import Modal from '@/Components/Modal';
 import MathText from '@/Components/MathText';
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import {
     ArrowLeftIcon, CheckCircleIcon, ClipboardDocumentCheckIcon,
-    ExclamationCircleIcon, TrophyIcon,
+    ExclamationCircleIcon, TrashIcon, TrophyIcon,
 } from '@heroicons/react/24/outline';
 
 const scoreColor = (score) =>
@@ -23,7 +23,17 @@ const fmtDuration = (s) => {
 export default function QuizResults({ quiz, classroom, subject, attempts, questionStats, kkm, studentsNotDone }) {
     const { flash } = usePage().props;
     const [showCopy, setShowCopy] = useState(false);
+    const [deleteTarget, setDeleteTarget] = useState(null);
+    const [deleting, setDeleting] = useState(false);
     const copyForm = useForm({ column: 'tugas' });
+
+    const submitDelete = () => {
+        router.delete(route('quizzes.attempts.destroy', [quiz.id, deleteTarget.id]), {
+            preserveScroll: true,
+            onStart: () => setDeleting(true),
+            onFinish: () => { setDeleting(false); setDeleteTarget(null); },
+        });
+    };
 
     const avg = attempts.length ? Math.round(attempts.reduce((s, a) => s + a.score, 0) / attempts.length) : 0;
     const totalStudents = attempts.length + studentsNotDone.length;
@@ -144,6 +154,7 @@ export default function QuizResults({ quiz, classroom, subject, attempts, questi
                                         <th className="px-6 py-3">Dikumpulkan</th>
                                         <th className="px-6 py-3">Lama</th>
                                         <th className="px-6 py-3 text-right">Skor</th>
+                                        <th className="px-6 py-3 w-12"></th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
@@ -163,6 +174,12 @@ export default function QuizResults({ quiz, classroom, subject, attempts, questi
                                             </td>
                                             <td className="px-6 py-3 text-sm text-gray-500 dark:text-slate-400">{fmtDuration(a.duration_seconds)}</td>
                                             <td className={`px-6 py-3 text-right font-black text-lg ${scoreColor(a.score)}`}>{a.score}</td>
+                                            <td className="px-6 py-3 text-right">
+                                                <button onClick={() => setDeleteTarget(a)} title="Hapus pengerjaan"
+                                                    className="p-1.5 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 dark:text-slate-500 dark:hover:text-rose-400 dark:hover:bg-rose-950/40 transition">
+                                                    <TrashIcon className="w-4 h-4" />
+                                                </button>
+                                            </td>
                                         </motion.tr>
                                     ))}
                                 </tbody>
@@ -222,6 +239,20 @@ export default function QuizResults({ quiz, classroom, subject, attempts, questi
                     )}
                 </div>
             </div>
+
+            {/* Modal Hapus Pengerjaan */}
+            <Modal show={deleteTarget !== null} onClose={() => setDeleteTarget(null)} maxWidth="md">
+                <div className="p-6">
+                    <h2 className="text-lg font-bold text-gray-900 dark:text-slate-100">Hapus Pengerjaan</h2>
+                    <p className="mt-2 text-sm text-gray-600 dark:text-slate-400">
+                        Pengerjaan <span className="font-semibold">{deleteTarget?.student?.name}</span> (skor {deleteTarget?.score}) akan dihapus dan siswa ini bisa mengerjakan ulang dari awal. Berguna kalau salah pilih nama atau dikerjakan orang lain.
+                    </p>
+                    <div className="mt-6 flex justify-end gap-3">
+                        <button type="button" onClick={() => setDeleteTarget(null)} className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-slate-800 dark:hover:bg-slate-700 font-semibold text-gray-700 dark:text-slate-200 transition">Batal</button>
+                        <button type="button" onClick={submitDelete} disabled={deleting} className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 font-semibold text-white shadow-md shadow-rose-500/30 transition disabled:opacity-50">Hapus</button>
+                    </div>
+                </div>
+            </Modal>
 
             {/* Modal Salin ke Nilai */}
             <Modal show={showCopy} onClose={() => setShowCopy(false)} maxWidth="md">

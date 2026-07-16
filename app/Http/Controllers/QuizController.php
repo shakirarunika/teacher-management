@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Classroom;
 use App\Models\Quiz;
+use App\Models\QuizAttempt;
 use App\Models\Score;
 use App\Models\Subject;
 use Illuminate\Http\Request;
@@ -121,6 +122,20 @@ class QuizController extends Controller
                 ->orderBy('name')
                 ->get(['students.id', 'name']),
         ]);
+    }
+
+    /**
+     * Hapus pengerjaan siswa — misal salah pilih nama atau dijahili teman.
+     * Siswa tsb bisa mengerjakan ulang dari awal.
+     */
+    public function destroyAttempt(Quiz $quiz, QuizAttempt $attempt)
+    {
+        // {quiz} sudah ter-OwnerScope; pastikan attempt memang milik kuis ini.
+        abort_unless($attempt->quiz_id === $quiz->id, 404);
+
+        $attempt->delete();
+
+        return back()->with('success', 'Pengerjaan dihapus. Siswa bisa mengerjakan ulang.');
     }
 
     /**
