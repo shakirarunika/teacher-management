@@ -19,7 +19,10 @@ class UserForm
                     ->label('Email address')
                     ->email()
                     ->required(),
-                DateTimePicker::make('email_verified_at'),
+                DateTimePicker::make('email_verified_at')
+                    ->label('Email terverifikasi pada')
+                    ->default(now())
+                    ->helperText('Akun buatan admin langsung terverifikasi. Kosongkan hanya jika ingin memaksa verifikasi email (butuh SMTP).'),
                 TextInput::make('password')
                     ->password()
                     // Wajib hanya saat membuat user; saat edit, kosongkan jika tak ingin mengubah
