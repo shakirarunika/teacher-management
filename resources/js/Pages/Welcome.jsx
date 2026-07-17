@@ -129,7 +129,7 @@ export default function Welcome({ auth }) {
 
     const features = [
         { icon: '📋', title: 'Absensi Digital', desc: 'Rekam kehadiran siswa per kelas dengan cepat dan akurat setiap hari.' },
-        { icon: '🧩', title: 'Kuis Online', desc: 'Buat kuis pilihan ganda, PG kompleks, isian singkat & menjodohkan. Bagikan lewat link/QR, dinilai otomatis.' },
+        { icon: '🧩', title: 'Kuis Online', desc: 'Buat kuis pilihan ganda, isian singkat & menjodohkan. Bagikan lewat link/QR, dinilai otomatis.' },
         { icon: '🗃️', title: 'Bank Soal', desc: 'Simpan soal sekali, pakai ulang di kuis mana pun. Mendukung rumus matematika, gambar & audio.' },
         { icon: '📊', title: 'Nilai & Rapor', desc: 'Input nilai tugas, PTS, dan PAS. Hitung nilai akhir otomatis berdasarkan bobot, salin skor kuis sekali klik.' },
         { icon: '📈', title: 'Laporan Kehadiran', desc: 'Lihat rekap absensi per siswa lengkap dengan status hadir, izin, sakit, alpha.' },
