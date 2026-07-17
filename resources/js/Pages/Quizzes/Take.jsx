@@ -35,7 +35,15 @@ export default function QuizTake({ quiz, students, doneStudentIds }) {
     const result = flash?.quiz_result;
 
     const total = quiz.total_questions;
-    const answeredCount = Object.keys(answers).length;
+    // "Terjawab" tergantung tipe: jodoh = semua pasangan terisi, teks = non-kosong
+    const isAnswered = (q) => {
+        const a = answers[q.i];
+        if (a === undefined || a === null) return false;
+        if (q.type === 'jodoh') return q.lefts.every((_, k) => a[k] !== null && a[k] !== undefined);
+        if (typeof a === 'string') return a.trim() !== '';
+        return true;
+    };
+    const answeredCount = quiz.questions.filter(isAnswered).length;
     const studentName = students.find((s) => s.id === Number(form.data.student_id))?.name;
 
     // Progres disimpan di localStorage: refresh tidak menghapus jawaban dan
@@ -108,6 +116,12 @@ export default function QuizTake({ quiz, students, doneStudentIds }) {
             setTimeout(() => setStep(dispIdx + 1), 200);
         }
     };
+    const setText = (origQ, value) => setAnswers((a) => ({ ...a, [origQ]: value }));
+    const setMatch = (origQ, k, value, pairCount) => setAnswers((a) => {
+        const arr = Array.isArray(a[origQ]) ? [...a[origQ]] : Array(pairCount).fill(null);
+        arr[k] = value === '' ? null : Number(value);
+        return { ...a, [origQ]: arr };
+    });
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-indigo-600 via-purple-600 to-fuchsia-600 flex items-center justify-center p-4">
@@ -148,16 +162,39 @@ export default function QuizTake({ quiz, students, doneStudentIds }) {
                                 {result.score}
                             </p>
                             <p className="font-bold text-gray-600">{result.correct} dari {result.total} soal benar</p>
+                            {result.pending_essays > 0 && (
+                                <p className="mt-2 text-sm font-bold text-violet-600 bg-violet-50 rounded-xl px-4 py-2 inline-block">
+                                    ✍️ Nilai sementara — {result.pending_essays} soal esai menunggu penilaian gurumu.
+                                </p>
+                            )}
 
                             {/* Review jawaban (urutan tampilan siswa) */}
                             <div className="mt-6 space-y-3 text-left max-h-72 overflow-y-auto">
                                 {quiz.questions.map((q) => {
                                     const r = result.review[q.i];
-                                    const keyText = q.options.find((o) => o.i === r.answer)?.text;
+                                    if (r.type === 'esai') {
+                                        return (
+                                            <div key={q.i} className="rounded-xl p-3 text-sm border bg-violet-50 border-violet-200">
+                                                <p className="font-bold text-gray-800">✍️ <MathText text={q.q} /></p>
+                                                <p className="mt-1 text-violet-700 font-semibold">Menunggu penilaian guru.</p>
+                                            </div>
+                                        );
+                                    }
+                                    const keyText = r.type === 'pg' ? q.options.find((o) => o.i === r.answer)?.text : r.answer;
                                     return (
                                         <div key={q.i} className={`rounded-xl p-3 text-sm border ${r.correct ? 'bg-emerald-50 border-emerald-200' : 'bg-rose-50 border-rose-200'}`}>
                                             <p className="font-bold text-gray-800">{r.correct ? '✅' : '❌'} <MathText text={q.q} /></p>
-                                            {!r.correct && keyText && (
+                                            {r.type === 'jodoh' && (
+                                                <>
+                                                    <p className="mt-1 font-semibold text-gray-600">{r.matched} dari {r.total} pasangan benar</p>
+                                                    {!r.correct && (
+                                                        <ul className="mt-1 text-emerald-700 font-semibold space-y-0.5">
+                                                            {r.pairs.map((p, k) => <li key={k}><MathText text={p.left} /> → <MathText text={p.right} /></li>)}
+                                                        </ul>
+                                                    )}
+                                                </>
+                                            )}
+                                            {r.type !== 'jodoh' && !r.correct && keyText && (
                                                 <p className="mt-1 text-emerald-700 font-semibold">Jawaban benar: <MathText text={keyText} /></p>
                                             )}
                                         </div>
@@ -171,7 +208,7 @@ export default function QuizTake({ quiz, students, doneStudentIds }) {
                         <div>
                             <h2 className="text-xl font-black text-gray-900 text-center">Siapa kamu? 👋</h2>
                             <p className="text-gray-500 text-sm text-center mt-1 mb-5">
-                                {total} soal pilihan ganda menantimu.
+                                {total} soal menantimu.
                                 {quiz.duration_minutes && <> Waktu: <span className="font-bold">{quiz.duration_minutes} menit</span>.</>}
                                 {!quiz.show_result && <> <span className="font-bold text-violet-600">Mode ujian</span> — nilai diumumkan guru.</>}
                             </p>
@@ -213,7 +250,7 @@ export default function QuizTake({ quiz, students, doneStudentIds }) {
                                     <button key={k} onClick={() => setStep(k)}
                                         className={`w-8 h-8 rounded-lg text-xs font-black transition active:scale-90 ${
                                             k === step ? 'bg-indigo-600 text-white ring-2 ring-indigo-300'
-                                            : answers[q.i] !== undefined ? 'bg-emerald-100 text-emerald-700'
+                                            : isAnswered(q) ? 'bg-emerald-100 text-emerald-700'
                                             : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}>
                                         {k + 1}
                                     </button>
@@ -233,14 +270,53 @@ export default function QuizTake({ quiz, students, doneStudentIds }) {
                                         </div>
                                     )}
                                     <h2 className="text-lg sm:text-xl font-black text-gray-900 mb-5"><MathText text={quiz.questions[step].q} /></h2>
-                                    <div className="grid gap-3 sm:grid-cols-2">
-                                        {quiz.questions[step].options.map((opt, j) => (
-                                            <button key={opt.i} onClick={() => pick(step, quiz.questions[step].i, opt.i)}
-                                                className={`${OPTION_COLORS[j]} font-bold text-left px-4 py-4 rounded-xl shadow-md transition active:scale-95 ${answers[quiz.questions[step].i] === opt.i ? 'ring-4 ring-gray-900/60 scale-[0.98]' : ''}`}>
-                                                <MathText text={opt.text} />
-                                            </button>
-                                        ))}
-                                    </div>
+
+                                    {quiz.questions[step].type === 'pg' && (
+                                        <div className="grid gap-3 sm:grid-cols-2">
+                                            {quiz.questions[step].options.map((opt, j) => (
+                                                <button key={opt.i} onClick={() => pick(step, quiz.questions[step].i, opt.i)}
+                                                    className={`${OPTION_COLORS[j]} font-bold text-left px-4 py-4 rounded-xl shadow-md transition active:scale-95 ${answers[quiz.questions[step].i] === opt.i ? 'ring-4 ring-gray-900/60 scale-[0.98]' : ''}`}>
+                                                    <MathText text={opt.text} />
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {quiz.questions[step].type === 'isian' && (
+                                        <input type="text" value={answers[quiz.questions[step].i] ?? ''}
+                                            onChange={(e) => setText(quiz.questions[step].i, e.target.value)}
+                                            placeholder="Ketik jawabanmu di sini..."
+                                            className="block w-full rounded-xl border-2 border-indigo-300 px-4 py-3.5 text-base font-semibold shadow-sm focus:border-indigo-500 focus:ring-indigo-500" />
+                                    )}
+
+                                    {quiz.questions[step].type === 'jodoh' && (
+                                        <div className="space-y-3">
+                                            {quiz.questions[step].lefts.map((left, k) => (
+                                                <div key={k} className="flex items-center gap-3">
+                                                    <span className="flex-1 font-bold text-gray-800 text-sm sm:text-base"><MathText text={left} /></span>
+                                                    <span className="text-gray-300 font-black shrink-0">→</span>
+                                                    <select value={answers[quiz.questions[step].i]?.[k] ?? ''}
+                                                        onChange={(e) => setMatch(quiz.questions[step].i, k, e.target.value, quiz.questions[step].lefts.length)}
+                                                        className="flex-1 rounded-xl border-2 border-indigo-300 px-3 py-2.5 text-sm font-semibold shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                                        <option value="">-- Pilih pasangan --</option>
+                                                        {quiz.questions[step].rights.map((r) => (
+                                                            <option key={r.i} value={r.i}>{r.text}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {quiz.questions[step].type === 'esai' && (
+                                        <>
+                                            <textarea value={answers[quiz.questions[step].i] ?? ''} rows={6}
+                                                onChange={(e) => setText(quiz.questions[step].i, e.target.value)}
+                                                placeholder="Tulis jawaban uraianmu di sini..."
+                                                className="block w-full rounded-xl border-2 border-indigo-300 px-4 py-3 text-sm sm:text-base shadow-sm focus:border-indigo-500 focus:ring-indigo-500" />
+                                            <p className="mt-2 text-xs font-semibold text-gray-400">✍️ Soal uraian — dinilai langsung oleh gurumu.</p>
+                                        </>
+                                    )}
                                 </motion.div>
                             </AnimatePresence>
 
@@ -258,7 +334,7 @@ export default function QuizTake({ quiz, students, doneStudentIds }) {
                                 ) : (
                                     <button onClick={() => setStep(step + 1)}
                                         className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm transition">
-                                        {answers[quiz.questions[step].i] === undefined ? 'Lewati →' : 'Berikutnya →'}
+                                        {!isAnswered(quiz.questions[step]) ? 'Lewati →' : 'Berikutnya →'}
                                     </button>
                                 )}
                             </div>

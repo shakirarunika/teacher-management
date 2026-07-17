@@ -17,7 +17,29 @@ import {
     ArchiveBoxIcon, ClockIcon,
 } from '@heroicons/react/24/outline';
 
-const emptyQuestion = () => ({ q: '', stimulus: '', media: null, options: ['', ''], answer: 0 });
+const QUESTION_TYPES = { pg: 'Pilihan Ganda', isian: 'Isian Singkat', jodoh: 'Menjodohkan', esai: 'Esai' };
+
+const emptyPairs = () => [{ left: '', right: '' }, { left: '', right: '' }];
+
+// State editor menyimpan semua field sekaligus (options, answer_text, pairs)
+// supaya ganti tipe soal tidak menghapus ketikan; transform() memangkas saat submit.
+const emptyQuestion = () => ({ type: 'pg', q: '', stimulus: '', media: null, options: ['', ''], answer: 0, answer_text: '', pairs: emptyPairs() });
+
+const toEditorQuestion = (q) => ({
+    type: q.type ?? 'pg', q: q.q, stimulus: q.stimulus ?? '', media: q.media ?? null,
+    options: q.options ?? ['', ''],
+    answer: (q.type ?? 'pg') === 'pg' ? (q.answer ?? 0) : 0,
+    answer_text: q.type === 'isian' ? q.answer : '',
+    pairs: q.pairs ?? emptyPairs(),
+});
+
+const toPayloadQuestion = (q) => {
+    const base = { type: q.type, q: q.q, stimulus: q.stimulus, media: q.media };
+    if (q.type === 'isian') return { ...base, answer: q.answer_text };
+    if (q.type === 'jodoh') return { ...base, pairs: q.pairs };
+    if (q.type === 'esai') return base;
+    return { ...base, options: q.options, answer: q.answer };
+};
 
 // datetime-local <-> ISO UTC (browser yang konversi zona waktu)
 const isoToLocal = (iso) => iso ? new Date(new Date(iso).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '';
@@ -48,7 +70,7 @@ export default function QuizzesIndex({ classroom, quizzes, subjects, studentsCou
     const openEdit = (quiz) => {
         form.clearErrors();
         form.setData({
-            title: quiz.title, subject_id: quiz.subject_id, questions: quiz.questions,
+            title: quiz.title, subject_id: quiz.subject_id, questions: quiz.questions.map(toEditorQuestion),
             duration_minutes: quiz.duration_minutes ?? '',
             opens_at: isoToLocal(quiz.opens_at), closes_at: isoToLocal(quiz.closes_at),
             shuffle_questions: quiz.shuffle_questions, shuffle_options: quiz.shuffle_options,
@@ -63,6 +85,7 @@ export default function QuizzesIndex({ classroom, quizzes, subjects, studentsCou
         const opts = { preserveScroll: true, onSuccess: closeModal };
         const transform = (data) => ({
             ...data,
+            questions: data.questions.map(toPayloadQuestion),
             duration_minutes: data.duration_minutes || null,
             opens_at: localToIso(data.opens_at),
             closes_at: localToIso(data.closes_at),
@@ -83,6 +106,8 @@ export default function QuizzesIndex({ classroom, quizzes, subjects, studentsCou
         setQuestion(i, { options });
     };
     const addOption = (i) => setQuestion(i, { options: [...form.data.questions[i].options, ''] });
+    const setPair = (i, k, side, value) =>
+        setQuestion(i, { pairs: form.data.questions[i].pairs.map((p, idx) => (idx === k ? { ...p, [side]: value } : p)) });
     const removeOption = (i, j) => {
         const q = form.data.questions[i];
         setQuestion(i, {
@@ -116,7 +141,10 @@ export default function QuizzesIndex({ classroom, quizzes, subjects, studentsCou
         const current = form.data.questions.filter((q) => q.q.trim() !== '' || q.options.some((o) => o.trim() !== ''));
         form.setData('questions', [
             ...current,
-            ...picked.map((it) => ({ q: it.q, stimulus: it.stimulus ?? '', media: it.media ?? null, options: it.options, answer: it.answer })),
+            ...picked.map((it) => toEditorQuestion({
+                type: it.type ?? 'pg', q: it.q, stimulus: it.stimulus ?? '', media: it.media ?? null,
+                options: it.options, answer: it.type === 'isian' ? it.answer_text : it.answer, pairs: it.pairs,
+            })),
         ]);
         setBank((b) => ({ ...b, open: false, checked: {} }));
     };
@@ -361,7 +389,13 @@ export default function QuizzesIndex({ classroom, quizzes, subjects, studentsCou
                                 {form.data.questions.map((question, i) => (
                                     <div key={i} className="rounded-2xl border border-gray-200 dark:border-slate-700 bg-gray-50/60 dark:bg-slate-800/40 p-4">
                                         <div className="flex items-start justify-between gap-2">
-                                            <span className="text-xs font-black uppercase tracking-wide text-indigo-500 dark:text-indigo-400">Soal {i + 1}</span>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-xs font-black uppercase tracking-wide text-indigo-500 dark:text-indigo-400">Soal {i + 1}</span>
+                                                <select value={question.type} onChange={(e) => setQuestion(i, { type: e.target.value })}
+                                                    className="rounded-lg border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 py-1 pl-2 pr-7 text-xs font-bold shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                                    {Object.entries(QUESTION_TYPES).map(([v, label]) => <option key={v} value={v}>{label}</option>)}
+                                                </select>
+                                            </div>
                                             {form.data.questions.length > 1 && (
                                                 <button type="button" onClick={() => removeQuestion(i)} className="p-1 rounded-md text-gray-400 hover:text-rose-500 transition">
                                                     <TrashIcon className="w-4 h-4" />
@@ -378,6 +412,55 @@ export default function QuizzesIndex({ classroom, quizzes, subjects, studentsCou
                                         <QuestionExtras q={question} onChange={(patch) => setQuestion(i, patch)} />
                                         {form.errors[`questions.${i}.q`] && <p className="mt-1 text-sm text-rose-600">{form.errors[`questions.${i}.q`]}</p>}
 
+                                        {question.type === 'isian' && (
+                                            <div className="mt-3">
+                                                <input type="text" value={question.answer_text} onChange={(e) => setQuestion(i, { answer_text: e.target.value })}
+                                                    placeholder="Kunci jawaban"
+                                                    className="block w-full rounded-lg border-emerald-400 dark:border-emerald-700 bg-emerald-50/50 dark:bg-emerald-950/20 dark:text-slate-100 dark:placeholder-slate-500 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500" />
+                                                <p className="mt-1 text-xs text-gray-400 dark:text-slate-500">Jawaban dicocokkan tanpa peduli huruf besar/kecil. Beberapa alternatif dipisah <code className="font-mono font-bold">|</code> mis. <code className="font-mono">empat|4</code></p>
+                                                {form.errors[`questions.${i}.answer`] && <p className="mt-1 text-sm text-rose-600">{form.errors[`questions.${i}.answer`]}</p>}
+                                            </div>
+                                        )}
+
+                                        {question.type === 'jodoh' && (
+                                            <div className="mt-3 space-y-2">
+                                                {question.pairs.map((pair, k) => (
+                                                    <div key={k} className="flex items-center gap-2">
+                                                        <input type="text" value={pair.left} onChange={(e) => setPair(i, k, 'left', e.target.value)}
+                                                            placeholder={`Kiri ${k + 1}`}
+                                                            className="flex-1 rounded-lg border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500" />
+                                                        <span className="text-gray-400 dark:text-slate-500 font-bold shrink-0">→</span>
+                                                        <input type="text" value={pair.right} onChange={(e) => setPair(i, k, 'right', e.target.value)}
+                                                            placeholder={`Pasangannya`}
+                                                            className="flex-1 rounded-lg border-emerald-400 dark:border-emerald-700 bg-emerald-50/50 dark:bg-emerald-950/20 dark:text-slate-100 dark:placeholder-slate-500 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500" />
+                                                        {question.pairs.length > 2 && (
+                                                            <button type="button" onClick={() => setQuestion(i, { pairs: question.pairs.filter((_, idx) => idx !== k) })}
+                                                                className="p-1 rounded-md text-gray-400 hover:text-rose-500 transition">
+                                                                <XMarkIcon className="w-4 h-4" />
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                                <div className="flex items-center justify-between">
+                                                    {question.pairs.length < 10 ? (
+                                                        <button type="button" onClick={() => setQuestion(i, { pairs: [...question.pairs, { left: '', right: '' }] })}
+                                                            className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
+                                                            + Tambah pasangan
+                                                        </button>
+                                                    ) : <span />}
+                                                    <span className="text-xs text-gray-400 dark:text-slate-500">Urutan sisi kanan diacak otomatis saat siswa mengerjakan</span>
+                                                </div>
+                                                {form.errors[`questions.${i}.pairs`] && <p className="text-sm text-rose-600">{form.errors[`questions.${i}.pairs`]}</p>}
+                                            </div>
+                                        )}
+
+                                        {question.type === 'esai' && (
+                                            <p className="mt-3 text-xs font-semibold text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-950/30 rounded-lg px-3 py-2">
+                                                ✍️ Siswa menjawab dengan uraian bebas. Kamu menilainya manual (0-100) di halaman <span className="font-bold">Hasil</span> setelah siswa mengumpulkan.
+                                            </p>
+                                        )}
+
+                                        {question.type === 'pg' && (<>
                                         <div className="mt-3 space-y-2">
                                             {question.options.map((opt, j) => (
                                                 <div key={j} className="flex items-center gap-2">
@@ -407,19 +490,22 @@ export default function QuizzesIndex({ classroom, quizzes, subjects, studentsCou
                                             ) : <span />}
                                             <span className="text-xs text-gray-400 dark:text-slate-500">Klik bulatan = kunci jawaban</span>
                                         </div>
+                                        </>)}
 
                                         {/* Preview rumus (muncul kalau ada $...$) */}
-                                        {hasMath(question.q, question.options) && (
+                                        {hasMath(question.q, question.type === 'pg' ? question.options : []) && (
                                             <div className="mt-3 rounded-xl border border-indigo-200 dark:border-indigo-900/50 bg-white dark:bg-slate-900 p-3">
                                                 <p className="text-[10px] font-black uppercase tracking-wide text-indigo-400 mb-1.5">Preview tampilan siswa</p>
                                                 <p className="text-sm font-semibold text-gray-800 dark:text-slate-200"><MathText text={question.q} /></p>
-                                                <ul className="mt-1.5 space-y-0.5">
-                                                    {question.options.map((opt, j) => (
-                                                        <li key={j} className="text-sm text-gray-600 dark:text-slate-400">
-                                                            {String.fromCharCode(65 + j)}. <MathText text={opt} />
-                                                        </li>
-                                                    ))}
-                                                </ul>
+                                                {question.type === 'pg' && (
+                                                    <ul className="mt-1.5 space-y-0.5">
+                                                        {question.options.map((opt, j) => (
+                                                            <li key={j} className="text-sm text-gray-600 dark:text-slate-400">
+                                                                {String.fromCharCode(65 + j)}. <MathText text={opt} />
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                )}
                                             </div>
                                         )}
                                     </div>
@@ -472,7 +558,8 @@ export default function QuizzesIndex({ classroom, quizzes, subjects, studentsCou
                                 <div className="min-w-0">
                                     <p className="text-sm font-semibold text-gray-800 dark:text-slate-200"><MathText text={it.q} /></p>
                                     <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
-                                        {it.subject?.name}{it.materi ? ` · ${it.materi}` : ''}{it.difficulty ? ` · ${it.difficulty}` : ''} · {it.options.length} pilihan
+                                        {it.subject?.name}{it.materi ? ` · ${it.materi}` : ''}{it.difficulty ? ` · ${it.difficulty}` : ''}
+                                        {' · '}{(it.type ?? 'pg') === 'pg' ? `PG ${it.options.length} pilihan` : QUESTION_TYPES[it.type]}
                                     </p>
                                 </div>
                             </label>

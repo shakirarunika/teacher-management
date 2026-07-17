@@ -22,18 +22,32 @@ class PublicQuizController extends Controller
         $questions = [];
         if (!$closedReason) {
             foreach ($quiz->questions as $i => $q) {
-                $options = array_map(
-                    fn ($j) => ['i' => $j, 'text' => $q['options'][$j]],
-                    array_keys($q['options'])
-                );
-                if ($quiz->shuffle_options) shuffle($options);
-                $questions[] = [
+                $type = $q['type'] ?? 'pg';
+                $item = [
                     'i' => $i,
+                    'type' => $type,
                     'q' => $q['q'],
                     'stimulus' => $q['stimulus'] ?? null,
                     'media' => $q['media'] ?? null,
-                    'options' => $options,
                 ];
+                if ($type === 'pg') {
+                    $options = array_map(
+                        fn ($j) => ['i' => $j, 'text' => $q['options'][$j]],
+                        array_keys($q['options'])
+                    );
+                    if ($quiz->shuffle_options) shuffle($options);
+                    $item['options'] = $options;
+                } elseif ($type === 'jodoh') {
+                    $item['lefts'] = array_column($q['pairs'], 'left');
+                    $rights = array_map(
+                        fn ($k) => ['i' => $k, 'text' => $q['pairs'][$k]['right']],
+                        array_keys($q['pairs'])
+                    );
+                    shuffle($rights); // selalu diacak — urutan asli = kunci jawaban
+                    $item['rights'] = $rights;
+                }
+                // isian & esai: cukup pertanyaannya saja
+                $questions[] = $item;
             }
             if ($quiz->shuffle_questions) shuffle($questions);
         }
@@ -75,7 +89,7 @@ class PublicQuizController extends Controller
             // Jawaban diindeks sesuai urutan soal ASLI; null = tidak dijawab
             // (bisa terjadi saat waktu habis dan auto-submit).
             'answers' => 'required|array|size:' . count($quiz->questions),
-            'answers.*' => 'nullable|integer|min:0',
+            'answers.*' => 'nullable', // bentuk tergantung tipe soal, disanitasi di bawah
             'duration_seconds' => 'nullable|integer|min:0',
         ]);
 
@@ -88,18 +102,26 @@ class PublicQuizController extends Controller
             return back()->with('error', 'Kamu sudah mengerjakan kuis ini.');
         }
 
-        // Penilaian di server, kunci tidak pernah menyentuh browser
-        $correct = 0;
-        $review = [];
+        // Sanitasi jawaban per tipe soal sebelum disimpan & dinilai
+        $answers = [];
         foreach ($quiz->questions as $i => $q) {
-            $picked = $validated['answers'][$i];
-            $ok = $picked !== null && (int) $picked === (int) $q['answer'];
-            if ($ok) $correct++;
-            $review[] = ['correct' => $ok, 'answer' => (int) $q['answer']];
+            $raw = $validated['answers'][$i] ?? null;
+            $answers[$i] = match (true) {
+                $raw === null => null,
+                ($q['type'] ?? 'pg') === 'jodoh' => is_array($raw)
+                    ? array_map(fn ($v) => $v === null ? null : (int) $v, array_slice($raw, 0, count($q['pairs'])))
+                    : null,
+                in_array($q['type'] ?? 'pg', ['isian', 'esai'], true) => is_string($raw) ? mb_substr($raw, 0, 5000) : null,
+                default => is_numeric($raw) ? (int) $raw : null,
+            };
         }
 
+        // Penilaian di server, kunci tidak pernah menyentuh browser
+        $graded = $quiz->gradeAnswers($answers);
+        $score = $graded['score'];
+        $review = $graded['review'];
+        $correct = count(array_filter($review, fn ($r) => !empty($r['correct'])));
         $total = count($quiz->questions);
-        $score = (int) round($correct / $total * 100);
 
         // ponytail: durasi dilaporkan client, di-clamp ke batas wajar.
         // Enforcement timer ketat butuh pencatatan mulai di server — nanti kalau perlu.
@@ -108,7 +130,7 @@ class PublicQuizController extends Controller
 
         $quiz->attempts()->create([
             'student_id' => $validated['student_id'],
-            'answers' => array_values($validated['answers']),
+            'answers' => array_values($answers),
             'score' => $score,
             'duration_seconds' => $duration ?: null,
         ]);
@@ -124,6 +146,7 @@ class PublicQuizController extends Controller
             'score' => $score,
             'correct' => $correct,
             'total' => $total,
+            'pending_essays' => $graded['pending_essays'],
             'review' => $review,
         ]);
     }

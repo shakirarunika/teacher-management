@@ -13,9 +13,15 @@ import {
     XMarkIcon, ArchiveBoxIcon,
 } from '@heroicons/react/24/outline';
 
+const QUESTION_TYPES = { pg: 'Pilihan Ganda', isian: 'Isian Singkat', jodoh: 'Menjodohkan', esai: 'Esai' };
+
+const emptyPairs = () => [{ left: '', right: '' }, { left: '', right: '' }];
+
+// Form menyimpan semua field sekaligus supaya ganti tipe tidak menghapus
+// ketikan; transform() memangkas field yang tidak relevan saat submit.
 const emptyForm = (subjects) => ({
-    subject_id: subjects[0]?.id ?? '', materi: '', difficulty: '',
-    q: '', stimulus: '', media: null, options: ['', ''], answer: 0,
+    subject_id: subjects[0]?.id ?? '', materi: '', difficulty: '', type: 'pg',
+    q: '', stimulus: '', media: null, options: ['', ''], answer: 0, answer_text: '', pairs: emptyPairs(),
 });
 
 const DIFF_BADGE = {
@@ -39,7 +45,11 @@ export default function BankQuestionsIndex({ questions, subjects }) {
     const openCreate = () => { form.clearErrors(); form.setData(emptyForm(subjects)); setModal({ open: true, editing: null }); };
     const openEdit = (it) => {
         form.clearErrors();
-        form.setData({ subject_id: it.subject_id, materi: it.materi ?? '', difficulty: it.difficulty ?? '', q: it.q, stimulus: it.stimulus ?? '', media: it.media ?? null, options: it.options, answer: it.answer });
+        form.setData({
+            subject_id: it.subject_id, materi: it.materi ?? '', difficulty: it.difficulty ?? '', type: it.type ?? 'pg',
+            q: it.q, stimulus: it.stimulus ?? '', media: it.media ?? null,
+            options: it.options ?? ['', ''], answer: it.answer ?? 0, answer_text: it.answer_text ?? '', pairs: it.pairs ?? emptyPairs(),
+        });
         setModal({ open: true, editing: it });
     };
     const closeModal = () => setModal({ open: false, editing: null });
@@ -47,7 +57,14 @@ export default function BankQuestionsIndex({ questions, subjects }) {
     const submit = (e) => {
         e.preventDefault();
         const opts = { preserveScroll: true, onSuccess: closeModal };
-        form.transform((data) => ({ ...data, materi: data.materi || null, difficulty: data.difficulty || null }));
+        form.transform((data) => {
+            const { options, answer, answer_text, pairs, ...rest } = data;
+            const out = { ...rest, materi: data.materi || null, difficulty: data.difficulty || null };
+            if (data.type === 'isian') return { ...out, answer_text };
+            if (data.type === 'jodoh') return { ...out, pairs };
+            if (data.type === 'esai') return out;
+            return { ...out, options, answer };
+        });
         if (modal.editing) form.put(route('bank-questions.update', modal.editing.id), opts);
         else form.post(route('bank-questions.store'), opts);
     };
@@ -64,6 +81,8 @@ export default function BankQuestionsIndex({ questions, subjects }) {
             answer: form.data.answer === j ? 0 : form.data.answer > j ? form.data.answer - 1 : form.data.answer,
         });
     };
+    const setPair = (k, side, value) =>
+        form.setData('pairs', form.data.pairs.map((p, idx) => (idx === k ? { ...p, [side]: value } : p)));
 
     // Editor rumus: target 'q' (pertanyaan) atau index opsi
     const [mathTarget, setMathTarget] = useState(null);
@@ -143,8 +162,14 @@ export default function BankQuestionsIndex({ questions, subjects }) {
                                             <span className="font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/45 px-2.5 py-0.5 rounded-full">{it.subject?.name}</span>
                                             {it.materi && <span className="font-bold text-gray-500 dark:text-slate-400 bg-gray-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-full">{it.materi}</span>}
                                             {it.difficulty && <span className={`font-bold px-2.5 py-0.5 rounded-full ${DIFF_BADGE[it.difficulty]}`}>{it.difficulty}</span>}
+                                            {(it.type ?? 'pg') !== 'pg' && (
+                                                <span className="font-bold text-violet-700 dark:text-violet-300 bg-violet-50 dark:bg-violet-950/40 px-2.5 py-0.5 rounded-full">{QUESTION_TYPES[it.type]}</span>
+                                            )}
                                             <span className="text-gray-400 dark:text-slate-500">
-                                                Kunci: {String.fromCharCode(65 + it.answer)}. <MathText text={it.options[it.answer]} />
+                                                {(it.type ?? 'pg') === 'pg' && <>Kunci: {String.fromCharCode(65 + it.answer)}. <MathText text={it.options[it.answer]} /></>}
+                                                {it.type === 'isian' && <>Kunci: <MathText text={it.answer_text} /></>}
+                                                {it.type === 'jodoh' && <>{it.pairs.length} pasangan</>}
+                                                {it.type === 'esai' && <>Dinilai manual</>}
                                             </span>
                                         </div>
                                     </div>
@@ -196,7 +221,13 @@ export default function BankQuestionsIndex({ questions, subjects }) {
                     </div>
 
                     <div className="mt-4">
-                        <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">Pertanyaan</label>
+                        <div className="flex items-center justify-between">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">Pertanyaan</label>
+                            <select value={form.data.type} onChange={(e) => form.setData('type', e.target.value)}
+                                className="rounded-lg border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 py-1 pl-2 pr-7 text-xs font-bold shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                {Object.entries(QUESTION_TYPES).map(([v, label]) => <option key={v} value={v}>{label}</option>)}
+                            </select>
+                        </div>
                         <div className="mt-1 flex items-start gap-2">
                             <textarea value={form.data.q} onChange={(e) => form.setData('q', e.target.value)} rows={2} autoFocus
                                 className="block w-full rounded-lg border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 px-4 py-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
@@ -207,6 +238,55 @@ export default function BankQuestionsIndex({ questions, subjects }) {
                         {form.errors.q && <p className="mt-1 text-sm text-rose-600">{form.errors.q}</p>}
                     </div>
 
+                    {form.data.type === 'isian' && (
+                        <div className="mt-4">
+                            <input type="text" value={form.data.answer_text} onChange={(e) => form.setData('answer_text', e.target.value)}
+                                placeholder="Kunci jawaban"
+                                className="block w-full rounded-lg border-emerald-400 dark:border-emerald-700 bg-emerald-50/50 dark:bg-emerald-950/20 dark:text-slate-100 dark:placeholder-slate-500 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500" />
+                            <p className="mt-1 text-xs text-gray-400 dark:text-slate-500">Jawaban dicocokkan tanpa peduli huruf besar/kecil. Beberapa alternatif dipisah <code className="font-mono font-bold">|</code> mis. <code className="font-mono">empat|4</code></p>
+                            {form.errors.answer_text && <p className="mt-1 text-sm text-rose-600">{form.errors.answer_text}</p>}
+                        </div>
+                    )}
+
+                    {form.data.type === 'jodoh' && (
+                        <div className="mt-4 space-y-2">
+                            {form.data.pairs.map((pair, k) => (
+                                <div key={k} className="flex items-center gap-2">
+                                    <input type="text" value={pair.left} onChange={(e) => setPair(k, 'left', e.target.value)}
+                                        placeholder={`Kiri ${k + 1}`}
+                                        className="flex-1 rounded-lg border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500" />
+                                    <span className="text-gray-400 dark:text-slate-500 font-bold shrink-0">→</span>
+                                    <input type="text" value={pair.right} onChange={(e) => setPair(k, 'right', e.target.value)}
+                                        placeholder="Pasangannya"
+                                        className="flex-1 rounded-lg border-emerald-400 dark:border-emerald-700 bg-emerald-50/50 dark:bg-emerald-950/20 dark:text-slate-100 dark:placeholder-slate-500 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500" />
+                                    {form.data.pairs.length > 2 && (
+                                        <button type="button" onClick={() => form.setData('pairs', form.data.pairs.filter((_, idx) => idx !== k))}
+                                            className="p-1 rounded-md text-gray-400 hover:text-rose-500 transition">
+                                            <XMarkIcon className="w-4 h-4" />
+                                        </button>
+                                    )}
+                                </div>
+                            ))}
+                            <div className="flex items-center justify-between">
+                                {form.data.pairs.length < 10 ? (
+                                    <button type="button" onClick={() => form.setData('pairs', [...form.data.pairs, { left: '', right: '' }])}
+                                        className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
+                                        + Tambah pasangan
+                                    </button>
+                                ) : <span />}
+                                <span className="text-xs text-gray-400 dark:text-slate-500">Urutan sisi kanan diacak otomatis saat siswa mengerjakan</span>
+                            </div>
+                            {form.errors.pairs && <p className="text-sm text-rose-600">{form.errors.pairs}</p>}
+                        </div>
+                    )}
+
+                    {form.data.type === 'esai' && (
+                        <p className="mt-4 text-xs font-semibold text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-950/30 rounded-lg px-3 py-2">
+                            ✍️ Siswa menjawab dengan uraian bebas. Kamu menilainya manual (0-100) di halaman <span className="font-bold">Hasil</span> kuis.
+                        </p>
+                    )}
+
+                    {form.data.type === 'pg' && (<>
                     <div className="mt-4 space-y-2">
                         {form.data.options.map((opt, j) => (
                             <div key={j} className="flex items-center gap-2">
@@ -237,22 +317,25 @@ export default function BankQuestionsIndex({ questions, subjects }) {
                         ) : <span />}
                         <span className="text-xs text-gray-400 dark:text-slate-500">Klik bulatan = kunci jawaban</span>
                     </div>
+                    </>)}
                     <p className="mt-2 text-xs text-gray-400 dark:text-slate-500">
                         💡 Rumus matematika: klik tombol <span className="font-bold text-indigo-500">Σ</span> untuk membuka editor rumus, atau ketik manual di antara tanda dolar mis. <code className="font-mono">{'$\\frac{1}{2}x^2$'}</code>
                     </p>
 
                     {/* Preview rumus (muncul kalau ada $...$) */}
-                    {hasMath(form.data.q, form.data.options) && (
+                    {hasMath(form.data.q, form.data.type === 'pg' ? form.data.options : []) && (
                         <div className="mt-3 rounded-xl border border-indigo-200 dark:border-indigo-900/50 bg-white dark:bg-slate-900 p-3">
                             <p className="text-[10px] font-black uppercase tracking-wide text-indigo-400 mb-1.5">Preview tampilan siswa</p>
                             <p className="text-sm font-semibold text-gray-800 dark:text-slate-200"><MathText text={form.data.q} /></p>
-                            <ul className="mt-1.5 space-y-0.5">
-                                {form.data.options.map((opt, j) => (
-                                    <li key={j} className="text-sm text-gray-600 dark:text-slate-400">
-                                        {String.fromCharCode(65 + j)}. <MathText text={opt} />
-                                    </li>
-                                ))}
-                            </ul>
+                            {form.data.type === 'pg' && (
+                                <ul className="mt-1.5 space-y-0.5">
+                                    {form.data.options.map((opt, j) => (
+                                        <li key={j} className="text-sm text-gray-600 dark:text-slate-400">
+                                            {String.fromCharCode(65 + j)}. <MathText text={opt} />
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
                         </div>
                     )}
 

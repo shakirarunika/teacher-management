@@ -60,15 +60,47 @@ class BankQuestionController extends Controller
             'media' => 'nullable|array',
             'media.type' => 'required_with:media|in:image,audio,youtube',
             'media.url' => 'required_with:media|string|max:1000',
-            'options' => 'required|array|min:2|max:5',
+            'type' => 'nullable|in:pg,isian,jodoh,esai',
+            'options' => 'nullable|array|max:5',
             'options.*' => 'required|string|max:500',
-            'answer' => 'required|integer|min:0',
+            'answer' => 'nullable|integer|min:0',
+            'answer_text' => 'nullable|string|max:500',
+            'pairs' => 'nullable|array|max:10',
+            'pairs.*.left' => 'required|string|max:500',
+            'pairs.*.right' => 'required|string|max:500',
         ]);
 
-        if ($validated['answer'] >= count($validated['options'])) {
-            abort(422, 'Kunci jawaban tidak valid.');
+        $type = $validated['type'] ?? 'pg';
+        switch ($type) {
+            case 'isian':
+                if (trim($validated['answer_text'] ?? '') === '') {
+                    abort(422, 'Kunci jawaban isian wajib diisi.');
+                }
+                break;
+            case 'jodoh':
+                if (count($validated['pairs'] ?? []) < 2) {
+                    abort(422, 'Menjodohkan minimal 2 pasangan.');
+                }
+                break;
+            case 'esai':
+                break;
+            default: // pg
+                if (count($validated['options'] ?? []) < 2) {
+                    abort(422, 'Minimal 2 pilihan jawaban.');
+                }
+                if (($validated['answer'] ?? null) === null || $validated['answer'] >= count($validated['options'])) {
+                    abort(422, 'Kunci jawaban tidak valid.');
+                }
         }
 
-        return $validated;
+        // Field yang tidak relevan di-null-kan supaya ganti tipe saat edit
+        // tidak meninggalkan data lama.
+        return array_merge($validated, [
+            'type' => $type,
+            'options' => $type === 'pg' ? $validated['options'] : null,
+            'answer' => $type === 'pg' ? $validated['answer'] : null,
+            'answer_text' => $type === 'isian' ? $validated['answer_text'] : null,
+            'pairs' => $type === 'jodoh' ? $validated['pairs'] : null,
+        ]);
     }
 }

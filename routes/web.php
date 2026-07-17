@@ -77,6 +77,7 @@ Route::middleware(['auth', 'verified', 'subscribed'])->group(function () {
     Route::delete('/quizzes/{quiz}', [QuizController::class, 'destroy'])->name('quizzes.destroy');
     Route::get('/quizzes/{quiz}/results', [QuizController::class, 'results'])->name('quizzes.results');
     Route::post('/quizzes/{quiz}/copy-scores', [QuizController::class, 'copyScores'])->name('quizzes.copy-scores');
+    Route::post('/quizzes/{quiz}/grade-essays', [QuizController::class, 'gradeEssays'])->name('quizzes.grade-essays');
     Route::delete('/quizzes/{quiz}/attempts/{attempt}', [QuizController::class, 'destroyAttempt'])->name('quizzes.attempts.destroy');
     Route::post('/quizzes/{quiz}/duplicate', [QuizController::class, 'duplicate'])->name('quizzes.duplicate');
     Route::post('/quiz-media', [QuizController::class, 'uploadMedia'])->name('quiz-media.upload');

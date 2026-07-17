@@ -36,6 +36,76 @@ class Quiz extends Model
         return null;
     }
 
+    /**
+     * Penilaian di server — satu-satunya tempat logika skor.
+     * Skor = rata-rata fraksi per soal: PG/isian 0|1, menjodohkan proporsional
+     * per pasangan, esai nilai guru (0-100) / 100. Esai yang belum dinilai
+     * tidak masuk pembagi supaya skor sementara tetap adil.
+     */
+    public function gradeAnswers(array $answers, array $manualPoints = []): array
+    {
+        $earned = 0.0;
+        $gradedTotal = 0;
+        $pending = 0;
+        $review = [];
+
+        $norm = fn ($s) => mb_strtolower(trim(preg_replace('/\s+/u', ' ', (string) $s)));
+
+        foreach ($this->questions as $i => $q) {
+            $type = $q['type'] ?? 'pg';
+            $ans = $answers[$i] ?? null;
+
+            if ($type === 'esai') {
+                if (isset($manualPoints[$i])) {
+                    $earned += min(100, max(0, (int) $manualPoints[$i])) / 100;
+                    $gradedTotal++;
+                } else {
+                    $pending++;
+                }
+                $review[] = ['type' => 'esai', 'pending' => !isset($manualPoints[$i])];
+                continue;
+            }
+
+            $gradedTotal++;
+
+            if ($type === 'isian') {
+                // Alternatif kunci dipisah "|", dibandingkan setelah normalisasi
+                $keys = array_map($norm, explode('|', (string) $q['answer']));
+                $ok = is_string($ans) && trim($ans) !== '' && in_array($norm($ans), $keys, true);
+                if ($ok) $earned++;
+                $review[] = ['type' => 'isian', 'correct' => $ok, 'answer' => trim(explode('|', (string) $q['answer'])[0])];
+                continue;
+            }
+
+            if ($type === 'jodoh') {
+                // Kunci: kiri ke-k berpasangan dengan kanan ke-k (index asli)
+                $matched = 0;
+                foreach (array_keys($q['pairs']) as $k) {
+                    if (is_array($ans) && (int) ($ans[$k] ?? -1) === $k) $matched++;
+                }
+                $earned += $matched / count($q['pairs']);
+                $review[] = [
+                    'type' => 'jodoh',
+                    'correct' => $matched === count($q['pairs']),
+                    'matched' => $matched,
+                    'total' => count($q['pairs']),
+                    'pairs' => $q['pairs'],
+                ];
+                continue;
+            }
+
+            $ok = $ans !== null && $ans !== '' && is_numeric($ans) && (int) $ans === (int) $q['answer'];
+            if ($ok) $earned++;
+            $review[] = ['type' => 'pg', 'correct' => $ok, 'answer' => (int) $q['answer']];
+        }
+
+        return [
+            'score' => $gradedTotal > 0 ? (int) round($earned / $gradedTotal * 100) : 0,
+            'review' => $review,
+            'pending_essays' => $pending,
+        ];
+    }
+
     public function classroom()
     {
         return $this->belongsTo(Classroom::class);

@@ -89,23 +89,41 @@ class QuizController extends Controller
     {
         $attempts = $quiz->attempts()->with('student:id,name')->orderByDesc('score')->get();
 
-        // Statistik per soal: % benar + distribusi pilihan jawaban
-        $stats = array_map(fn ($q) => [
-            'q' => $q['q'],
-            'options' => $q['options'],
-            'answer' => (int) $q['answer'],
-            'correct' => 0,
-            'picks' => array_fill(0, count($q['options']), 0),
-        ], $quiz->questions);
+        // Statistik per soal, bentuknya tergantung tipe soal
+        $stats = array_map(function ($q) {
+            $type = $q['type'] ?? 'pg';
+            $base = ['type' => $type, 'q' => $q['q'], 'correct' => 0];
+
+            return match ($type) {
+                'pg' => $base + [
+                    'options' => $q['options'],
+                    'answer' => (int) $q['answer'],
+                    'picks' => array_fill(0, count($q['options']), 0),
+                ],
+                'isian' => $base + ['answer' => trim(explode('|', (string) $q['answer'])[0]), 'wrong' => []],
+                'jodoh' => $base + ['pairsTotal' => count($q['pairs']), 'matchedSum' => 0],
+                'esai' => $base,
+            };
+        }, $quiz->questions);
 
         foreach ($attempts as $attempt) {
+            $graded = $quiz->gradeAnswers($attempt->answers, $attempt->manual_points ?? []);
+            // Badge "esai belum dinilai" di papan peringkat
+            $attempt->setAttribute('pending_essays', $graded['pending_essays']);
+
             foreach ($quiz->questions as $i => $q) {
-                $picked = $attempt->answers[$i] ?? null;
-                if ($picked !== null && isset($stats[$i]['picks'][$picked])) {
-                    $stats[$i]['picks'][$picked]++;
-                }
-                if ($picked === (int) $q['answer']) {
+                $type = $q['type'] ?? 'pg';
+                $ans = $attempt->answers[$i] ?? null;
+                if (!empty($graded['review'][$i]['correct'])) {
                     $stats[$i]['correct']++;
+                }
+                if ($type === 'pg' && $ans !== null && isset($stats[$i]['picks'][$ans])) {
+                    $stats[$i]['picks'][$ans]++;
+                } elseif ($type === 'isian' && empty($graded['review'][$i]['correct']) && is_string($ans) && trim($ans) !== '') {
+                    $key = trim($ans);
+                    $stats[$i]['wrong'][$key] = ($stats[$i]['wrong'][$key] ?? 0) + 1;
+                } elseif ($type === 'jodoh') {
+                    $stats[$i]['matchedSum'] += $graded['review'][$i]['matched'];
                 }
             }
         }
@@ -136,6 +154,36 @@ class QuizController extends Controller
         $attempt->delete();
 
         return back()->with('success', 'Pengerjaan dihapus. Siswa bisa mengerjakan ulang.');
+    }
+
+    /**
+     * Simpan nilai esai dari guru: {attemptId: {indexSoal: 0-100}}, lalu
+     * hitung ulang skor attempt lewat gradeAnswers.
+     */
+    public function gradeEssays(Request $request, Quiz $quiz)
+    {
+        $validated = $request->validate([
+            'grades' => 'required|array',
+            'grades.*' => 'array',
+            'grades.*.*' => 'required|integer|min:0|max:100',
+        ]);
+
+        $attempts = $quiz->attempts()->whereIn('id', array_keys($validated['grades']))->get();
+        foreach ($attempts as $attempt) {
+            // Hanya index soal bertipe esai yang boleh dinilai manual
+            $points = array_filter(
+                $validated['grades'][$attempt->id],
+                fn ($i) => ($quiz->questions[$i]['type'] ?? 'pg') === 'esai',
+                ARRAY_FILTER_USE_KEY
+            );
+            $manual = array_replace($attempt->manual_points ?? [], $points);
+            $attempt->update([
+                'manual_points' => $manual,
+                'score' => $quiz->gradeAnswers($attempt->answers, $manual)['score'],
+            ]);
+        }
+
+        return back()->with('success', 'Nilai esai disimpan & skor dihitung ulang.');
     }
 
     /**
@@ -199,9 +247,13 @@ class QuizController extends Controller
             'questions.*.media' => 'nullable|array',
             'questions.*.media.type' => 'required_with:questions.*.media|in:image,audio,youtube',
             'questions.*.media.url' => 'required_with:questions.*.media|string|max:1000',
-            'questions.*.options' => 'required|array|min:2|max:5',
+            'questions.*.type' => 'nullable|in:pg,isian,jodoh,esai',
+            'questions.*.options' => 'nullable|array|max:5',
             'questions.*.options.*' => 'required|string|max:500',
-            'questions.*.answer' => 'required|integer|min:0',
+            'questions.*.answer' => 'nullable', // int (pg) atau string kunci (isian) — dicek per tipe di bawah
+            'questions.*.pairs' => 'nullable|array|max:10',
+            'questions.*.pairs.*.left' => 'required|string|max:500',
+            'questions.*.pairs.*.right' => 'required|string|max:500',
             'duration_minutes' => 'nullable|integer|min:1|max:600',
             'opens_at' => 'nullable|date',
             'closes_at' => 'nullable|date',
@@ -216,8 +268,27 @@ class QuizController extends Controller
         }
 
         foreach ($validated['questions'] as $i => $q) {
-            if ($q['answer'] >= count($q['options'])) {
-                abort(422, "Kunci jawaban soal " . ($i + 1) . " tidak valid.");
+            $n = $i + 1;
+            switch ($q['type'] ?? 'pg') {
+                case 'isian':
+                    if (!is_string($q['answer'] ?? null) || trim($q['answer']) === '' || mb_strlen($q['answer']) > 500) {
+                        abort(422, "Soal {$n}: kunci jawaban isian wajib diisi.");
+                    }
+                    break;
+                case 'jodoh':
+                    if (count($q['pairs'] ?? []) < 2) {
+                        abort(422, "Soal {$n}: menjodohkan minimal 2 pasangan.");
+                    }
+                    break;
+                case 'esai':
+                    break;
+                default: // pg
+                    if (count($q['options'] ?? []) < 2) {
+                        abort(422, "Soal {$n}: minimal 2 pilihan jawaban.");
+                    }
+                    if (!is_numeric($q['answer'] ?? null) || $q['answer'] < 0 || $q['answer'] >= count($q['options'])) {
+                        abort(422, "Kunci jawaban soal {$n} tidak valid.");
+                    }
             }
         }
 

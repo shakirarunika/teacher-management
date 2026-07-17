@@ -16,6 +16,7 @@ class BankQuestion extends Model
         'options' => 'array',
         'answer' => 'integer',
         'media' => 'array',
+        'pairs' => 'array',
     ];
 
     public function subject()
