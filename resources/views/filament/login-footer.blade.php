@@ -1,5 +1,5 @@
 <div class="siguru-login-footer">
-    <p>Made with <span class="heart">❤️</span> by <span class="author">Faishal</span></p>
+    <p>Made with <span class="heart">❤️</span> by <span class="author">Zahra</span></p>
 </div>
 
 <style>

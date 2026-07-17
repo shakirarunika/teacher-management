@@ -257,7 +257,7 @@ export default function AuthenticatedLayout({ header, children }) {
                 {/* Footer */}
                 <footer className="hidden sm:block text-center py-6 mt-4">
                     <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold tracking-wide transition-colors duration-300">
-                        Made with <span className="text-rose-400">❤️</span> by <span className="text-indigo-600 dark:text-indigo-400 font-bold">Faishal</span>
+                        Made with <span className="text-rose-400">❤️</span> by <span className="text-indigo-600 dark:text-indigo-400 font-bold">Zahra</span>
                     </p>
                 </footer>
             </div>

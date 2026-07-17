@@ -610,7 +610,7 @@ export default function Login({ status, canResetPassword }) {
                             Made with{' '}
                             <span style={{ color: '#f43f5e' }}>❤️</span>
                             {' '}by{' '}
-                            <span style={{ color: isDark ? '#818cf8' : '#4f46e5', fontWeight: 700 }}>Faishal</span>
+                            <span style={{ color: isDark ? '#818cf8' : '#4f46e5', fontWeight: 700 }}>Zahra</span>
                         </p>
                     </div>
                 </div>

@@ -1,7 +1,7 @@
 @if (filament()->auth()->check())
 <footer class="siguru-footer">
     <div class="siguru-footer-content">
-        <p>Made with <span class="heart">❤️</span> by <span class="author">Faishal</span></p>
+        <p>Made with <span class="heart">❤️</span> by <span class="author">Zahra</span></p>
     </div>
 </footer>
 @endif

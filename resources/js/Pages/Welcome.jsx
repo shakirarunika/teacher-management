@@ -15,7 +15,7 @@ export function MadeWithLove({ theme = 'light' }) {
             Made with{' '}
             <span style={{ color: '#f43f5e', fontSize: '0.85rem' }}>❤️</span>
             {' '}by{' '}
-            <span style={{ color: isDark ? '#818cf8' : '#4f46e5', fontWeight: 700 }}>Faishal</span>
+            <span style={{ color: isDark ? '#818cf8' : '#4f46e5', fontWeight: 700 }}>Zahra</span>
         </div>
     );
 }
@@ -129,11 +129,11 @@ export default function Welcome({ auth }) {
 
     const features = [
         { icon: '📋', title: 'Absensi Digital', desc: 'Rekam kehadiran siswa per kelas dengan cepat dan akurat setiap hari.' },
-        { icon: '📊', title: 'Nilai & Rapor', desc: 'Input nilai tugas, PTS, dan PAS. Hitung nilai akhir otomatis berdasarkan bobot.' },
-        { icon: '🗓️', title: 'Hari Libur', desc: 'Kelola kalender hari libur nasional dan internal sekolah secara terpusat.' },
+        { icon: '🧩', title: 'Kuis Online', desc: 'Buat kuis pilihan ganda, PG kompleks, isian singkat & menjodohkan. Bagikan lewat link/QR, dinilai otomatis.' },
+        { icon: '🗃️', title: 'Bank Soal', desc: 'Simpan soal sekali, pakai ulang di kuis mana pun. Mendukung rumus matematika, gambar & audio.' },
+        { icon: '📊', title: 'Nilai & Rapor', desc: 'Input nilai tugas, PTS, dan PAS. Hitung nilai akhir otomatis berdasarkan bobot, salin skor kuis sekali klik.' },
         { icon: '📈', title: 'Laporan Kehadiran', desc: 'Lihat rekap absensi per siswa lengkap dengan status hadir, izin, sakit, alpha.' },
         { icon: '🏫', title: 'Manajemen Kelas', desc: 'Kelola data kelas, siswa, mata pelajaran dalam satu sistem terintegrasi.' },
-        { icon: '🔐', title: 'Panel Admin', desc: 'Dashboard admin khusus untuk kepala sekolah dengan statistik lengkap.' },
     ];
 
     return (
@@ -243,21 +243,26 @@ export default function Welcome({ auth }) {
                             )}
                         </button>
 
+                        {/* Akses admin sengaja disamarkan jadi icon tanpa label */}
                         <a
                             href="/admin"
                             className="sintesis-btn-admin"
+                            aria-label="Admin"
                             style={{
-                                fontSize: '0.82rem', fontWeight: 600, color: colors.textSecondary,
-                                textDecoration: 'none', padding: '0.4rem 0.85rem',
-                                borderRadius: '0.625rem',
+                                width: '36px', height: '36px',
+                                borderRadius: '0.75rem',
                                 border: `1px solid ${colors.btnAdminBorder}`,
                                 background: colors.btnAdminBg,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                color: colors.textSecondary,
                                 transition: 'all 0.2s',
                             }}
                             onMouseEnter={e => { e.currentTarget.style.color = '#6366f1'; e.currentTarget.style.borderColor = 'rgba(99,102,241,0.3)'; e.currentTarget.style.background = colors.btnAdminHoverBg; }}
                             onMouseLeave={e => { e.currentTarget.style.color = colors.textSecondary; e.currentTarget.style.borderColor = colors.btnAdminBorder; e.currentTarget.style.background = colors.btnAdminBg; }}
                         >
-                            Panel Admin
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+                            </svg>
                         </a>
                         <Link
                             href={route('login')}
@@ -372,27 +377,6 @@ export default function Welcome({ auth }) {
                             </svg>
                             Masuk sebagai Guru
                         </Link>
-
-                        <a
-                            href="/admin"
-                            style={{
-                                display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-                                padding: '0.875rem 1.75rem',
-                                borderRadius: '0.875rem',
-                                background: colors.btnAdminBg,
-                                border: `1px solid ${colors.btnAdminBorder}`,
-                                color: colors.textSecondary, fontWeight: 600, fontSize: '0.95rem',
-                                textDecoration: 'none',
-                                transition: 'all 0.2s ease',
-                            }}
-                            onMouseEnter={e => { e.currentTarget.style.borderColor = colors.btnAdminHoverBorder; e.currentTarget.style.color = '#6366f1'; e.currentTarget.style.background = colors.btnAdminHoverBg; }}
-                            onMouseLeave={e => { e.currentTarget.style.borderColor = colors.btnAdminBorder; e.currentTarget.style.color = colors.textSecondary; e.currentTarget.style.background = colors.btnAdminBg; }}
-                        >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
-                            </svg>
-                            Panel Admin
-                        </a>
                     </div>
                 </section>
 
