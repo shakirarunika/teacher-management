@@ -38,15 +38,12 @@ class Quiz extends Model
 
     /**
      * Penilaian di server — satu-satunya tempat logika skor.
-     * Skor = rata-rata fraksi per soal: PG/isian 0|1, menjodohkan proporsional
-     * per pasangan, esai nilai guru (0-100) / 100. Esai yang belum dinilai
-     * tidak masuk pembagi supaya skor sementara tetap adil.
+     * Skor = rata-rata fraksi per soal: PG/PG kompleks/isian 0|1,
+     * menjodohkan proporsional per pasangan.
      */
-    public function gradeAnswers(array $answers, array $manualPoints = []): array
+    public function gradeAnswers(array $answers): array
     {
         $earned = 0.0;
-        $gradedTotal = 0;
-        $pending = 0;
         $review = [];
 
         $norm = fn ($s) => mb_strtolower(trim(preg_replace('/\s+/u', ' ', (string) $s)));
@@ -55,18 +52,18 @@ class Quiz extends Model
             $type = $q['type'] ?? 'pg';
             $ans = $answers[$i] ?? null;
 
-            if ($type === 'esai') {
-                if (isset($manualPoints[$i])) {
-                    $earned += min(100, max(0, (int) $manualPoints[$i])) / 100;
-                    $gradedTotal++;
-                } else {
-                    $pending++;
-                }
-                $review[] = ['type' => 'esai', 'pending' => !isset($manualPoints[$i])];
+            if ($type === 'pgk') {
+                // Semua-atau-tidak: pilihan siswa harus persis sama dengan kunci
+                // (parsial memancing centang semua pilihan)
+                $key = array_map('intval', (array) $q['answer']);
+                $picked = is_array($ans) ? array_map('intval', $ans) : [];
+                sort($key);
+                sort($picked);
+                $ok = $picked !== [] && $picked === $key;
+                if ($ok) $earned++;
+                $review[] = ['type' => 'pgk', 'correct' => $ok, 'answer' => $key];
                 continue;
             }
-
-            $gradedTotal++;
 
             if ($type === 'isian') {
                 // Alternatif kunci dipisah "|", dibandingkan setelah normalisasi
@@ -94,15 +91,17 @@ class Quiz extends Model
                 continue;
             }
 
-            $ok = $ans !== null && $ans !== '' && is_numeric($ans) && (int) $ans === (int) $q['answer'];
+            // ?? -1: soal esai lama (tipe sudah dihapus) tidak punya kunci — dinilai salah
+            $ok = $ans !== null && $ans !== '' && is_numeric($ans) && (int) $ans === (int) ($q['answer'] ?? -1);
             if ($ok) $earned++;
-            $review[] = ['type' => 'pg', 'correct' => $ok, 'answer' => (int) $q['answer']];
+            $review[] = ['type' => 'pg', 'correct' => $ok, 'answer' => (int) ($q['answer'] ?? -1)];
         }
 
+        $total = count($this->questions);
+
         return [
-            'score' => $gradedTotal > 0 ? (int) round($earned / $gradedTotal * 100) : 0,
+            'score' => $total > 0 ? (int) round($earned / $total * 100) : 0,
             'review' => $review,
-            'pending_essays' => $pending,
         ];
     }
 

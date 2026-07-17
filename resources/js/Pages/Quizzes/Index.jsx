@@ -17,18 +17,19 @@ import {
     ArchiveBoxIcon, ClockIcon,
 } from '@heroicons/react/24/outline';
 
-const QUESTION_TYPES = { pg: 'Pilihan Ganda', isian: 'Isian Singkat', jodoh: 'Menjodohkan', esai: 'Esai' };
+const QUESTION_TYPES = { pg: 'Pilihan Ganda', pgk: 'PG Kompleks (jawaban > 1)', isian: 'Isian Singkat', jodoh: 'Menjodohkan' };
 
 const emptyPairs = () => [{ left: '', right: '' }, { left: '', right: '' }];
 
 // State editor menyimpan semua field sekaligus (options, answer_text, pairs)
 // supaya ganti tipe soal tidak menghapus ketikan; transform() memangkas saat submit.
-const emptyQuestion = () => ({ type: 'pg', q: '', stimulus: '', media: null, options: ['', ''], answer: 0, answer_text: '', pairs: emptyPairs() });
+const emptyQuestion = () => ({ type: 'pg', q: '', stimulus: '', media: null, options: ['', ''], answer: 0, answers: [], answer_text: '', pairs: emptyPairs() });
 
 const toEditorQuestion = (q) => ({
     type: q.type ?? 'pg', q: q.q, stimulus: q.stimulus ?? '', media: q.media ?? null,
     options: q.options ?? ['', ''],
     answer: (q.type ?? 'pg') === 'pg' ? (q.answer ?? 0) : 0,
+    answers: q.type === 'pgk' ? (q.answer ?? []) : [],
     answer_text: q.type === 'isian' ? q.answer : '',
     pairs: q.pairs ?? emptyPairs(),
 });
@@ -37,7 +38,7 @@ const toPayloadQuestion = (q) => {
     const base = { type: q.type, q: q.q, stimulus: q.stimulus, media: q.media };
     if (q.type === 'isian') return { ...base, answer: q.answer_text };
     if (q.type === 'jodoh') return { ...base, pairs: q.pairs };
-    if (q.type === 'esai') return base;
+    if (q.type === 'pgk') return { ...base, options: q.options, answer: q.answers };
     return { ...base, options: q.options, answer: q.answer };
 };
 
@@ -113,7 +114,12 @@ export default function QuizzesIndex({ classroom, quizzes, subjects, studentsCou
         setQuestion(i, {
             options: q.options.filter((_, k) => k !== j),
             answer: q.answer === j ? 0 : q.answer > j ? q.answer - 1 : q.answer,
+            answers: q.answers.filter((k) => k !== j).map((k) => (k > j ? k - 1 : k)),
         });
+    };
+    const toggleAnswer = (i, j) => {
+        const q = form.data.questions[i];
+        setQuestion(i, { answers: q.answers.includes(j) ? q.answers.filter((k) => k !== j) : [...q.answers, j].sort((a, b) => a - b) });
     };
     const removeQuestion = (i) => form.setData('questions', form.data.questions.filter((_, k) => k !== i));
 
@@ -143,7 +149,8 @@ export default function QuizzesIndex({ classroom, quizzes, subjects, studentsCou
             ...current,
             ...picked.map((it) => toEditorQuestion({
                 type: it.type ?? 'pg', q: it.q, stimulus: it.stimulus ?? '', media: it.media ?? null,
-                options: it.options, answer: it.type === 'isian' ? it.answer_text : it.answer, pairs: it.pairs,
+                options: it.options, pairs: it.pairs,
+                answer: it.type === 'isian' ? it.answer_text : it.type === 'pgk' ? it.answers : it.answer,
             })),
         ]);
         setBank((b) => ({ ...b, open: false, checked: {} }));
@@ -454,22 +461,19 @@ export default function QuizzesIndex({ classroom, quizzes, subjects, studentsCou
                                             </div>
                                         )}
 
-                                        {question.type === 'esai' && (
-                                            <p className="mt-3 text-xs font-semibold text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-950/30 rounded-lg px-3 py-2">
-                                                ✍️ Siswa menjawab dengan uraian bebas. Kamu menilainya manual (0-100) di halaman <span className="font-bold">Hasil</span> setelah siswa mengumpulkan.
-                                            </p>
-                                        )}
-
-                                        {question.type === 'pg' && (<>
+                                        {['pg', 'pgk'].includes(question.type) && (<>
                                         <div className="mt-3 grid sm:grid-cols-2 gap-2">
-                                            {question.options.map((opt, j) => (
+                                            {question.options.map((opt, j) => {
+                                                const isKey = question.type === 'pgk' ? question.answers.includes(j) : question.answer === j;
+                                                return (
                                                 <div key={j} className="flex items-center gap-2">
-                                                    <input type="radio" name={`answer-${i}`} checked={question.answer === j} onChange={() => setQuestion(i, { answer: j })}
+                                                    <input type={question.type === 'pgk' ? 'checkbox' : 'radio'} name={`answer-${i}`} checked={isKey}
+                                                        onChange={() => (question.type === 'pgk' ? toggleAnswer(i, j) : setQuestion(i, { answer: j }))}
                                                         title="Tandai sebagai kunci jawaban"
-                                                        className="w-4 h-4 text-emerald-600 border-gray-300 dark:border-slate-600 focus:ring-emerald-500" />
+                                                        className={`w-4 h-4 text-emerald-600 border-gray-300 dark:border-slate-600 focus:ring-emerald-500 ${question.type === 'pgk' ? 'rounded' : ''}`} />
                                                     <input type="text" value={opt} onChange={(e) => setOption(i, j, e.target.value)}
                                                         placeholder={`Pilihan ${String.fromCharCode(65 + j)}`}
-                                                        className={`flex-1 rounded-lg px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500 ${question.answer === j ? 'border-emerald-400 dark:border-emerald-700 bg-emerald-50/50 dark:bg-emerald-950/20' : 'border-gray-300 dark:border-slate-700'}`} />
+                                                        className={`flex-1 rounded-lg px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500 ${isKey ? 'border-emerald-400 dark:border-emerald-700 bg-emerald-50/50 dark:bg-emerald-950/20' : 'border-gray-300 dark:border-slate-700'}`} />
                                                     <button type="button" onClick={() => setMathTarget({ i, j })} title="Sisipkan rumus matematika"
                                                         className="shrink-0 px-2.5 py-2 rounded-lg bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:hover:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 font-bold text-xs transition">Σ</button>
                                                     {question.options.length > 2 && (
@@ -478,7 +482,8 @@ export default function QuizzesIndex({ classroom, quizzes, subjects, studentsCou
                                                         </button>
                                                     )}
                                                 </div>
-                                            ))}
+                                                );
+                                            })}
                                             {form.errors[`questions.${i}.options`] && <p className="text-sm text-rose-600">{form.errors[`questions.${i}.options`]}</p>}
                                         </div>
 
@@ -488,16 +493,18 @@ export default function QuizzesIndex({ classroom, quizzes, subjects, studentsCou
                                                     + Tambah pilihan
                                                 </button>
                                             ) : <span />}
-                                            <span className="text-xs text-gray-400 dark:text-slate-500">Klik bulatan = kunci jawaban</span>
+                                            <span className="text-xs text-gray-400 dark:text-slate-500">
+                                                {question.type === 'pgk' ? 'Centang semua kunci jawaban (bisa lebih dari satu)' : 'Klik bulatan = kunci jawaban'}
+                                            </span>
                                         </div>
                                         </>)}
 
                                         {/* Preview rumus (muncul kalau ada $...$) */}
-                                        {hasMath(question.q, question.type === 'pg' ? question.options : []) && (
+                                        {hasMath(question.q, ['pg', 'pgk'].includes(question.type) ? question.options : []) && (
                                             <div className="mt-3 rounded-xl border border-indigo-200 dark:border-indigo-900/50 bg-white dark:bg-slate-900 p-3">
                                                 <p className="text-[10px] font-black uppercase tracking-wide text-indigo-400 mb-1.5">Preview tampilan siswa</p>
                                                 <p className="text-sm font-semibold text-gray-800 dark:text-slate-200"><MathText text={question.q} /></p>
-                                                {question.type === 'pg' && (
+                                                {['pg', 'pgk'].includes(question.type) && (
                                                     <ul className="mt-1.5 space-y-0.5">
                                                         {question.options.map((opt, j) => (
                                                             <li key={j} className="text-sm text-gray-600 dark:text-slate-400">

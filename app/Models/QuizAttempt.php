@@ -13,7 +13,6 @@ class QuizAttempt extends Model
 
     protected $casts = [
         'answers' => 'array',
-        'manual_points' => 'array',
     ];
 
     public function quiz()

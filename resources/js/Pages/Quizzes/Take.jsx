@@ -40,6 +40,7 @@ export default function QuizTake({ quiz, students, doneStudentIds }) {
         const a = answers[q.i];
         if (a === undefined || a === null) return false;
         if (q.type === 'jodoh') return q.lefts.every((_, k) => a[k] !== null && a[k] !== undefined);
+        if (q.type === 'pgk') return Array.isArray(a) && a.length > 0;
         if (typeof a === 'string') return a.trim() !== '';
         return true;
     };
@@ -117,6 +118,11 @@ export default function QuizTake({ quiz, students, doneStudentIds }) {
         }
     };
     const setText = (origQ, value) => setAnswers((a) => ({ ...a, [origQ]: value }));
+    // PG kompleks: klik pilihan = toggle centang, tidak auto-lanjut
+    const toggleMulti = (origQ, optI) => setAnswers((a) => {
+        const cur = Array.isArray(a[origQ]) ? a[origQ] : [];
+        return { ...a, [origQ]: cur.includes(optI) ? cur.filter((x) => x !== optI) : [...cur, optI] };
+    });
     const setMatch = (origQ, k, value, pairCount) => setAnswers((a) => {
         const arr = Array.isArray(a[origQ]) ? [...a[origQ]] : Array(pairCount).fill(null);
         arr[k] = value === '' ? null : Number(value);
@@ -162,25 +168,14 @@ export default function QuizTake({ quiz, students, doneStudentIds }) {
                                 {result.score}
                             </p>
                             <p className="font-bold text-gray-600">{result.correct} dari {result.total} soal benar</p>
-                            {result.pending_essays > 0 && (
-                                <p className="mt-2 text-sm font-bold text-violet-600 bg-violet-50 rounded-xl px-4 py-2 inline-block">
-                                    ✍️ Nilai sementara — {result.pending_essays} soal esai menunggu penilaian gurumu.
-                                </p>
-                            )}
 
                             {/* Review jawaban (urutan tampilan siswa) */}
                             <div className="mt-6 space-y-3 text-left max-h-72 overflow-y-auto">
                                 {quiz.questions.map((q) => {
                                     const r = result.review[q.i];
-                                    if (r.type === 'esai') {
-                                        return (
-                                            <div key={q.i} className="rounded-xl p-3 text-sm border bg-violet-50 border-violet-200">
-                                                <p className="font-bold text-gray-800">✍️ <MathText text={q.q} /></p>
-                                                <p className="mt-1 text-violet-700 font-semibold">Menunggu penilaian guru.</p>
-                                            </div>
-                                        );
-                                    }
-                                    const keyText = r.type === 'pg' ? q.options.find((o) => o.i === r.answer)?.text : r.answer;
+                                    const keyText = r.type === 'pg' ? q.options.find((o) => o.i === r.answer)?.text
+                                        : r.type === 'pgk' ? q.options.filter((o) => r.answer.includes(o.i)).map((o) => o.text).join(', ')
+                                        : r.answer;
                                     return (
                                         <div key={q.i} className={`rounded-xl p-3 text-sm border ${r.correct ? 'bg-emerald-50 border-emerald-200' : 'bg-rose-50 border-rose-200'}`}>
                                             <p className="font-bold text-gray-800">{r.correct ? '✅' : '❌'} <MathText text={q.q} /></p>
@@ -308,13 +303,22 @@ export default function QuizTake({ quiz, students, doneStudentIds }) {
                                         </div>
                                     )}
 
-                                    {quiz.questions[step].type === 'esai' && (
+                                    {quiz.questions[step].type === 'pgk' && (
                                         <>
-                                            <textarea value={answers[quiz.questions[step].i] ?? ''} rows={6}
-                                                onChange={(e) => setText(quiz.questions[step].i, e.target.value)}
-                                                placeholder="Tulis jawaban uraianmu di sini..."
-                                                className="block w-full rounded-xl border-2 border-indigo-300 px-4 py-3 text-sm sm:text-base shadow-sm focus:border-indigo-500 focus:ring-indigo-500" />
-                                            <p className="mt-2 text-xs font-semibold text-gray-400">✍️ Soal uraian — dinilai langsung oleh gurumu.</p>
+                                            <p className="mb-3 text-xs font-bold text-indigo-600 bg-indigo-50 rounded-lg px-3 py-2 inline-block">
+                                                ☑️ Pilih semua jawaban yang benar (bisa lebih dari satu)
+                                            </p>
+                                            <div className="grid gap-3 sm:grid-cols-2">
+                                                {quiz.questions[step].options.map((opt, j) => {
+                                                    const picked = (answers[quiz.questions[step].i] ?? []).includes(opt.i);
+                                                    return (
+                                                        <button key={opt.i} onClick={() => toggleMulti(quiz.questions[step].i, opt.i)}
+                                                            className={`${OPTION_COLORS[j]} font-bold text-left px-4 py-4 rounded-xl shadow-md transition active:scale-95 ${picked ? 'ring-4 ring-gray-900/60 scale-[0.98]' : ''}`}>
+                                                            {picked ? '☑ ' : ''}<MathText text={opt.text} />
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
                                         </>
                                     )}
                                 </motion.div>

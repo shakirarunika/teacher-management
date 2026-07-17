@@ -27,26 +27,6 @@ export default function QuizResults({ quiz, classroom, subject, attempts, questi
     const [deleting, setDeleting] = useState(false);
     const copyForm = useForm({ column: 'tugas' });
 
-    // --- Penilaian esai ---
-    const essayIdx = questionStats.map((s, i) => (s.type === 'esai' ? i : null)).filter((i) => i !== null);
-    const [grades, setGrades] = useState({}); // edit lokal: {attemptId: {indexSoal: '85'}}
-    const [savingGrades, setSavingGrades] = useState(false);
-    const gradeVal = (a, i) => grades[a.id]?.[i] ?? a.manual_points?.[i] ?? '';
-    const setGrade = (aId, i, v) => setGrades((g) => ({ ...g, [aId]: { ...g[aId], [i]: v } }));
-    const hasAnyGrade = attempts.some((a) => essayIdx.some((i) => gradeVal(a, i) !== ''));
-    const saveGrades = () => {
-        const payload = {};
-        attempts.forEach((a) => essayIdx.forEach((i) => {
-            const v = gradeVal(a, i);
-            if (v !== '') (payload[a.id] = payload[a.id] ?? {})[i] = Number(v);
-        }));
-        router.post(route('quizzes.grade-essays', quiz.id), { grades: payload }, {
-            preserveScroll: true,
-            onStart: () => setSavingGrades(true),
-            onFinish: () => { setSavingGrades(false); setGrades({}); },
-        });
-    };
-
     const submitDelete = () => {
         router.delete(route('quizzes.attempts.destroy', [quiz.id, deleteTarget.id]), {
             preserveScroll: true,
@@ -188,9 +168,6 @@ export default function QuizResults({ quiz, classroom, subject, attempts, questi
                                                 {a.score < kkm && (
                                                     <span className="ml-2 text-[10px] font-black uppercase text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 px-2 py-0.5 rounded-full">Remedial</span>
                                                 )}
-                                                {a.pending_essays > 0 && (
-                                                    <span className="ml-2 text-[10px] font-black uppercase text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-950/40 px-2 py-0.5 rounded-full">✍️ Esai belum dinilai</span>
-                                                )}
                                             </td>
                                             <td className="px-6 py-3 text-sm text-gray-500 dark:text-slate-400">
                                                 {new Date(a.created_at).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
@@ -221,11 +198,7 @@ export default function QuizResults({ quiz, classroom, subject, attempts, questi
                                     <div key={i}>
                                         <div className="flex items-center justify-between gap-3 mb-2">
                                             <p className="text-sm font-bold text-gray-800 dark:text-slate-200">{i + 1}. <MathText text={stat.q} /></p>
-                                            {stat.type === 'esai' ? (
-                                                <span className="text-xs font-black shrink-0 text-violet-600 dark:text-violet-400">✍️ Esai — dinilai manual</span>
-                                            ) : (
-                                                <span className={`text-xs font-black shrink-0 ${pct >= 60 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>{pct}% benar</span>
-                                            )}
+                                            <span className={`text-xs font-black shrink-0 ${pct >= 60 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>{pct}% benar</span>
                                         </div>
 
                                         {stat.type === 'isian' && (
@@ -245,12 +218,12 @@ export default function QuizResults({ quiz, classroom, subject, attempts, questi
                                             </p>
                                         )}
 
-                                        {stat.type === 'pg' && (
+                                        {['pg', 'pgk'].includes(stat.type) && (
                                         /* Distribusi pilihan jawaban */
                                         <div className="space-y-1.5">
                                             {stat.options.map((opt, j) => {
                                                 const count = stat.picks[j];
-                                                const isKey = j === stat.answer;
+                                                const isKey = stat.type === 'pgk' ? stat.answer.includes(j) : j === stat.answer;
                                                 return (
                                                     <div key={j} className="flex items-center gap-2 text-xs">
                                                         <span className={`w-5 shrink-0 font-black ${isKey ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400 dark:text-slate-500'}`}>
@@ -270,43 +243,6 @@ export default function QuizResults({ quiz, classroom, subject, attempts, questi
                                     </div>
                                 );
                             })}
-                        </div>
-                    )}
-
-                    {/* Penilaian Esai */}
-                    {essayIdx.length > 0 && attempts.length > 0 && (
-                        <div className="bg-white/70 dark:bg-slate-900/45 backdrop-blur-xl border border-white dark:border-slate-800/80 rounded-[2rem] shadow-xl dark:shadow-none p-6 space-y-6">
-                            <div className="flex items-center justify-between gap-3">
-                                <div>
-                                    <h3 className="font-extrabold text-gray-900 dark:text-slate-100">✍️ Penilaian Esai</h3>
-                                    <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">Beri nilai 0-100 per jawaban. Skor total siswa dihitung ulang otomatis setelah disimpan.</p>
-                                </div>
-                                <button onClick={saveGrades} disabled={!hasAnyGrade || savingGrades}
-                                    className="shrink-0 px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 font-bold text-sm text-white shadow-md shadow-violet-500/30 transition disabled:opacity-40">
-                                    {savingGrades ? 'Menyimpan...' : 'Simpan Nilai Esai'}
-                                </button>
-                            </div>
-                            {essayIdx.map((qi) => (
-                                <div key={qi}>
-                                    <p className="text-sm font-bold text-gray-800 dark:text-slate-200 mb-2">{qi + 1}. <MathText text={questionStats[qi].q} /></p>
-                                    <div className="space-y-2">
-                                        {attempts.map((a) => (
-                                            <div key={a.id} className="flex items-start gap-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50/60 dark:bg-slate-800/40 p-3">
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-xs font-black text-gray-500 dark:text-slate-400">{a.student?.name}</p>
-                                                    <p className="mt-1 text-sm text-gray-800 dark:text-slate-200 whitespace-pre-wrap">
-                                                        {(a.answers[qi] ?? '').toString().trim() || <span className="italic text-gray-400 dark:text-slate-500">(tidak dijawab)</span>}
-                                                    </p>
-                                                </div>
-                                                <input type="number" min="0" max="100" value={gradeVal(a, qi)}
-                                                    onChange={(e) => setGrade(a.id, qi, e.target.value)}
-                                                    placeholder="0-100"
-                                                    className={`w-20 shrink-0 rounded-lg px-2 py-1.5 text-sm font-bold text-center shadow-sm focus:border-violet-500 focus:ring-violet-500 dark:bg-slate-800 dark:text-slate-100 ${gradeVal(a, qi) === '' ? 'border-amber-400 dark:border-amber-700' : 'border-gray-300 dark:border-slate-700'}`} />
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            ))}
                         </div>
                     )}
 

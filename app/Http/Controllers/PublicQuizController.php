@@ -30,7 +30,7 @@ class PublicQuizController extends Controller
                     'stimulus' => $q['stimulus'] ?? null,
                     'media' => $q['media'] ?? null,
                 ];
-                if ($type === 'pg') {
+                if ($type === 'pg' || $type === 'pgk') {
                     $options = array_map(
                         fn ($j) => ['i' => $j, 'text' => $q['options'][$j]],
                         array_keys($q['options'])
@@ -46,7 +46,7 @@ class PublicQuizController extends Controller
                     shuffle($rights); // selalu diacak — urutan asli = kunci jawaban
                     $item['rights'] = $rights;
                 }
-                // isian & esai: cukup pertanyaannya saja
+                // isian: cukup pertanyaannya saja
                 $questions[] = $item;
             }
             if ($quiz->shuffle_questions) shuffle($questions);
@@ -111,7 +111,10 @@ class PublicQuizController extends Controller
                 ($q['type'] ?? 'pg') === 'jodoh' => is_array($raw)
                     ? array_map(fn ($v) => $v === null ? null : (int) $v, array_slice($raw, 0, count($q['pairs'])))
                     : null,
-                in_array($q['type'] ?? 'pg', ['isian', 'esai'], true) => is_string($raw) ? mb_substr($raw, 0, 5000) : null,
+                ($q['type'] ?? 'pg') === 'pgk' => is_array($raw)
+                    ? array_values(array_unique(array_map('intval', array_slice($raw, 0, count($q['options'])))))
+                    : null,
+                ($q['type'] ?? 'pg') === 'isian' => is_string($raw) ? mb_substr($raw, 0, 5000) : null,
                 default => is_numeric($raw) ? (int) $raw : null,
             };
         }
@@ -146,7 +149,6 @@ class PublicQuizController extends Controller
             'score' => $score,
             'correct' => $correct,
             'total' => $total,
-            'pending_essays' => $graded['pending_essays'],
             'review' => $review,
         ]);
     }

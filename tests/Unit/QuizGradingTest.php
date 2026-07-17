@@ -57,23 +57,16 @@ class QuizGradingTest extends TestCase
         $this->assertSame(100, $quiz->gradeAnswers([[0, 1, 2, 3]])['score']);
     }
 
-    public function test_esai_belum_dinilai_tidak_masuk_pembagi_lalu_dihitung_ulang(): void
+    public function test_pgk_semua_pilihan_harus_persis_sama_dengan_kunci(): void
     {
         $quiz = $this->quiz([
-            ['q' => '1+1?', 'options' => ['1', '2'], 'answer' => 1],
-            ['type' => 'esai', 'q' => 'Jelaskan!'],
+            ['type' => 'pgk', 'q' => 'Mana bilangan genap?', 'options' => ['1', '2', '3', '4'], 'answer' => [1, 3]],
         ]);
-        $answers = [1, 'Karena begini...'];
 
-        // Sebelum dinilai: skor sementara hanya dari soal otomatis
-        $g = $quiz->gradeAnswers($answers);
-        $this->assertSame(100, $g['score']);
-        $this->assertSame(1, $g['pending_essays']);
-        $this->assertTrue($g['review'][1]['pending']);
-
-        // Setelah guru menilai esai 60: (1 + 0.6) / 2 = 80
-        $g = $quiz->gradeAnswers($answers, [1 => 60]);
-        $this->assertSame(80, $g['score']);
-        $this->assertSame(0, $g['pending_essays']);
+        $this->assertSame(100, $quiz->gradeAnswers([[3, 1]])['score']); // urutan bebas
+        $this->assertSame(0, $quiz->gradeAnswers([[1]])['score']);      // kurang centang
+        $this->assertSame(0, $quiz->gradeAnswers([[1, 3, 0]])['score']); // kelebihan centang
+        $this->assertSame(0, $quiz->gradeAnswers([null])['score']);
+        $this->assertSame([1, 3], $quiz->gradeAnswers([null])['review'][0]['answer']);
     }
 }

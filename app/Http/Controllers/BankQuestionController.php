@@ -60,10 +60,12 @@ class BankQuestionController extends Controller
             'media' => 'nullable|array',
             'media.type' => 'required_with:media|in:image,audio,youtube',
             'media.url' => 'required_with:media|string|max:1000',
-            'type' => 'nullable|in:pg,isian,jodoh,esai',
+            'type' => 'nullable|in:pg,pgk,isian,jodoh',
             'options' => 'nullable|array|max:5',
             'options.*' => 'required|string|max:500',
             'answer' => 'nullable|integer|min:0',
+            'answers' => 'nullable|array|max:5', // kunci pgk: array index pilihan benar
+            'answers.*' => 'required|integer|min:0',
             'answer_text' => 'nullable|string|max:500',
             'pairs' => 'nullable|array|max:10',
             'pairs.*.left' => 'required|string|max:500',
@@ -82,7 +84,14 @@ class BankQuestionController extends Controller
                     abort(422, 'Menjodohkan minimal 2 pasangan.');
                 }
                 break;
-            case 'esai':
+            case 'pgk':
+                if (count($validated['options'] ?? []) < 2) {
+                    abort(422, 'Minimal 2 pilihan jawaban.');
+                }
+                $keys = array_unique($validated['answers'] ?? []);
+                if ($keys === [] || max($keys) >= count($validated['options'])) {
+                    abort(422, 'Centang minimal satu kunci jawaban yang valid.');
+                }
                 break;
             default: // pg
                 if (count($validated['options'] ?? []) < 2) {
@@ -97,8 +106,9 @@ class BankQuestionController extends Controller
         // tidak meninggalkan data lama.
         return array_merge($validated, [
             'type' => $type,
-            'options' => $type === 'pg' ? $validated['options'] : null,
+            'options' => in_array($type, ['pg', 'pgk'], true) ? $validated['options'] : null,
             'answer' => $type === 'pg' ? $validated['answer'] : null,
+            'answers' => $type === 'pgk' ? array_values(array_unique($validated['answers'])) : null,
             'answer_text' => $type === 'isian' ? $validated['answer_text'] : null,
             'pairs' => $type === 'jodoh' ? $validated['pairs'] : null,
         ]);

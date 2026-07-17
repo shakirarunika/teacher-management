@@ -13,7 +13,7 @@ import {
     XMarkIcon, ArchiveBoxIcon,
 } from '@heroicons/react/24/outline';
 
-const QUESTION_TYPES = { pg: 'Pilihan Ganda', isian: 'Isian Singkat', jodoh: 'Menjodohkan', esai: 'Esai' };
+const QUESTION_TYPES = { pg: 'Pilihan Ganda', pgk: 'PG Kompleks (jawaban > 1)', isian: 'Isian Singkat', jodoh: 'Menjodohkan' };
 
 const emptyPairs = () => [{ left: '', right: '' }, { left: '', right: '' }];
 
@@ -21,7 +21,7 @@ const emptyPairs = () => [{ left: '', right: '' }, { left: '', right: '' }];
 // ketikan; transform() memangkas field yang tidak relevan saat submit.
 const emptyForm = (subjects) => ({
     subject_id: subjects[0]?.id ?? '', materi: '', difficulty: '', type: 'pg',
-    q: '', stimulus: '', media: null, options: ['', ''], answer: 0, answer_text: '', pairs: emptyPairs(),
+    q: '', stimulus: '', media: null, options: ['', ''], answer: 0, answers: [], answer_text: '', pairs: emptyPairs(),
 });
 
 const DIFF_BADGE = {
@@ -48,7 +48,7 @@ export default function BankQuestionsIndex({ questions, subjects }) {
         form.setData({
             subject_id: it.subject_id, materi: it.materi ?? '', difficulty: it.difficulty ?? '', type: it.type ?? 'pg',
             q: it.q, stimulus: it.stimulus ?? '', media: it.media ?? null,
-            options: it.options ?? ['', ''], answer: it.answer ?? 0, answer_text: it.answer_text ?? '', pairs: it.pairs ?? emptyPairs(),
+            options: it.options ?? ['', ''], answer: it.answer ?? 0, answers: it.answers ?? [], answer_text: it.answer_text ?? '', pairs: it.pairs ?? emptyPairs(),
         });
         setModal({ open: true, editing: it });
     };
@@ -58,11 +58,11 @@ export default function BankQuestionsIndex({ questions, subjects }) {
         e.preventDefault();
         const opts = { preserveScroll: true, onSuccess: closeModal };
         form.transform((data) => {
-            const { options, answer, answer_text, pairs, ...rest } = data;
+            const { options, answer, answers, answer_text, pairs, ...rest } = data;
             const out = { ...rest, materi: data.materi || null, difficulty: data.difficulty || null };
             if (data.type === 'isian') return { ...out, answer_text };
             if (data.type === 'jodoh') return { ...out, pairs };
-            if (data.type === 'esai') return out;
+            if (data.type === 'pgk') return { ...out, options, answers };
             return { ...out, options, answer };
         });
         if (modal.editing) form.put(route('bank-questions.update', modal.editing.id), opts);
@@ -79,8 +79,11 @@ export default function BankQuestionsIndex({ questions, subjects }) {
             ...form.data,
             options: form.data.options.filter((_, k) => k !== j),
             answer: form.data.answer === j ? 0 : form.data.answer > j ? form.data.answer - 1 : form.data.answer,
+            answers: form.data.answers.filter((k) => k !== j).map((k) => (k > j ? k - 1 : k)),
         });
     };
+    const toggleAnswer = (j) => form.setData('answers',
+        form.data.answers.includes(j) ? form.data.answers.filter((k) => k !== j) : [...form.data.answers, j].sort((a, b) => a - b));
     const setPair = (k, side, value) =>
         form.setData('pairs', form.data.pairs.map((p, idx) => (idx === k ? { ...p, [side]: value } : p)));
 
@@ -167,9 +170,9 @@ export default function BankQuestionsIndex({ questions, subjects }) {
                                             )}
                                             <span className="text-gray-400 dark:text-slate-500">
                                                 {(it.type ?? 'pg') === 'pg' && <>Kunci: {String.fromCharCode(65 + it.answer)}. <MathText text={it.options[it.answer]} /></>}
+                                                {it.type === 'pgk' && <>Kunci: {(it.answers ?? []).map((a) => String.fromCharCode(65 + a)).join(', ')}</>}
                                                 {it.type === 'isian' && <>Kunci: <MathText text={it.answer_text} /></>}
                                                 {it.type === 'jodoh' && <>{it.pairs.length} pasangan</>}
-                                                {it.type === 'esai' && <>Dinilai manual</>}
                                             </span>
                                         </div>
                                     </div>
@@ -280,22 +283,19 @@ export default function BankQuestionsIndex({ questions, subjects }) {
                         </div>
                     )}
 
-                    {form.data.type === 'esai' && (
-                        <p className="mt-4 text-xs font-semibold text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-950/30 rounded-lg px-3 py-2">
-                            ✍️ Siswa menjawab dengan uraian bebas. Kamu menilainya manual (0-100) di halaman <span className="font-bold">Hasil</span> kuis.
-                        </p>
-                    )}
-
-                    {form.data.type === 'pg' && (<>
+                    {['pg', 'pgk'].includes(form.data.type) && (<>
                     <div className="mt-4 grid sm:grid-cols-2 gap-2">
-                        {form.data.options.map((opt, j) => (
+                        {form.data.options.map((opt, j) => {
+                            const isKey = form.data.type === 'pgk' ? form.data.answers.includes(j) : form.data.answer === j;
+                            return (
                             <div key={j} className="flex items-center gap-2">
-                                <input type="radio" name="bank-answer" checked={form.data.answer === j} onChange={() => form.setData('answer', j)}
+                                <input type={form.data.type === 'pgk' ? 'checkbox' : 'radio'} name="bank-answer" checked={isKey}
+                                    onChange={() => (form.data.type === 'pgk' ? toggleAnswer(j) : form.setData('answer', j))}
                                     title="Tandai sebagai kunci jawaban"
-                                    className="w-4 h-4 text-emerald-600 border-gray-300 dark:border-slate-600 focus:ring-emerald-500" />
+                                    className={`w-4 h-4 text-emerald-600 border-gray-300 dark:border-slate-600 focus:ring-emerald-500 ${form.data.type === 'pgk' ? 'rounded' : ''}`} />
                                 <input type="text" value={opt} onChange={(e) => setOption(j, e.target.value)}
                                     placeholder={`Pilihan ${String.fromCharCode(65 + j)}`}
-                                    className={`flex-1 rounded-lg px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500 ${form.data.answer === j ? 'border-emerald-400 dark:border-emerald-700 bg-emerald-50/50 dark:bg-emerald-950/20' : 'border-gray-300 dark:border-slate-700'}`} />
+                                    className={`flex-1 rounded-lg px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500 ${isKey ? 'border-emerald-400 dark:border-emerald-700 bg-emerald-50/50 dark:bg-emerald-950/20' : 'border-gray-300 dark:border-slate-700'}`} />
                                 <button type="button" onClick={() => setMathTarget(j)} title="Sisipkan rumus matematika"
                                     className="shrink-0 px-2.5 py-2 rounded-lg bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:hover:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 font-bold text-xs transition">Σ</button>
                                 {form.data.options.length > 2 && (
@@ -304,8 +304,10 @@ export default function BankQuestionsIndex({ questions, subjects }) {
                                     </button>
                                 )}
                             </div>
-                        ))}
+                            );
+                        })}
                         {form.errors.options && <p className="text-sm text-rose-600">{form.errors.options}</p>}
+                        {form.errors.answers && <p className="text-sm text-rose-600">{form.errors.answers}</p>}
                     </div>
 
                     <div className="mt-3 flex items-center justify-between">
@@ -315,7 +317,9 @@ export default function BankQuestionsIndex({ questions, subjects }) {
                                 + Tambah pilihan
                             </button>
                         ) : <span />}
-                        <span className="text-xs text-gray-400 dark:text-slate-500">Klik bulatan = kunci jawaban</span>
+                        <span className="text-xs text-gray-400 dark:text-slate-500">
+                            {form.data.type === 'pgk' ? 'Centang semua kunci jawaban (bisa lebih dari satu)' : 'Klik bulatan = kunci jawaban'}
+                        </span>
                     </div>
                     </>)}
                     <p className="mt-2 text-xs text-gray-400 dark:text-slate-500">
@@ -323,11 +327,11 @@ export default function BankQuestionsIndex({ questions, subjects }) {
                     </p>
 
                     {/* Preview rumus (muncul kalau ada $...$) */}
-                    {hasMath(form.data.q, form.data.type === 'pg' ? form.data.options : []) && (
+                    {hasMath(form.data.q, ['pg', 'pgk'].includes(form.data.type) ? form.data.options : []) && (
                         <div className="mt-3 rounded-xl border border-indigo-200 dark:border-indigo-900/50 bg-white dark:bg-slate-900 p-3">
                             <p className="text-[10px] font-black uppercase tracking-wide text-indigo-400 mb-1.5">Preview tampilan siswa</p>
                             <p className="text-sm font-semibold text-gray-800 dark:text-slate-200"><MathText text={form.data.q} /></p>
-                            {form.data.type === 'pg' && (
+                            {['pg', 'pgk'].includes(form.data.type) && (
                                 <ul className="mt-1.5 space-y-0.5">
                                     {form.data.options.map((opt, j) => (
                                         <li key={j} className="text-sm text-gray-600 dark:text-slate-400">
