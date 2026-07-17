@@ -189,7 +189,7 @@ export default function BankQuestionsIndex({ questions, subjects }) {
             </div>
 
             {/* Modal Tambah/Edit Soal — klik backdrop dikonfirmasi dulu biar ketikan tidak hilang */}
-            <Modal show={modal.open} onClose={() => { if (window.confirm('Tutup form? Perubahan yang belum disimpan akan hilang.')) closeModal(); }} maxWidth="xl">
+            <Modal show={modal.open} onClose={() => { if (window.confirm('Tutup form? Perubahan yang belum disimpan akan hilang.')) closeModal(); }} maxWidth="2xl">
                 <form onSubmit={submit} className="p-6 max-h-[85vh] overflow-y-auto">
                     <h2 className="text-lg font-bold text-gray-900 dark:text-slate-100">{modal.editing ? 'Edit Soal' : 'Tambah Soal ke Bank'}</h2>
 
@@ -287,7 +287,7 @@ export default function BankQuestionsIndex({ questions, subjects }) {
                     )}
 
                     {form.data.type === 'pg' && (<>
-                    <div className="mt-4 space-y-2">
+                    <div className="mt-4 grid sm:grid-cols-2 gap-2">
                         {form.data.options.map((opt, j) => (
                             <div key={j} className="flex items-center gap-2">
                                 <input type="radio" name="bank-answer" checked={form.data.answer === j} onChange={() => form.setData('answer', j)}
@@ -319,7 +319,7 @@ export default function BankQuestionsIndex({ questions, subjects }) {
                     </div>
                     </>)}
                     <p className="mt-2 text-xs text-gray-400 dark:text-slate-500">
-                        💡 Rumus matematika: klik tombol <span className="font-bold text-indigo-500">Σ</span> untuk membuka editor rumus, atau ketik manual di antara tanda dolar mis. <code className="font-mono">{'$\\frac{1}{2}x^2$'}</code>
+                        💡 Rumus matematika: klik <span className="font-bold text-indigo-500">Σ</span> atau ketik di antara tanda dolar mis. <code className="font-mono">{'$\\frac{1}{2}x^2$'}</code>
                     </p>
 
                     {/* Preview rumus (muncul kalau ada $...$) */}

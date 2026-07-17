@@ -303,7 +303,7 @@ export default function QuizzesIndex({ classroom, quizzes, subjects, studentsCou
             </div>
 
             {/* Modal Buat/Edit Kuis — klik backdrop dikonfirmasi dulu biar ketikan soal tidak hilang */}
-            <Modal show={modal.open} onClose={() => { if (window.confirm('Tutup form? Perubahan yang belum disimpan akan hilang.')) closeModal(); }} maxWidth="2xl">
+            <Modal show={modal.open} onClose={() => { if (window.confirm('Tutup form? Perubahan yang belum disimpan akan hilang.')) closeModal(); }} maxWidth="3xl">
                 <form onSubmit={submit} className="p-6 max-h-[85vh] overflow-y-auto">
                     <h2 className="text-lg font-bold text-gray-900 dark:text-slate-100">{modal.editing ? 'Edit Kuis' : 'Buat Kuis Baru'}</h2>
 
@@ -383,7 +383,7 @@ export default function QuizzesIndex({ classroom, quizzes, subjects, studentsCou
                                 </button>
                             </div>
                             <p className="mt-1 text-xs text-gray-400 dark:text-slate-500">
-                                💡 Rumus matematika: klik tombol <span className="font-bold text-indigo-500">Σ</span> untuk membuka editor rumus, atau ketik manual di antara tanda dolar mis. <code className="font-mono">{'$\\frac{1}{2}x^2$'}</code>.
+                                💡 Rumus matematika: klik <span className="font-bold text-indigo-500">Σ</span> atau ketik di antara tanda dolar mis. <code className="font-mono">{'$\\frac{1}{2}x^2$'}</code>
                             </p>
                             <div className="mt-2 space-y-5">
                                 {form.data.questions.map((question, i) => (
@@ -461,7 +461,7 @@ export default function QuizzesIndex({ classroom, quizzes, subjects, studentsCou
                                         )}
 
                                         {question.type === 'pg' && (<>
-                                        <div className="mt-3 space-y-2">
+                                        <div className="mt-3 grid sm:grid-cols-2 gap-2">
                                             {question.options.map((opt, j) => (
                                                 <div key={j} className="flex items-center gap-2">
                                                     <input type="radio" name={`answer-${i}`} checked={question.answer === j} onChange={() => setQuestion(i, { answer: j })}
