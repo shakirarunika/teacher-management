@@ -128,11 +128,14 @@ export default function Welcome({ auth }) {
     };
 
     const features = [
-        { icon: '📋', title: 'Absensi Digital', desc: 'Rekam kehadiran siswa per kelas dengan cepat dan akurat setiap hari.' },
+        { icon: '📋', title: 'Absensi Digital', desc: 'Rekam kehadiran siswa per kelas setiap hari, lengkap dengan rekap hadir, izin, sakit, alpha per siswa.' },
         { icon: '🧩', title: 'Kuis Online', desc: 'Buat kuis pilihan ganda, isian singkat & menjodohkan. Bagikan lewat link/QR, dinilai otomatis.' },
         { icon: '🗃️', title: 'Bank Soal', desc: 'Simpan soal sekali, pakai ulang di kuis mana pun. Mendukung rumus matematika, gambar & audio.' },
+        { icon: '⏱️', title: 'Mode Ujian', desc: 'Timer pengerjaan, acak urutan soal & pilihan, jadwal buka-tutup otomatis, skor disembunyikan sampai diumumkan guru.' },
+        { icon: '📈', title: 'Analisis Hasil', desc: 'Papan peringkat, distribusi nilai, analisis jawaban per soal, sampai deteksi siswa yang perlu remedial.' },
+        { icon: '🔗', title: 'Siswa Tanpa Akun', desc: 'Siswa cukup buka link atau scan QR dari HP — tanpa install aplikasi, tanpa daftar akun.' },
         { icon: '📊', title: 'Nilai & Rapor', desc: 'Input nilai tugas, PTS, dan PAS. Hitung nilai akhir otomatis berdasarkan bobot, salin skor kuis sekali klik.' },
-        { icon: '📈', title: 'Laporan Kehadiran', desc: 'Lihat rekap absensi per siswa lengkap dengan status hadir, izin, sakit, alpha.' },
+        { icon: '🗓️', title: 'Kalender Libur', desc: 'Sinkronkan libur nasional sekali klik, tambah libur internal sekolah — absensi & laporan otomatis menandainya.' },
         { icon: '🏫', title: 'Manajemen Kelas', desc: 'Kelola data kelas, siswa, mata pelajaran dalam satu sistem terintegrasi.' },
     ];
 
