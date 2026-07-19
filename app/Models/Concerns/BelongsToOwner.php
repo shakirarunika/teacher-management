@@ -32,4 +32,10 @@ trait BelongsToOwner
     {
         return 'user_id';
     }
+
+    /** Guru pemilik data — dipakai antara lain untuk cek langganan di halaman publik. */
+    public function owner()
+    {
+        return $this->belongsTo(\App\Models\User::class, $this->ownerColumn());
+    }
 }

@@ -17,6 +17,7 @@ use App\Http\Controllers\AcademicYearController;
 use App\Http\Controllers\QuizController;
 use App\Http\Controllers\PublicQuizController;
 use App\Http\Controllers\BankQuestionController;
+use App\Http\Controllers\GameController;
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -81,6 +82,12 @@ Route::middleware(['auth', 'verified', 'subscribed'])->group(function () {
     Route::post('/quizzes/{quiz}/duplicate', [QuizController::class, 'duplicate'])->name('quizzes.duplicate');
     Route::post('/quiz-media', [QuizController::class, 'uploadMedia'])->name('quiz-media.upload');
 
+    // Game kelas (Extreme Answer) — kelola game; halaman main-nya publik via token
+    Route::get('/games', [GameController::class, 'index'])->name('games.index');
+    Route::post('/games', [GameController::class, 'store'])->name('games.store');
+    Route::put('/games/{game}', [GameController::class, 'update'])->name('games.update');
+    Route::delete('/games/{game}', [GameController::class, 'destroy'])->name('games.destroy');
+
     // Bank Soal (global per guru, tidak terikat kelas)
     Route::get('/bank-soal', [BankQuestionController::class, 'index'])->name('bank-questions.index');
     Route::get('/bank-soal/list', [BankQuestionController::class, 'list'])->name('bank-questions.list');
@@ -94,6 +101,16 @@ Route::middleware(['auth', 'verified', 'subscribed'])->group(function () {
     Route::post('/holidays/sync', [HolidayController::class, 'sync'])->name('holidays.sync');
     Route::delete('/holidays/{holiday}', [HolidayController::class, 'destroy'])->name('holidays.destroy');
 });
+
+// Game kelas publik — layar main diakses via token acak, tanpa sesi login guru
+// (laptop yang dipegang siswa tidak membawa akses akun)
+Route::get('/game/{token}', [GameController::class, 'play'])->name('games.play');
+Route::post('/game/{token}/check', [GameController::class, 'check'])
+    ->middleware('throttle:60,1')
+    ->name('games.check');
+Route::post('/game/{token}/reveal', [GameController::class, 'reveal'])
+    ->middleware('throttle:30,1')
+    ->name('games.reveal');
 
 // Kuis publik — siswa akses tanpa login via token acak
 Route::get('/kuis/{token}', [PublicQuizController::class, 'show'])->name('quiz.take');

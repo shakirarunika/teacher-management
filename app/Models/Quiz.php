@@ -29,6 +29,8 @@ class Quiz extends Model
      */
     public function closedReason(): ?string
     {
+        // Langganan guru habis → semua link kuisnya ikut mati (tidak bisa bypass via URL)
+        if (!$this->owner?->hasActiveAccess()) return 'closed';
         if (!$this->is_open) return 'closed';
         if ($this->opens_at && now()->lt($this->opens_at)) return 'not_open_yet';
         if ($this->closes_at && now()->gt($this->closes_at)) return 'ended';

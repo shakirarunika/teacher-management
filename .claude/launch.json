@@ -8,6 +8,12 @@
       "port": 8321
     },
     {
+      "name": "laravel-8322",
+      "runtimeExecutable": "php",
+      "runtimeArgs": ["artisan", "serve", "--port=8322"],
+      "port": 8322
+    },
+    {
       "name": "vite",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
