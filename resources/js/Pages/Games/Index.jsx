@@ -101,7 +101,7 @@ export default function GamesIndex({ games, questions, subjects }) {
                                             <h3 className="font-extrabold text-gray-900 dark:text-slate-100 truncate">{g.name}</h3>
                                             <p className="mt-1 text-xs font-bold text-gray-400 dark:text-slate-500 flex items-center gap-3">
                                                 <span>{g.question_ids.length} soal</span>
-                                                <span className="inline-flex items-center gap-1"><ClockIcon className="w-3.5 h-3.5" /> {fmtTimer(g.timer_seconds)}/soal</span>
+                                                <span className="inline-flex items-center gap-1"><ClockIcon className="w-3.5 h-3.5" /> {g.timer_seconds > 0 ? `${fmtTimer(g.timer_seconds)}/soal` : 'tanpa batas waktu'}</span>
                                             </p>
                                         </div>
                                         <div className="flex items-center gap-1 shrink-0">
@@ -142,9 +142,16 @@ export default function GamesIndex({ games, questions, subjects }) {
                         </div>
                         <div>
                             <label className="text-xs font-bold text-gray-500 dark:text-slate-400">Waktu per soal (detik)</label>
-                            <input type="number" min={5} max={3600} value={form.data.timer_seconds} required
+                            <input type="number" min={5} max={3600} value={form.data.timer_seconds === 0 ? '' : form.data.timer_seconds}
+                                required={form.data.timer_seconds !== 0} disabled={form.data.timer_seconds === 0}
                                 onChange={(e) => form.setData('timer_seconds', Number(e.target.value))}
-                                className="mt-1 block w-full rounded-lg border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500" />
+                                className="mt-1 block w-full rounded-lg border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 disabled:opacity-50" />
+                            <label className="mt-1.5 flex items-center gap-1.5 text-xs font-bold text-gray-500 dark:text-slate-400 cursor-pointer">
+                                <input type="checkbox" checked={form.data.timer_seconds === 0}
+                                    onChange={(e) => form.setData('timer_seconds', e.target.checked ? 0 : 60)}
+                                    className="rounded border-gray-300 dark:border-slate-600 text-indigo-600 focus:ring-indigo-500 dark:bg-slate-800" />
+                                Tanpa batas waktu
+                            </label>
                             {form.errors.timer_seconds && <p className="mt-1 text-xs font-bold text-rose-500">{form.errors.timer_seconds}</p>}
                         </div>
                     </div>

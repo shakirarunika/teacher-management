@@ -37,6 +37,7 @@ const SFX = {
 // Siswa maju ke laptop guru, ketik jawaban (MathLive: ^ pangkat, sqrt akar), Enter.
 // Benar → soal berikutnya. Waktu habis / guru skip → kunci tampil dulu.
 export default function GamePlay({ game, questions }) {
+    const hasTimer = game.timer_seconds > 0; // 0 = tanpa batas waktu
     const [idx, setIdx] = useState(0);
     // status: answering | correct | timeout (bahas dulu, kunci belum tampil) | revealed | finished
     const [status, setStatus] = useState(questions.length ? 'answering' : 'finished');
@@ -89,7 +90,7 @@ export default function GamePlay({ game, questions }) {
 
     // Timer per soal — jalan hanya saat menjawab & tidak dijeda; 5 detik terakhir bunyi tick
     useEffect(() => {
-        if (status !== 'answering' || paused) return;
+        if (!hasTimer || status !== 'answering' || paused) return;
         if (timeLeft <= 0) { timeUp(); return; }
         if (timeLeft <= 5) play('tick');
         const t = setTimeout(() => setTimeLeft((s) => s - 1), 1000);
@@ -217,13 +218,13 @@ export default function GamePlay({ game, questions }) {
                     <p className="font-extrabold tracking-tight truncate">{game.name}</p>
                     <p className="text-xs font-bold text-slate-500">Soal {Math.min(idx + 1, questions.length)} / {questions.length}</p>
                 </div>
-                {status !== 'finished' && (
+                {hasTimer && status !== 'finished' && (
                     <div className={`font-mono text-4xl sm:text-5xl font-extrabold tabular-nums ${timerColor}`}>
                         {String(Math.floor(timeLeft / 60)).padStart(2, '0')}:{String(timeLeft % 60).padStart(2, '0')}
                     </div>
                 )}
                 <div className="flex items-center gap-4">
-                    {status === 'answering' && (
+                    {hasTimer && status === 'answering' && (
                         <button onClick={() => setPaused(!paused)} title={paused ? 'Lanjutkan' : 'Jeda timer'}
                             className="text-lg text-slate-500 hover:text-slate-300 transition">
                             {paused ? '▶️' : '⏸️'}
@@ -284,7 +285,7 @@ export default function GamePlay({ game, questions }) {
                     {status === 'timeout' && (
                         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
                             className="rounded-2xl border border-amber-500/40 bg-amber-500/10 p-5 flex items-center justify-between gap-4 flex-wrap">
-                            <p className="font-extrabold text-amber-300">⏱ Waktu habis — bahas dulu cara mengerjakannya</p>
+                            <p className="font-extrabold text-amber-300">{hasTimer ? '⏱ Waktu habis — bahas dulu cara mengerjakannya' : '⏭ Dilewati — bahas dulu cara mengerjakannya'}</p>
                             <div className="flex gap-3">
                                 <button onClick={reveal} className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold transition active:scale-95">
                                     💡 Tampilkan Jawaban

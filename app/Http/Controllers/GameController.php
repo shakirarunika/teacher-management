@@ -131,7 +131,7 @@ class GameController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:100',
-            'timer_seconds' => 'required|integer|min:5|max:3600',
+            'timer_seconds' => 'required|integer|min:0|max:3600', // 0 = tanpa batas waktu
             'question_ids' => 'required|array|min:1|max:100',
             'question_ids.*' => [
                 'required', 'integer', 'distinct',
