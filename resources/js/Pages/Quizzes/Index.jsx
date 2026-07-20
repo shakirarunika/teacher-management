@@ -17,7 +17,12 @@ import {
     ArchiveBoxIcon, ClockIcon,
 } from '@heroicons/react/24/outline';
 
-const QUESTION_TYPES = { pg: 'Pilihan Ganda', pgk: 'PG Kompleks (jawaban > 1)', isian: 'Isian Singkat', jodoh: 'Menjodohkan' };
+const QUESTION_TYPES = { pg: 'Pilihan Ganda', bs: 'Benar / Salah', pgk: 'PG Kompleks (jawaban > 1)', isian: 'Isian Singkat', jodoh: 'Menjodohkan' };
+
+// ponytail: benar/salah = PG dengan opsi tetap — dikirim sebagai type 'pg',
+// jadi grading, statistik, dan halaman siswa lama langsung jalan tanpa ubah backend.
+const BS_OPTIONS = ['Benar', 'Salah'];
+const isBS = (q) => (q.type ?? 'pg') === 'pg' && q.options?.length === 2 && q.options[0] === 'Benar' && q.options[1] === 'Salah';
 
 const emptyPairs = () => [{ left: '', right: '' }, { left: '', right: '' }];
 
@@ -26,7 +31,7 @@ const emptyPairs = () => [{ left: '', right: '' }, { left: '', right: '' }];
 const emptyQuestion = () => ({ type: 'pg', q: '', stimulus: '', media: null, options: ['', ''], answer: 0, answers: [], answer_text: '', pairs: emptyPairs() });
 
 const toEditorQuestion = (q) => ({
-    type: q.type ?? 'pg', q: q.q, stimulus: q.stimulus ?? '', media: q.media ?? null,
+    type: isBS(q) ? 'bs' : (q.type ?? 'pg'), q: q.q, stimulus: q.stimulus ?? '', media: q.media ?? null,
     options: q.options ?? ['', ''],
     answer: (q.type ?? 'pg') === 'pg' ? (q.answer ?? 0) : 0,
     answers: q.type === 'pgk' ? (q.answer ?? []) : [],
@@ -39,6 +44,7 @@ const toPayloadQuestion = (q) => {
     if (q.type === 'isian') return { ...base, answer: q.answer_text };
     if (q.type === 'jodoh') return { ...base, pairs: q.pairs };
     if (q.type === 'pgk') return { ...base, options: q.options, answer: q.answers };
+    if (q.type === 'bs') return { ...base, type: 'pg', options: BS_OPTIONS, answer: q.answer === 1 ? 1 : 0 };
     return { ...base, options: q.options, answer: q.answer };
 };
 
@@ -419,6 +425,21 @@ export default function QuizzesIndex({ classroom, quizzes, subjects, studentsCou
                                         <QuestionExtras q={question} onChange={(patch) => setQuestion(i, patch)} />
                                         {form.errors[`questions.${i}.q`] && <p className="mt-1 text-sm text-rose-600">{form.errors[`questions.${i}.q`]}</p>}
 
+                                        {question.type === 'bs' && (
+                                            <div className="mt-3 flex gap-3">
+                                                {BS_OPTIONS.map((label, j) => {
+                                                    const isKey = (question.answer === 1 ? 1 : 0) === j;
+                                                    return (
+                                                        <label key={j} className={`flex-1 flex items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-bold cursor-pointer transition ${isKey ? 'border-emerald-400 dark:border-emerald-700 bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-300' : 'border-gray-300 dark:border-slate-700 text-gray-600 dark:text-slate-300'}`}>
+                                                            <input type="radio" name={`answer-${i}`} checked={isKey} onChange={() => setQuestion(i, { answer: j })}
+                                                                className="w-4 h-4 text-emerald-600 border-gray-300 dark:border-slate-600 focus:ring-emerald-500" />
+                                                            {label}
+                                                        </label>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+
                                         {question.type === 'isian' && (
                                             <div className="mt-3">
                                                 <input type="text" value={question.answer_text} onChange={(e) => setQuestion(i, { answer_text: e.target.value })}
@@ -566,7 +587,7 @@ export default function QuizzesIndex({ classroom, quizzes, subjects, studentsCou
                                     <p className="text-sm font-semibold text-gray-800 dark:text-slate-200"><MathText text={it.q} /></p>
                                     <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
                                         {it.subject?.name}{it.materi ? ` · ${it.materi}` : ''}{it.difficulty ? ` · ${it.difficulty}` : ''}
-                                        {' · '}{(it.type ?? 'pg') === 'pg' ? `PG ${it.options.length} pilihan` : QUESTION_TYPES[it.type]}
+                                        {' · '}{(it.type ?? 'pg') === 'pg' ? (isBS(it) ? QUESTION_TYPES.bs : `PG ${it.options.length} pilihan`) : QUESTION_TYPES[it.type]}
                                     </p>
                                 </div>
                             </label>

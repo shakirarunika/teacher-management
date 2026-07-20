@@ -35,7 +35,8 @@ class PublicQuizController extends Controller
                         fn ($j) => ['i' => $j, 'text' => $q['options'][$j]],
                         array_keys($q['options'])
                     );
-                    if ($quiz->shuffle_options) shuffle($options);
+                    // Soal Benar/Salah (pg berkunci opsi tetap) tidak ikut diacak — urutan Benar dulu lebih natural
+                    if ($quiz->shuffle_options && $q['options'] !== ['Benar', 'Salah']) shuffle($options);
                     $item['options'] = $options;
                 } elseif ($type === 'jodoh') {
                     $item['lefts'] = array_column($q['pairs'], 'left');

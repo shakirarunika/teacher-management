@@ -13,7 +13,12 @@ import {
     XMarkIcon, ArchiveBoxIcon,
 } from '@heroicons/react/24/outline';
 
-const QUESTION_TYPES = { pg: 'Pilihan Ganda', pgk: 'PG Kompleks (jawaban > 1)', isian: 'Isian Singkat', jodoh: 'Menjodohkan' };
+const QUESTION_TYPES = { pg: 'Pilihan Ganda', bs: 'Benar / Salah', pgk: 'PG Kompleks (jawaban > 1)', isian: 'Isian Singkat', jodoh: 'Menjodohkan' };
+
+// ponytail: benar/salah = PG dengan opsi tetap — disimpan sebagai type 'pg',
+// jadi grading, statistik, dan halaman siswa lama langsung jalan tanpa ubah backend.
+const BS_OPTIONS = ['Benar', 'Salah'];
+const isBS = (q) => (q.type ?? 'pg') === 'pg' && q.options?.length === 2 && q.options[0] === 'Benar' && q.options[1] === 'Salah';
 
 const emptyPairs = () => [{ left: '', right: '' }, { left: '', right: '' }];
 
@@ -46,7 +51,7 @@ export default function BankQuestionsIndex({ questions, subjects }) {
     const openEdit = (it) => {
         form.clearErrors();
         form.setData({
-            subject_id: it.subject_id, materi: it.materi ?? '', difficulty: it.difficulty ?? '', type: it.type ?? 'pg',
+            subject_id: it.subject_id, materi: it.materi ?? '', difficulty: it.difficulty ?? '', type: isBS(it) ? 'bs' : (it.type ?? 'pg'),
             q: it.q, stimulus: it.stimulus ?? '', media: it.media ?? null,
             options: it.options ?? ['', ''], answer: it.answer ?? 0, answers: it.answers ?? [], answer_text: it.answer_text ?? '', pairs: it.pairs ?? emptyPairs(),
         });
@@ -63,6 +68,7 @@ export default function BankQuestionsIndex({ questions, subjects }) {
             if (data.type === 'isian') return { ...out, answer_text };
             if (data.type === 'jodoh') return { ...out, pairs };
             if (data.type === 'pgk') return { ...out, options, answers };
+            if (data.type === 'bs') return { ...out, type: 'pg', options: BS_OPTIONS, answer: answer === 1 ? 1 : 0 };
             return { ...out, options, answer };
         });
         if (modal.editing) form.put(route('bank-questions.update', modal.editing.id), opts);
@@ -165,8 +171,8 @@ export default function BankQuestionsIndex({ questions, subjects }) {
                                             <span className="font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/45 px-2.5 py-0.5 rounded-full">{it.subject?.name}</span>
                                             {it.materi && <span className="font-bold text-gray-500 dark:text-slate-400 bg-gray-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-full">{it.materi}</span>}
                                             {it.difficulty && <span className={`font-bold px-2.5 py-0.5 rounded-full ${DIFF_BADGE[it.difficulty]}`}>{it.difficulty}</span>}
-                                            {(it.type ?? 'pg') !== 'pg' && (
-                                                <span className="font-bold text-violet-700 dark:text-violet-300 bg-violet-50 dark:bg-violet-950/40 px-2.5 py-0.5 rounded-full">{QUESTION_TYPES[it.type]}</span>
+                                            {((it.type ?? 'pg') !== 'pg' || isBS(it)) && (
+                                                <span className="font-bold text-violet-700 dark:text-violet-300 bg-violet-50 dark:bg-violet-950/40 px-2.5 py-0.5 rounded-full">{isBS(it) ? QUESTION_TYPES.bs : QUESTION_TYPES[it.type]}</span>
                                             )}
                                             <span className="text-gray-400 dark:text-slate-500">
                                                 {(it.type ?? 'pg') === 'pg' && <>Kunci: {String.fromCharCode(65 + it.answer)}. <MathText text={it.options[it.answer]} /></>}
@@ -240,6 +246,24 @@ export default function BankQuestionsIndex({ questions, subjects }) {
                         <QuestionExtras q={form.data} onChange={(patch) => form.setData({ ...form.data, ...patch })} />
                         {form.errors.q && <p className="mt-1 text-sm text-rose-600">{form.errors.q}</p>}
                     </div>
+
+                    {form.data.type === 'bs' && (
+                        <div className="mt-4">
+                            <div className="flex gap-3">
+                                {BS_OPTIONS.map((label, j) => {
+                                    const isKey = (form.data.answer === 1 ? 1 : 0) === j;
+                                    return (
+                                        <label key={j} className={`flex-1 flex items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-bold cursor-pointer transition ${isKey ? 'border-emerald-400 dark:border-emerald-700 bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-300' : 'border-gray-300 dark:border-slate-700 text-gray-600 dark:text-slate-300'}`}>
+                                            <input type="radio" name="bank-answer" checked={isKey} onChange={() => form.setData('answer', j)}
+                                                className="w-4 h-4 text-emerald-600 border-gray-300 dark:border-slate-600 focus:ring-emerald-500" />
+                                            {label}
+                                        </label>
+                                    );
+                                })}
+                            </div>
+                            <p className="mt-1 text-xs text-gray-400 dark:text-slate-500">Pilih kunci jawabannya</p>
+                        </div>
+                    )}
 
                     {form.data.type === 'isian' && (
                         <div className="mt-4">
