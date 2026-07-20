@@ -81,7 +81,8 @@ class AdminStatsOverview extends BaseWidget
             $totalHadirS = (int) ($att->total_hadir ?? 0);
             $totalAlpha = (int) ($att->total_alpha ?? 0);
 
-            $w = $settingsByTeacher[$classTeacher[$score->classroom_id] ?? null]?->gradingWeights() ?? $default;
+            // ->get() aman untuk kelas warisan tanpa teacher_id (akses [null] = fatal di HTTP)
+            $w = $settingsByTeacher->get($classTeacher->get($score->classroom_id))?->gradingWeights() ?? $default;
 
             if ($totalAlpha >= 3) {
                 $belowKkm++;
