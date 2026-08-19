@@ -103,15 +103,23 @@ export default function GamePlay({ game, questions }) {
         const mf = mfRef.current;
         if (!mf) return;
         const onChange = () => submitRef.current();
-        const onKeyDown = (e) => { if (e.key === 'Enter') { e.preventDefault(); submitRef.current(); } };
+        // Enter didengar di document, bukan di kolom jawaban: kalau listener
+        // nempel di kolomnya, sekali guru klik Jeda/Layar Penuh/area kosong,
+        // fokus lepas dan Enter mati sampai kolomnya diklik lagi.
+        // Tombol dikecualikan supaya Enter tetap menekan tombol yang lagi fokus.
+        const onKeyDown = (e) => {
+            if (e.key !== 'Enter' || e.target?.tagName === 'BUTTON') return;
+            e.preventDefault();
+            submitRef.current();
+        };
         const onInput = (e) => { if (e.inputType === 'insertLineBreak') submitRef.current(); };
         mf.addEventListener('change', onChange);
-        mf.addEventListener('keydown', onKeyDown);
+        document.addEventListener('keydown', onKeyDown);
         mf.addEventListener('input', onInput);
         mf.focus();
         return () => {
             mf.removeEventListener('change', onChange);
-            mf.removeEventListener('keydown', onKeyDown);
+            document.removeEventListener('keydown', onKeyDown);
             mf.removeEventListener('input', onInput);
         };
     }, []);
