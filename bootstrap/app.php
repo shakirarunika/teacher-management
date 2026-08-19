@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Sentry\Laravel\Integration;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -28,5 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
         });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // Kirim exception ke Sentry. Tanpa SENTRY_LARAVEL_DSN di .env,
+        // ini no-op — aman jalan di lokal tanpa konfigurasi apa pun.
+        Integration::handles($exceptions);
     })->create();

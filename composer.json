@@ -13,6 +13,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^3.0",
         "phpoffice/phpspreadsheet": "^5.8",
+        "sentry/sentry-laravel": "^4.27",
         "tightenco/ziggy": "^2.0"
     },
     "require-dev": {
@@ -86,6 +87,9 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true,
             "php-http/discovery": true
+        },
+        "platform": {
+            "php": "8.3.28"
         }
     },
     "minimum-stability": "stable",
