@@ -12,6 +12,11 @@ git pull
 echo ">> Install dependency PHP..."
 composer install --no-dev --optimize-autoloader
 
+echo ">> Backup database sebelum migration..."
+# set -e sengaja dibiarkan: kalau backup gagal, deploy berhenti.
+# Jangan pernah migrate tanpa titik balik.
+php artisan backup:database
+
 echo ">> Jalankan migration..."
 php artisan migrate --force
 
@@ -29,3 +34,17 @@ php artisan view:cache
 php artisan filament:cache-components
 
 echo ">> Deploy selesai."
+
+# ---------------------------------------------------------------------------
+# Scheduler (backup harian + pengingat langganan) TIDAK jalan sendiri.
+# Daftarkan sekali saja di Windows Task Scheduler, jalan tiap menit:
+#
+#   schtasks /create /tn "Sintesis Scheduler" /sc minute /mo 1 /ru SYSTEM ^
+#     /tr "cmd /c cd /d C:\laragon\www\teacher-management && php artisan schedule:run"
+#
+# Cek terdaftar:  schtasks /query /tn "Sintesis Scheduler"
+# Cek jadwalnya:  php artisan schedule:list
+#
+# Queue worker tidak diperlukan: QUEUE_CONNECTION=sync dan belum ada job
+# ShouldQueue. Kalau nanti ada, ganti ke database + jalankan queue:work.
+# ---------------------------------------------------------------------------

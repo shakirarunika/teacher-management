@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+
+      - name: Cache dependency Composer
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('composer.lock') }}
+
+      - run: composer install --prefer-dist --no-interaction --no-progress
+
+      - run: cp .env.example .env && php artisan key:generate
+
+      # Database tes: SQLite in-memory (lihat phpunit.xml), tidak perlu service MySQL.
+      - run: php artisan test

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Carbon;
 use Illuminate\Notifications\Notifiable;
 
 #[Fillable(['name', 'email', 'password', 'role', 'email_verified_at', 'trial_ends_at', 'subscription_ends_at', 'weight_kehadiran', 'weight_tugas', 'weight_pts', 'weight_pas', 'kkm'])]
@@ -57,16 +58,21 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     }
 
     /**
+     * Kapan akses guru berakhir: yang paling akhir antara trial & langganan.
+     * Satu sumber kebenaran untuk gate langganan dan pengingat email.
+     */
+    public function accessEndsAt(): ?Carbon
+    {
+        return collect([$this->trial_ends_at, $this->subscription_ends_at])->filter()->max();
+    }
+
+    /**
      * Apakah guru masih boleh mengakses aplikasi: trial belum habis atau
      * langganan masih aktif. Admin selalu boleh.
      */
     public function hasActiveAccess(): bool
     {
-        if ($this->role === 'admin') {
-            return true;
-        }
-
-        return (bool) ($this->trial_ends_at?->isFuture() || $this->subscription_ends_at?->isFuture());
+        return $this->role === 'admin' || (bool) $this->accessEndsAt()?->isFuture();
     }
 
     /**

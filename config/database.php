@@ -30,6 +30,18 @@ return [
     |
     */
 
+    /*
+    |--------------------------------------------------------------------------
+    | Path mysqldump
+    |--------------------------------------------------------------------------
+    |
+    | Dipakai command `backup:database`. Di Windows/Laragon mysqldump sering
+    | tidak ada di PATH milik PHP — isi MYSQLDUMP_PATH dengan path lengkapnya.
+    |
+    */
+
+    'mysqldump_path' => env('MYSQLDUMP_PATH', 'mysqldump'),
+
     'connections' => [
 
         'sqlite' => [
