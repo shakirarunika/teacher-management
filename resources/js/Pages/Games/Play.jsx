@@ -1,7 +1,7 @@
 import MathText from '@/Components/MathText';
 import { MediaView } from '@/Components/QuestionMedia';
 import { Head, Link } from '@inertiajs/react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useAnimationControls } from 'framer-motion';
 import axios from 'axios';
 import { useEffect, useRef, useState } from 'react';
 import { MathfieldElement } from 'mathlive';
@@ -43,7 +43,11 @@ export default function GamePlay({ game, questions }) {
     const [status, setStatus] = useState(questions.length ? 'answering' : 'finished');
     const [timeLeft, setTimeLeft] = useState(game.timer_seconds);
     const [revealedKey, setRevealedKey] = useState('');
-    const [wrongFlash, setWrongFlash] = useState(0); // key untuk retrigger animasi shake
+    const [wrong, setWrong] = useState(false); // jawaban terakhir salah -> border merah
+    // Shake dijalankan lewat kontrol animasi, BUKAN dengan mengganti key React:
+    // ganti key = subtree dibongkar-pasang, math-field ikut dibuat ulang, fokus
+    // hilang dan listener yang terpasang saat mount ikut mati.
+    const shake = useAnimationControls();
     const [paused, setPaused] = useState(false);
     const [skipArmed, setSkipArmed] = useState(false); // klik 1 = konfirmasi, klik 2 = lewati
     const [results, setResults] = useState([]); // rekap per soal: {q, outcome: correct|timeout}
@@ -147,7 +151,8 @@ export default function GamePlay({ game, questions }) {
                 setTimeout(next, 1800);
             } else {
                 play('wrong');
-                setWrongFlash((k) => k + 1);
+                setWrong(true);
+                shake.start({ x: [0, -14, 14, -8, 8, 0], transition: { duration: 0.4 } });
                 mf.value = '';
                 mf.focus();
             }
@@ -190,6 +195,7 @@ export default function GamePlay({ game, questions }) {
         busyRef.current = false;
         setPaused(false);
         setSkipArmed(false);
+        setWrong(false);
         if (mfRef.current) mfRef.current.value = '';
         setRevealedKey('');
         if (i + 1 >= questions.length) { play('finish'); setStatus('finished'); return; }
@@ -207,6 +213,7 @@ export default function GamePlay({ game, questions }) {
         setResults([]);
         setPaused(false);
         setSkipArmed(false);
+        setWrong(false);
         if (mfRef.current) mfRef.current.value = '';
         setStatus('answering');
         setTimeout(() => mfRef.current?.focus(), 50);
@@ -306,9 +313,8 @@ export default function GamePlay({ game, questions }) {
                     )}
 
                     {/* Input jawaban */}
-                    <motion.div key={wrongFlash} animate={wrongFlash ? { x: [0, -14, 14, -8, 8, 0] } : false} transition={{ duration: 0.4 }}
-                        className={status === 'timeout' ? 'hidden' : ''}>
-                        <div className={`rounded-2xl p-[2px] transition-colors ${wrongFlash ? 'bg-gradient-to-r from-rose-500 to-rose-400' : 'bg-gradient-to-r from-cyan-500 to-indigo-500'}`}>
+                    <motion.div animate={shake} className={status === 'timeout' ? 'hidden' : ''}>
+                        <div className={`rounded-2xl p-[2px] transition-colors ${wrong ? 'bg-gradient-to-r from-rose-500 to-rose-400' : 'bg-gradient-to-r from-cyan-500 to-indigo-500'}`}>
                             <div className="rounded-2xl bg-slate-900 p-4 sm:p-5 flex items-center gap-4">
                                 <math-field
                                     ref={mfRef}
